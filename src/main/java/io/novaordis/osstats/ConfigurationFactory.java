@@ -18,50 +18,62 @@ package io.novaordis.osstats;
 
 import io.novaordis.utilities.UserErrorException;
 
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/27/16
  */
-public class Main {
+public class ConfigurationFactory {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
     // Static ----------------------------------------------------------------------------------------------------------
 
-    public static void main(String[] args) {
+    /**
+     * @throws UserErrorException on user errors.
+     */
+    public static Configuration buildInstance(String[] cla) throws Exception {
 
-        try {
+        Configuration configuration = null;
 
-            Configuration conf = ConfigurationFactory.buildInstance(args);
-            MainLoop mainLoop = new MainLoop(conf);
-            mainLoop.run();
-        }
-        catch(UserErrorException e) {
+        List<String> commandLineArguments = new ArrayList<>(Arrays.asList(cla));
 
-            //
-            // we know about this failure, it is supposed to go to stderr
-            //
+        for (int i = 0; i < commandLineArguments.size(); i++) {
 
-            Console.error(e.getMessage());
-        }
-        catch(Throwable t) {
+            String crt = commandLineArguments.get(i);
 
-            //
-            // we don't expect that, provide more information
-            //
+            if ("test-user-error".equals(crt)) {
+                //
+                // we do this for testing
+                //
+                throw new UserErrorException(commandLineArguments.get(i + 1));
 
-            String msg = "internal failure: " + t.getClass().getSimpleName();
-            if (t.getMessage() != null) {
-                msg += ": " + t.getMessage();
+            } else if ("test-unexpected-error".equals(crt)) {
+                //
+                //  we do this for testing
+                //
+                String exceptionClassName = commandLineArguments.get(i + 1);
+                String message = commandLineArguments.get(i + 2);
+                Constructor c = Class.forName(exceptionClassName).getConstructor(String.class);
+                //noinspection UnnecessaryLocalVariable
+                Exception e = (Exception) c.newInstance(message);
+                throw e;
             }
-            msg += " (consult logs for more details)";
-            Console.error(msg);
         }
+
+        return configuration;
     }
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    private ConfigurationFactory() {
+    }
 
     // Public ----------------------------------------------------------------------------------------------------------
 

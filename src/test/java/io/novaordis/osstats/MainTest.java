@@ -16,7 +16,14 @@
 
 package io.novaordis.osstats;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -30,14 +37,66 @@ public class MainTest {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    private PrintStream originalErrorStream;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    @Test
-    public void mainTest() throws Exception {
+    @Before
+    public void setUp() {
 
-        Main.main(new String[] {});
+        originalErrorStream = System.err;
+    }
+
+    @After
+    public void tearDown() {
+
+        //
+        // restore the original error stream
+        //
+        System.setErr(originalErrorStream);
+    }
+
+    @Test
+    public void main_UserErrorException() throws Exception {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream mockError = new PrintStream(baos);
+        System.setErr(mockError);
+
+        Main.main(new String[] {"test-user-error", "test message"});
+
+        //
+        // UserErrorMessage
+        //
+
+        String errorMessage = new String(baos.toByteArray()).trim();
+        assertTrue(errorMessage.equals("[error]: test message"));
+    }
+
+    @Test
+    public void main_UnexpectedException() throws Exception {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream mockError = new PrintStream(baos);
+        System.setErr(mockError);
+
+        Main.main(new String[] {
+                "test-unexpected-error",
+                "io.novaordis.osstats.MockRuntimeException",
+                "other test message"});
+        //
+        // unexpected Exception
+        //
+
+        String errorMessage = new String(baos.toByteArray());
+
+        assertTrue(errorMessage.startsWith("[error]: "));
+        assertTrue(errorMessage.contains("internal failure:"));
+        assertTrue(errorMessage.contains("MockRuntimeException"));
+        assertTrue(errorMessage.contains("other test message"));
+        assertTrue(errorMessage.contains("(consult logs for more details)"));
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

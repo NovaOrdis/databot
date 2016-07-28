@@ -16,48 +16,15 @@
 
 package io.novaordis.osstats;
 
-import io.novaordis.utilities.UserErrorException;
-
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/27/16
  */
-public class Main {
+public abstract class ConfigurationTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
     // Static ----------------------------------------------------------------------------------------------------------
-
-    public static void main(String[] args) {
-
-        try {
-
-            Configuration conf = ConfigurationFactory.buildInstance(args);
-            MainLoop mainLoop = new MainLoop(conf);
-            mainLoop.run();
-        }
-        catch(UserErrorException e) {
-
-            //
-            // we know about this failure, it is supposed to go to stderr
-            //
-
-            Console.error(e.getMessage());
-        }
-        catch(Throwable t) {
-
-            //
-            // we don't expect that, provide more information
-            //
-
-            String msg = "internal failure: " + t.getClass().getSimpleName();
-            if (t.getMessage() != null) {
-                msg += ": " + t.getMessage();
-            }
-            msg += " (consult logs for more details)";
-            Console.error(msg);
-        }
-    }
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
@@ -68,6 +35,8 @@ public class Main {
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    protected abstract Configuration getConfigurationToTest() throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 
