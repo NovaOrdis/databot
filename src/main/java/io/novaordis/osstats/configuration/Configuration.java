@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
+package io.novaordis.osstats.configuration;
 
 /**
 
@@ -28,9 +28,6 @@ package io.novaordis.osstats;
  --interval=<seconds> specifies the sampling interval length, in seconds.  If not specified the
  default is 10 seconds.
 
- --foreground -  runs in foreground from the controlling terminal, instead of background, which is
- the default. In foreground mode, the output is switched automatically to /dev/stdout and --output
- option is ignored.
 
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/27/16
@@ -39,8 +36,16 @@ public interface Configuration {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
+    public int DEFAULT_SAMPLING_INTERVAL_SEC = 10;
+
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    /**
+     * The sampling interval, in seconds. If not specified, the default is 10 seconds.
+     * @return
+     */
+    int getSamplingInterval();
 
 }

@@ -16,6 +16,8 @@
 
 package io.novaordis.osstats;
 
+import io.novaordis.osstats.configuration.Configuration;
+import io.novaordis.osstats.configuration.ConfigurationFactory;
 import io.novaordis.utilities.UserErrorException;
 
 /**

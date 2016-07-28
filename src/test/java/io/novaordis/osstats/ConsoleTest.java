@@ -16,11 +16,20 @@
 
 package io.novaordis.osstats;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
+import static org.junit.Assert.assertEquals;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/27/16
  */
-public abstract class ConfigurationTest {
+public class ConsoleTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -28,15 +37,43 @@ public abstract class ConfigurationTest {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    private PrintStream originalErrorStream;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
 
+    @Before
+    public void setUp() {
+
+        originalErrorStream = System.err;
+    }
+
+    @After
+    public void tearDown() {
+
+        //
+        // restore the original error stream
+        //
+        System.setErr(originalErrorStream);
+    }
+
+    @Test
+    public void error() throws Exception {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream mockError = new PrintStream(baos);
+        System.setErr(mockError);
+
+        Console.error("something");
+
+        String s = new String(baos.toByteArray());
+        assertEquals("[error]: something\n", s);
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
-
-    protected abstract Configuration getConfigurationToTest() throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

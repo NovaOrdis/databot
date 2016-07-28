@@ -14,72 +14,63 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
+package io.novaordis.osstats.configuration;
 
-import io.novaordis.utilities.UserErrorException;
+import org.junit.Test;
 
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/27/16
  */
-public class ConfigurationFactory {
+public abstract class ConfigurationTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
     // Static ----------------------------------------------------------------------------------------------------------
 
-    /**
-     * @throws UserErrorException on user errors.
-     */
-    public static Configuration buildInstance(String[] cla) throws Exception {
-
-        Configuration configuration = null;
-
-        List<String> commandLineArguments = new ArrayList<>(Arrays.asList(cla));
-
-        for (int i = 0; i < commandLineArguments.size(); i++) {
-
-            String crt = commandLineArguments.get(i);
-
-            if ("test-user-error".equals(crt)) {
-                //
-                // we do this for testing
-                //
-                throw new UserErrorException(commandLineArguments.get(i + 1));
-
-            } else if ("test-unexpected-error".equals(crt)) {
-                //
-                //  we do this for testing
-                //
-                String exceptionClassName = commandLineArguments.get(i + 1);
-                String message = commandLineArguments.get(i + 2);
-                Constructor c = Class.forName(exceptionClassName).getConstructor(String.class);
-                //noinspection UnnecessaryLocalVariable
-                Exception e = (Exception) c.newInstance(message);
-                throw e;
-            }
-        }
-
-        return configuration;
-    }
-
     // Attributes ------------------------------------------------------------------------------------------------------
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    private ConfigurationFactory() {
+    // Public ----------------------------------------------------------------------------------------------------------
+
+    /**
+     * The default configuration represents built-in values, values that are available when no external configuration
+     * file is specified, or when no specific values are present in the configuration file.
+     */
+    @Test
+    public void defaultConfiguration() throws Exception {
+
+        Configuration c = getConfigurationToTest(false);
+
+        assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingInterval());
     }
 
-    // Public ----------------------------------------------------------------------------------------------------------
+    /**
+     * The reference configuration is represented by files in ${basedir}/src/test/resources/data/configuration
+     */
+    @Test
+    public void referenceConfiguration() throws Exception {
+
+        Configuration c = getConfigurationToTest(true);
+        assertNotNull(c);
+        assertEquals(20, c.getSamplingInterval());
+        assertNotEquals(20, Configuration.DEFAULT_SAMPLING_INTERVAL_SEC);
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    /**
+     * @param useReferenceFile if true, use the corresponding reference file from under src/test/resources/data, if
+     *                         false, don't use any file, but expect built-in values.
+     */
+    protected abstract Configuration getConfigurationToTest(boolean useReferenceFile) throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

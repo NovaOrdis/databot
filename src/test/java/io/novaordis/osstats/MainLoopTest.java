@@ -16,13 +16,11 @@
 
 package io.novaordis.osstats;
 
-import io.novaordis.osstats.configuration.Configuration;
-
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/27/16
  */
-public class MainLoop {
+public class MainLoopTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -30,24 +28,9 @@ public class MainLoop {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private Configuration configuration;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MainLoop(Configuration conf) {
-        this.configuration = conf;
-    }
-
     // Public ----------------------------------------------------------------------------------------------------------
-
-    /**
-     * This is supposed to loop in the background "forever", and very fast. Must not throw any kind of exception,
-     * because if it does, the background process will exit.
-     */
-    public void run() {
-
-        throw new RuntimeException("NOT YET IMPLEMENTED");
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
