@@ -38,12 +38,14 @@ public class PropertiesConfigurationFile implements Configuration {
     private static final Logger log = LoggerFactory.getLogger(PropertiesConfigurationFile.class);
 
     public static final String SAMPLING_INTERVAL_PROPERTY_NAME = "sampling.interval";
+    public static final String OUTPUT_FILE_PROPERTY_NAME = "output.file";
 
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
     private int samplingInterval;
+    private String outputFileName;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -88,6 +90,7 @@ public class PropertiesConfigurationFile implements Configuration {
     PropertiesConfigurationFile() {
 
         this.samplingInterval = DEFAULT_SAMPLING_INTERVAL_SEC;
+        this.outputFileName = DEFAULT_OUTPUT_FILE_NAME;
     }
 
     // Configuration implementation ------------------------------------------------------------------------------------
@@ -96,6 +99,12 @@ public class PropertiesConfigurationFile implements Configuration {
     public int getSamplingInterval() {
 
         return samplingInterval;
+    }
+
+    @Override
+    public String getOutputFileName() {
+
+        return outputFileName;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
@@ -118,6 +127,13 @@ public class PropertiesConfigurationFile implements Configuration {
             catch(Exception e) {
                 throw new UserErrorException("invalid sampling interval value: \"" + s + "\"", e);
             }
+        }
+
+        s = properties.getProperty(OUTPUT_FILE_PROPERTY_NAME);
+
+        if (s != null) {
+
+            outputFileName = s;
         }
     }
 

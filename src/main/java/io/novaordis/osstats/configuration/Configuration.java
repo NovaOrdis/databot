@@ -16,6 +16,8 @@
 
 package io.novaordis.osstats.configuration;
 
+import java.io.File;
+
 /**
 
  TODO
@@ -37,15 +39,22 @@ public interface Configuration {
     // Constants -------------------------------------------------------------------------------------------------------
 
     public int DEFAULT_SAMPLING_INTERVAL_SEC = 10;
+    public String DEFAULT_OUTPUT_FILE_NAME = "/tmp/os-stats.csv";
 
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
 
     /**
-     * The sampling interval, in seconds. If not specified, the default is 10 seconds.
-     * @return
+     * @return the sampling interval, in seconds. If not specified, the default is 10 seconds.
      */
     int getSamplingInterval();
+
+    /**
+     * @return the name of the output file. If not specified, the default value is /tmp/os-stats.csv.  Note that if
+     * --foreground option is used, the output will forcibly send to /dev/stdout, regardless of the value of the output
+     * file.
+     */
+    String getOutputFileName();
 
 }

@@ -48,6 +48,7 @@ public abstract class ConfigurationTest {
         Configuration c = getConfigurationToTest(false);
 
         assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingInterval());
+        assertEquals(Configuration.DEFAULT_OUTPUT_FILE_NAME, c.getOutputFileName());
     }
 
     /**
@@ -57,9 +58,12 @@ public abstract class ConfigurationTest {
     public void referenceConfiguration() throws Exception {
 
         Configuration c = getConfigurationToTest(true);
-        assertNotNull(c);
+
         assertEquals(20, c.getSamplingInterval());
         assertNotEquals(20, Configuration.DEFAULT_SAMPLING_INTERVAL_SEC);
+
+        assertEquals("/tmp/test.csv", c.getOutputFileName());
+        assertNotEquals("/tmp/test.csv", Configuration.DEFAULT_OUTPUT_FILE_NAME);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
