@@ -46,10 +46,11 @@ public class PropertiesConfigurationFile implements Configuration {
 
     private int samplingInterval;
     private String outputFileName;
+    private boolean foreground;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public PropertiesConfigurationFile(String fileName) throws UserErrorException {
+    public PropertiesConfigurationFile(String fileName, boolean foreground) throws UserErrorException {
 
         this();
 
@@ -81,6 +82,8 @@ public class PropertiesConfigurationFile implements Configuration {
             }
         }
 
+        this.foreground = foreground;
+
         readConfiguration(props);
     }
 
@@ -91,9 +94,16 @@ public class PropertiesConfigurationFile implements Configuration {
 
         this.samplingInterval = DEFAULT_SAMPLING_INTERVAL_SEC;
         this.outputFileName = DEFAULT_OUTPUT_FILE_NAME;
+        this.foreground = false;
     }
 
     // Configuration implementation ------------------------------------------------------------------------------------
+
+    @Override
+    public boolean isForeground() {
+
+        return foreground;
+    }
 
     @Override
     public int getSamplingInterval() {

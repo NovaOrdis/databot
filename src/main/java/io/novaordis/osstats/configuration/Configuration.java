@@ -16,21 +16,7 @@
 
 package io.novaordis.osstats.configuration;
 
-import java.io.File;
-
 /**
-
- TODO
-
- output-file --output=<output-file>  specifies the name of the output file.  If not specified,
- the default file to write to is /tmp/os-stats.csv. /dev/stdout can be used to send the output to
- stdout. Note that if  --foreground   option is used,   the output will forcibly  go to
- /dev/stdout, regardless on whether --output option was used or not.
-
- --interval=<seconds> specifies the sampling interval length, in seconds.  If not specified the
- default is 10 seconds.
-
-
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/27/16
  */
@@ -38,12 +24,17 @@ public interface Configuration {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
-    public int DEFAULT_SAMPLING_INTERVAL_SEC = 10;
-    public String DEFAULT_OUTPUT_FILE_NAME = "/tmp/os-stats.csv";
+    int DEFAULT_SAMPLING_INTERVAL_SEC = 10;
+    String DEFAULT_OUTPUT_FILE_NAME = "/tmp/os-stats.csv";
 
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    /**
+     * @return true if the process runs in foreground, and thus getOutputFileName() value is ignored.
+     */
+    boolean isForeground();
 
     /**
      * @return the sampling interval, in seconds. If not specified, the default is 10 seconds.

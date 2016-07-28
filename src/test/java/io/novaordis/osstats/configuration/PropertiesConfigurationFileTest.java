@@ -51,7 +51,7 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
     public void constructor_configurationFileDoesNotExist() throws Exception {
 
         try {
-            new PropertiesConfigurationFile("there/is/no/such/file");
+            new PropertiesConfigurationFile("there/is/no/such/file", false);
         }
         catch(UserErrorException e) {
             String msg = e.getMessage();
@@ -93,7 +93,7 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
             File configFile = new File(
                     System.getProperty("basedir"), "src/test/resources/data/configuration/reference-props.conf");
             assertTrue(configFile.isFile());
-            return new PropertiesConfigurationFile(configFile.getAbsolutePath());
+            return new PropertiesConfigurationFile(configFile.getAbsolutePath(), false);
         }
         else {
             return new PropertiesConfigurationFile();

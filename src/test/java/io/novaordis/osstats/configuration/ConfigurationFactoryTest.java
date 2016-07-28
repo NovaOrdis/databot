@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -66,9 +66,8 @@ public class ConfigurationFactoryTest {
 
             Configuration c = ConfigurationFactory.buildInstance(new String[0]);
 
-            assertNotNull(c);
-
             assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingInterval());
+            assertFalse(c.isForeground());
         }
         finally {
 
@@ -117,9 +116,8 @@ public class ConfigurationFactoryTest {
         Configuration c = ConfigurationFactory.buildInstance(new String[] {
                 "-c", configFile.getAbsolutePath() });
 
-        assertNotNull(c);
-
         assertEquals(20, c.getSamplingInterval());
+        assertFalse(c.isForeground());
     }
 
     @Test
@@ -134,6 +132,47 @@ public class ConfigurationFactoryTest {
                 "--configuration="+configFile.getAbsolutePath() });
 
         assertEquals(20, c.getSamplingInterval());
+        assertFalse(c.isForeground());
+    }
+
+    @Test
+    public void buildInstance_Foreground_ShortOption() throws Exception {
+
+        File d = new File(System.getProperty("basedir"), "src/test/resources/data/configuration");
+        EnvironmentVariableProvider orig = ConfigurationFactory.getEnvironmentVariableProvider();
+        MockEnvironmentVariableProvider mevp = new MockEnvironmentVariableProvider();
+        mevp.set(ConfigurationFactory.OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME, d.getAbsolutePath());
+
+        try {
+
+            ConfigurationFactory.setEnvironmentVariableProvider(mevp);
+
+            Configuration c = ConfigurationFactory.buildInstance(new String[]{"-fg"});
+            assertTrue(c.isForeground());
+        }
+        finally {
+            ConfigurationFactory.setEnvironmentVariableProvider(orig);
+        }
+    }
+
+    @Test
+    public void buildInstance_Foreground_LongOption() throws Exception {
+
+        File d = new File(System.getProperty("basedir"), "src/test/resources/data/configuration");
+        EnvironmentVariableProvider orig = ConfigurationFactory.getEnvironmentVariableProvider();
+        MockEnvironmentVariableProvider mevp = new MockEnvironmentVariableProvider();
+        mevp.set(ConfigurationFactory.OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME, d.getAbsolutePath());
+
+        try {
+
+            ConfigurationFactory.setEnvironmentVariableProvider(mevp);
+
+            Configuration c = ConfigurationFactory.buildInstance(new String[]{"--foreground"});
+            assertTrue(c.isForeground());
+        }
+        finally {
+            ConfigurationFactory.setEnvironmentVariableProvider(orig);
+        }
     }
 
     @Test
@@ -160,7 +199,7 @@ public class ConfigurationFactoryTest {
         File configFile = new File(resourceDir, "reference-props.conf");
         assertTrue(configFile.isFile());
 
-        Configuration c = ConfigurationFactory.buildInstance(configFile.getAbsolutePath());
+        Configuration c = ConfigurationFactory.buildInstance(configFile.getAbsolutePath(), false);
 
         assertEquals(20, c.getSamplingInterval());
     }
@@ -169,7 +208,7 @@ public class ConfigurationFactoryTest {
     public void buildInstance_UnknownType() throws Exception {
 
         try {
-            ConfigurationFactory.buildInstance("something/that/we/do/not/recognize");
+            ConfigurationFactory.buildInstance("something/that/we/do/not/recognize", false);
             fail("should throw exception");
         }
         catch(UserErrorException e) {

@@ -46,6 +46,9 @@ public class ConfigurationFactory {
     public static final String OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME = "OS_STATS_CONFIG_DIR";
     public static final String DEFAULT_CONFIGURATION_FILE_NAME = "os-stats.conf";
 
+    public static final String FOREGROUND_SHORT_OPTION = "-fg";
+    public static final String FOREGROUND_LONG_OPTION = "--foreground";
+
     // Static Attributes -----------------------------------------------------------------------------------------------
 
     private static EnvironmentVariableProvider environmentVariableProvider = new EnvironmentVariableProviderImpl();
@@ -62,6 +65,8 @@ public class ConfigurationFactory {
         String configurationFileName = null;
 
         List<String> commandLineArguments = new ArrayList<>(Arrays.asList(cla));
+
+        boolean foreground = false;
 
         for (int i = 0; i < commandLineArguments.size(); i++) {
 
@@ -96,6 +101,10 @@ public class ConfigurationFactory {
                     configurationFileName = crt.substring((CONFIGURATION_FILE_LONG_OPTION + "=").length());
                 }
             }
+            else if (FOREGROUND_SHORT_OPTION.endsWith(crt) || FOREGROUND_LONG_OPTION.endsWith(crt)) {
+
+                foreground = true;
+            }
             else if ("test-user-error".equals(crt)) {
 
                 //
@@ -127,7 +136,7 @@ public class ConfigurationFactory {
         }
 
         //noinspection UnnecessaryLocalVariable
-        Configuration configuration = buildInstance(configurationFileName);
+        Configuration configuration = buildInstance(configurationFileName, foreground);
         return configuration;
     }
 
@@ -154,7 +163,7 @@ public class ConfigurationFactory {
 
     // Package protected -----------------------------------------------------------------------------------------------
 
-    static Configuration buildInstance(String fileName) throws Exception {
+    static Configuration buildInstance(String fileName, boolean foreground) throws Exception {
 
         //
         // heuristics to choose the right subclass implementation
@@ -166,7 +175,7 @@ public class ConfigurationFactory {
             // properties-based configuration file
             //
 
-            return new PropertiesConfigurationFile(fileName);
+            return new PropertiesConfigurationFile(fileName, foreground);
         }
         else {
 

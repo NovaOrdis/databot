@@ -117,6 +117,10 @@ while [ "$1" != "" ]; do
         verbose=true
     elif [ "$1" = "--foreground" ]; then
         foreground=true
+        #
+        # also pass it as a java process argument, to let it know to ignore output.file
+        #
+        args="${args} $1"
     elif [ "$1" = "stop" ]; then
         stop && exit 0 || fail "failed to stop background os-stats"
     elif [ "$1" = "status" ]; then
