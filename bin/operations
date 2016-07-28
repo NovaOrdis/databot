@@ -55,6 +55,11 @@ Commands:
         --no-tests - won't run the test suite upon release. Not usually recommended, unless we're
           releasing a snapshot.
 
+    build
+
+        Build the "releasable" artifact,  which usually is a self-contained, ready-to-install zip.
+        In case of a library,  is the JAR file (or the library)  as installed in a repository such
+        as Maven.
 
     install [-f|--force]
 
@@ -1001,7 +1006,7 @@ function do-install-release-tools() {
     #
     # these are the links to ./operations that are going to be created in ./bin
     #
-    local links="install release test";
+    local links="release build install test";
     # create symbolic links
     (cd ${bin_dir}; \
         for link in ${links}; \
@@ -1056,55 +1061,6 @@ release_date=\${release_date}
 EOF
 ) > ${project_home}/src/main/resources/VERSION
     fi
-}
-
-function do-test() {
-
-    compute-next-version ${arguments[0]} ${arguments[1]}
-}
-
-#
-# expects all its arguments in the "arguments" global array
-#
-function do-install() {
-
-    #
-    # process arguments
-    #
-
-    #
-    # options:
-    #
-    #  --force
-    #
-
-    local force=false
-
-    local i=0
-    while [ ${i} -lt ${#arguments[*]} ]; do
-        local arg=${arguments[${i}]}
-        debug "do-install arg ${i}: ${arg}"
-        if [ "${arg}" = "-f" -o "${arg}" = "--force" ]; then
-            force=true
-        fi
-        ((i++))
-    done
-
-    #
-    # checking pre-requisites
-    #
-
-    [ -z ${RUNTIME_DIR} ] && fail "RUNTIME_DIR environment variable not set, don't know where to install"
-
-    debug "checking whether the project installation zip has been built ..."
-
-    local release_zip_file_path
-    release_zip_file_path=$(build-release-zip-file) || exit 1
-
-    local installed_path
-    installed_path=$(install ${release_zip_file_path} ${RUNTIME_DIR} ${force}) || exit 1
-
-    info "installed $(basename ${installed_path}) in $(dirname ${installed_path})"
 }
 
 #
@@ -1254,6 +1210,82 @@ function do-release() {
     info "If you want to create an official GitHub release, use tag \"${tag}\" and binary $(basename ${release_binary_artifact})."
     info "The local version has been incremented to ${next_local_version}."
     info ""
+}
+
+#
+# expects all its arguments in the "arguments" global array
+#
+function do-build() {
+
+    #
+    # process arguments
+    #
+
+    #
+    # options:
+    #
+    #  --
+    #
+
+    local force=false
+
+    local i=0
+    while [ ${i} -lt ${#arguments[*]} ]; do
+        local arg=${arguments[${i}]}
+        debug "do-build arg ${i}: ${arg}"
+        ((i++))
+    done
+
+    local release_zip_file_path
+    release_zip_file_path=$(build-release-zip-file) || exit 1
+}
+
+#
+# expects all its arguments in the "arguments" global array
+#
+function do-install() {
+
+    #
+    # process arguments
+    #
+
+    #
+    # options:
+    #
+    #  --force
+    #
+
+    local force=false
+
+    local i=0
+    while [ ${i} -lt ${#arguments[*]} ]; do
+        local arg=${arguments[${i}]}
+        debug "do-install arg ${i}: ${arg}"
+        if [ "${arg}" = "-f" -o "${arg}" = "--force" ]; then
+            force=true
+        fi
+        ((i++))
+    done
+
+    #
+    # checking pre-requisites
+    #
+
+    [ -z ${RUNTIME_DIR} ] && fail "RUNTIME_DIR environment variable not set, don't know where to install"
+
+    debug "building the releasable artifact ..."
+    local release_zip_file_path
+    release_zip_file_path=$(build-release-zip-file) || exit 1
+
+    local installed_path
+    installed_path=$(install ${release_zip_file_path} ${RUNTIME_DIR} ${force}) || exit 1
+
+    info "installed $(basename ${installed_path}) in $(dirname ${installed_path})"
+}
+
+function do-test() {
+
+    compute-next-version ${arguments[0]} ${arguments[1]}
 }
 
 main $@
