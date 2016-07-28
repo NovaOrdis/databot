@@ -16,8 +16,9 @@
 
 package io.novaordis.osstats.configuration;
 
+import io.novaordis.osstats.env.EnvironmentVariableProvider;
+import io.novaordis.osstats.env.MockEnvironmentVariableProvider;
 import io.novaordis.utilities.UserErrorException;
-import org.junit.After;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,12 +48,6 @@ public class ConfigurationFactoryTest {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    @After
-    public void tearDown() {
-
-        System.clearProperty(ConfigurationFactory.BIN_DIR_SYSTEM_PROPERTY_NAME);
-    }
-
     // buildInstance() command line arguments --------------------------------------------------------------------------
 
     @Test
@@ -60,13 +55,25 @@ public class ConfigurationFactoryTest {
 
         File d = new File(System.getProperty("basedir"), "src/test/resources/data/configuration");
         assertTrue(d.isDirectory());
-        System.setProperty(ConfigurationFactory.BIN_DIR_SYSTEM_PROPERTY_NAME, d.getAbsolutePath());
 
-        Configuration c = ConfigurationFactory.buildInstance(new String[0]);
+        EnvironmentVariableProvider orig = ConfigurationFactory.getEnvironmentVariableProvider();
+        MockEnvironmentVariableProvider mevp = new MockEnvironmentVariableProvider();
+        mevp.set(ConfigurationFactory.OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME, d.getAbsolutePath());
 
-        assertNotNull(c);
+        try {
 
-        assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingInterval());
+            ConfigurationFactory.setEnvironmentVariableProvider(mevp);
+
+            Configuration c = ConfigurationFactory.buildInstance(new String[0]);
+
+            assertNotNull(c);
+
+            assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingInterval());
+        }
+        finally {
+
+            ConfigurationFactory.setEnvironmentVariableProvider(orig);
+        }
     }
 
     @Test
@@ -129,6 +136,20 @@ public class ConfigurationFactoryTest {
         assertEquals(20, c.getSamplingInterval());
     }
 
+    @Test
+    public void buildInstance_UnknownCommandOrOption() throws Exception {
+
+        try {
+            ConfigurationFactory.buildInstance(new String[]{"--configuraton"});
+            fail("should throw exception");
+        }
+        catch(UserErrorException e) {
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("unknown command or option --configuraton", msg);
+        }
+    }
+
     // buildInstance() file name ---------------------------------------------------------------------------------------
 
     @Test
@@ -162,9 +183,14 @@ public class ConfigurationFactoryTest {
     // getDefaultConfigurationFileName() -------------------------------------------------------------------------------
 
     @Test
-    public void getDefaultConfigurationFileName_NoBinDir() throws Exception {
+    public void getDefaultConfigurationFileName_NoOsStatsConfigDirEnvironmentVariableDefined() throws Exception {
+
+        EnvironmentVariableProvider orig = ConfigurationFactory.getEnvironmentVariableProvider();
+        MockEnvironmentVariableProvider mevp = new MockEnvironmentVariableProvider();
 
         try {
+
+            ConfigurationFactory.setEnvironmentVariableProvider(mevp);
             ConfigurationFactory.getDefaultConfigurationFileName();
             fail("should throw Exception");
         }
@@ -172,17 +198,31 @@ public class ConfigurationFactoryTest {
 
             String msg = e.getMessage();
             log.info(msg);
-            assertEquals("required system property '" + ConfigurationFactory.BIN_DIR_SYSTEM_PROPERTY_NAME + "' missing",
-                    msg);
+            assertEquals(
+                    ConfigurationFactory.OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME +
+                            " environment variable not defined", msg);
+        }
+        finally {
+            ConfigurationFactory.setEnvironmentVariableProvider(orig);
         }
     }
 
     @Test
     public void getDefaultConfigurationFileName() throws Exception {
 
-        System.setProperty(ConfigurationFactory.BIN_DIR_SYSTEM_PROPERTY_NAME, "something/something-else");
-        String fileName = ConfigurationFactory.getDefaultConfigurationFileName();
-        assertEquals("something/something-else/" + ConfigurationFactory.DEFAULT_CONFIGURATION_FILE_NAME, fileName);
+        EnvironmentVariableProvider orig = ConfigurationFactory.getEnvironmentVariableProvider();
+        MockEnvironmentVariableProvider mevp = new MockEnvironmentVariableProvider();
+        mevp.set(ConfigurationFactory.OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME, "something/something-else");
+
+
+        try {
+            ConfigurationFactory.setEnvironmentVariableProvider(mevp);
+            String fileName = ConfigurationFactory.getDefaultConfigurationFileName();
+            assertEquals("something/something-else/" + ConfigurationFactory.DEFAULT_CONFIGURATION_FILE_NAME, fileName);
+        }
+        finally {
+            ConfigurationFactory.setEnvironmentVariableProvider(orig);
+        }
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

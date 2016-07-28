@@ -14,54 +14,31 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
-
-import io.novaordis.osstats.configuration.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package io.novaordis.osstats.env;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/27/16
+ * @since 7/28/16
  */
-public class MainLoop {
+public class EnvironmentVariableProviderImpl implements EnvironmentVariableProvider {
 
     // Constants -------------------------------------------------------------------------------------------------------
-
-    private static final Logger log = LoggerFactory.getLogger(MainLoop.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private Configuration configuration;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MainLoop(Configuration conf) {
-        this.configuration = conf;
+    // EnvironmentVariableProvider implementation ----------------------------------------------------------------------
+
+    @Override
+    public String get(String environmentVariableName) {
+
+        return System.getenv(environmentVariableName);
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    /**
-     * This is supposed to loop in the background "forever", and very fast. Must not throw any kind of exception,
-     * because if it does, the background process will exit.
-     */
-    public void run() {
-
-        while(true) {
-
-            System.out.println(".");
-
-            try {
-                Thread.sleep(configuration.getSamplingInterval() * 1000L);
-            }
-            catch(InterruptedException e) {
-                log.debug("main thread interrupted");
-            }
-        }
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

@@ -830,20 +830,34 @@ function build-release-zip-file() {
     mkdir ${zip_root_dir} && \
         debug "created zip root directory ${zip_root_dir}" || \
         fail "failed to create zip root directory ${zip_root_dir}"
+
     mkdir ${zip_root_dir}/lib && \
         debug "created zip root directory ${zip_root_dir}/lib" || \
         fail "failed to create zip root directory ${zip_root_dir}/lib"
+
     mkdir ${zip_root_dir}/bin && \
         debug "created zip root directory ${zip_root_dir}/bin" || \
         fail "failed to create zip root directory ${zip_root_dir}/bin"
+
     cp ${artifact_path} ${zip_root_dir}/lib && \
         debug "copied $(basename ${artifact_path}) in ${zip_root_dir}/lib" || exit 1;
+
+    # copy the processed resource files into lib
+    for i in ${project_home}/src/main/resources/*; do
+        i=$(basename ${i})
+        cp ${project_home}/target/classes/${i} ${zip_root_dir}/lib && \
+            debug "${project_home}/target/classes/${i} in ${zip_root_dir}/lib" || exit 1;
+    done
+
     cp ${project_home}/src/main/bash/* ${zip_root_dir}/bin && \
         debug "copied scripts to ${zip_root_dir}/bin" || exit 1;
+
     configure-run-wrapper ${zip_root_dir}/bin && \
         debug "successfully configured the run wrapper" || exit 1;
+
     chmod a+rx ${zip_root_dir}/bin/* && \
         debug "chmod a+rx ${zip_root_dir}/bin/*" || exit 1;
+
     cp ${project_home}/README.md ${zip_root_dir} && \
         debug "copied ${project_home}/README.md ${zip_root_dir}/" || exit 1;
 

@@ -1,10 +1,11 @@
-os-stats is a program designed to run in the background,  with a low-overhead.   Only one instance
-per VM is necessary.  os-stats reads O/S level metrics  in a loop  and writes them in a  CSV file.
-If an os-stats process is already running in the background,  an attempt to start another os-stats
-process will fail.  The program reads its configuration from $OS_STATS_HOME/etc/os-stats.conf, or,
-if configured at startup with  -c|--configuration=,  from the file specified  by the configuration
-option.  More details on the syntax of configuration file are available under the  "Configuration"
-section.
+
+os-stats  is a low-overhead monitoring program  designed  to run in the background,  indefinitely.
+Only one os-stats instance per VM is necessary.   os-stats reads  O/S level metrics in a loop  and
+writes them in a CSV file. If an os-stats process is already running in the background, an attempt
+to start another os-stats instance will fail. The program reads its configuration from the default
+location $OS_STATS_CONFIG_DIR/os-stats.conf or, if configured at startup with -c|--configuration=,
+from the file specified by the configuration option.  More details  on the syntax of configuration
+file are available under the "Configuration" section.
 
 os-stats  can  also  be  used  as a command line  manager  of  the os-stats process running in the
 background. The commands that can be used are:
@@ -13,10 +14,12 @@ background. The commands that can be used are:
 
   version - display the version and exit.
 
-  status -  display whether a background os-stats process already runs on the system, and provides
-    more information about it (such as the PID), if the process is found running.
+  status -  display whether a background os-stats process already runs on the system. If a process
+    is found running, the command provides more information about it (such as the PID).
 
   stop - stop the background os-stats process, if running.
 
 Configuration ------------------------------------------------------------------------------------
+
+  sampling.interval -  sampling interval, in seconds. If not specified, the default is 10 seconds.
 

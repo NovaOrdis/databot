@@ -16,7 +16,7 @@
 
 package io.novaordis.osstats.configuration;
 
-import io.novaordis.clad.UserErrorException;
+import io.novaordis.utilities.UserErrorException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

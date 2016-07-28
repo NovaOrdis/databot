@@ -14,53 +14,45 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
+package io.novaordis.osstats.env;
 
-import io.novaordis.osstats.configuration.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/27/16
+ * @since 7/28/16
  */
-public class MainLoop {
+public class MockEnvironmentVariableProvider implements EnvironmentVariableProvider {
 
     // Constants -------------------------------------------------------------------------------------------------------
-
-    private static final Logger log = LoggerFactory.getLogger(MainLoop.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private Configuration configuration;
+    private Map<String, String> env = new HashMap<>();
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MainLoop(Configuration conf) {
-        this.configuration = conf;
+    public MockEnvironmentVariableProvider() {
+
+        this.env = new HashMap<>();
+    }
+
+    // EnvironmentVariableProvider -------------------------------------------------------------------------------------
+
+    @Override
+    public String get(String environmentVariableName) {
+
+        return env.get(environmentVariableName);
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    /**
-     * This is supposed to loop in the background "forever", and very fast. Must not throw any kind of exception,
-     * because if it does, the background process will exit.
-     */
-    public void run() {
+    public void set(String environmentVariableName, String value) {
 
-        while(true) {
-
-            System.out.println(".");
-
-            try {
-                Thread.sleep(configuration.getSamplingInterval() * 1000L);
-            }
-            catch(InterruptedException e) {
-                log.debug("main thread interrupted");
-            }
-        }
+        env.put(environmentVariableName, value);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

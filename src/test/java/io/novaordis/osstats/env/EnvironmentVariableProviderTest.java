@@ -14,58 +14,54 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
+package io.novaordis.osstats.env;
 
-import io.novaordis.osstats.configuration.Configuration;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/27/16
+ * @since 7/28/16
  */
-public class MainLoop {
+public abstract class EnvironmentVariableProviderTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
-    private static final Logger log = LoggerFactory.getLogger(MainLoop.class);
+    private static final Logger log = LoggerFactory.getLogger(EnvironmentVariableProviderTest.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private Configuration configuration;
-
     // Constructors ----------------------------------------------------------------------------------------------------
-
-    public MainLoop(Configuration conf) {
-        this.configuration = conf;
-    }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    /**
-     * This is supposed to loop in the background "forever", and very fast. Must not throw any kind of exception,
-     * because if it does, the background process will exit.
-     */
-    public void run() {
+    @Test
+    public void noSuchVariable() throws Exception {
 
-        while(true) {
+        EnvironmentVariableProvider p = getEnvironmentVariableProviderToTest();
+        assertNull(p.get("pretty_sure_there_is_no_such_environment_variable"));
+    }
 
-            System.out.println(".");
+    @Test
+    public void getHOME() throws Exception {
 
-            try {
-                Thread.sleep(configuration.getSamplingInterval() * 1000L);
-            }
-            catch(InterruptedException e) {
-                log.debug("main thread interrupted");
-            }
-        }
+        EnvironmentVariableProvider p = getEnvironmentVariableProviderToTest();
+        String s = p.get("HOME");
+        log.info(s);
+        assertNotNull(s);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    protected abstract EnvironmentVariableProvider getEnvironmentVariableProviderToTest();
 
     // Private ---------------------------------------------------------------------------------------------------------
 

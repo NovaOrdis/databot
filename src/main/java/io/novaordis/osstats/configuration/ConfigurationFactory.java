@@ -16,6 +16,8 @@
 
 package io.novaordis.osstats.configuration;
 
+import io.novaordis.osstats.env.EnvironmentVariableProvider;
+import io.novaordis.osstats.env.EnvironmentVariableProviderImpl;
 import io.novaordis.utilities.UserErrorException;
 
 import java.io.File;
@@ -41,8 +43,12 @@ public class ConfigurationFactory {
 
     public static final String CONFIGURATION_FILE_SHORT_OPTION = "-c";
     public static final String CONFIGURATION_FILE_LONG_OPTION = "--configuration";
-    public static final String BIN_DIR_SYSTEM_PROPERTY_NAME = "bin.dir";
+    public static final String OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME = "OS_STATS_CONFIG_DIR";
     public static final String DEFAULT_CONFIGURATION_FILE_NAME = "os-stats.conf";
+
+    // Static Attributes -----------------------------------------------------------------------------------------------
+
+    private static EnvironmentVariableProvider environmentVariableProvider = new EnvironmentVariableProviderImpl();
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -110,6 +116,9 @@ public class ConfigurationFactory {
                 Exception e = (Exception) c.newInstance(message);
                 throw e;
             }
+            else {
+                throw new UserErrorException("unknown command or option " + crt);
+            }
         }
 
         if (configurationFileName == null) {
@@ -120,6 +129,18 @@ public class ConfigurationFactory {
         //noinspection UnnecessaryLocalVariable
         Configuration configuration = buildInstance(configurationFileName);
         return configuration;
+    }
+
+    // Package protected static ----------------------------------------------------------------------------------------
+
+    static void setEnvironmentVariableProvider(EnvironmentVariableProvider p) {
+
+        environmentVariableProvider = p;
+    }
+
+    static EnvironmentVariableProvider getEnvironmentVariableProvider() {
+
+        return environmentVariableProvider;
     }
 
     // Attributes ------------------------------------------------------------------------------------------------------
@@ -164,10 +185,11 @@ public class ConfigurationFactory {
      */
     static String getDefaultConfigurationFileName() throws UserErrorException {
 
-        String s = System.getProperty(BIN_DIR_SYSTEM_PROPERTY_NAME);
+        String s = environmentVariableProvider.get(OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME);
 
         if (s == null) {
-            throw new UserErrorException("required system property '" + BIN_DIR_SYSTEM_PROPERTY_NAME + "' missing");
+            throw new UserErrorException(
+                    OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME + " environment variable not defined");
         }
 
         return new File(s, DEFAULT_CONFIGURATION_FILE_NAME).getPath();
