@@ -14,38 +14,36 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.configuration;
+package io.novaordis.osstats;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/27/16
+ * @since 7/29/16
  */
-public interface Configuration {
+public class DataCollectorImplTest extends DataCollectorTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
-    int DEFAULT_SAMPLING_INTERVAL_SEC = 10;
-    String DEFAULT_OUTPUT_FILE_NAME = "/tmp/os-stats.csv";
-
     // Static ----------------------------------------------------------------------------------------------------------
+
+    // Attributes ------------------------------------------------------------------------------------------------------
+
+    // Constructors ----------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    /**
-     * @return true if the process runs in foreground, and thus getOutputFileName() value is ignored.
-     */
-    boolean isForeground();
+    // Package protected -----------------------------------------------------------------------------------------------
 
-    /**
-     * @return the sampling interval, in seconds. If not specified, the default is 10 seconds.
-     */
-    int getSamplingIntervalSec();
+    // Protected -------------------------------------------------------------------------------------------------------
 
-    /**
-     * @return the name of the output file. If not specified, the default value is /tmp/os-stats.csv.  Note that if
-     * --foreground option is used, the output will forcibly send to /dev/stdout, regardless of the value of the output
-     * file.
-     */
-    String getOutputFileName();
+    @Override
+    protected DataCollectorImpl getDataCollectorToTest() throws Exception {
+
+        return new DataCollectorImpl();
+    }
+
+    // Private ---------------------------------------------------------------------------------------------------------
+
+    // Inner classes ---------------------------------------------------------------------------------------------------
 
 }

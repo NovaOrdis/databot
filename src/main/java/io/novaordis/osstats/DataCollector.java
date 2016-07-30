@@ -14,38 +14,25 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.configuration;
+package io.novaordis.osstats;
+
+import io.novaordis.events.core.event.TimedEvent;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/27/16
+ * @since 7/29/16
  */
-public interface Configuration {
+public interface DataCollector {
 
     // Constants -------------------------------------------------------------------------------------------------------
-
-    int DEFAULT_SAMPLING_INTERVAL_SEC = 10;
-    String DEFAULT_OUTPUT_FILE_NAME = "/tmp/os-stats.csv";
 
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
 
     /**
-     * @return true if the process runs in foreground, and thus getOutputFileName() value is ignored.
+     * Take a reading. May return null if external circumstances prevented the collector to read data.
      */
-    boolean isForeground();
-
-    /**
-     * @return the sampling interval, in seconds. If not specified, the default is 10 seconds.
-     */
-    int getSamplingIntervalSec();
-
-    /**
-     * @return the name of the output file. If not specified, the default value is /tmp/os-stats.csv.  Note that if
-     * --foreground option is used, the output will forcibly send to /dev/stdout, regardless of the value of the output
-     * file.
-     */
-    String getOutputFileName();
+    TimedEvent read();
 
 }

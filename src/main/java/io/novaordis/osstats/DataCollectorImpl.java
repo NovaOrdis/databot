@@ -16,52 +16,30 @@
 
 package io.novaordis.osstats;
 
-import io.novaordis.osstats.configuration.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.novaordis.events.core.event.TimedEvent;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/27/16
+ * @since 7/29/16
  */
-public class MainLoop {
+public class DataCollectorImpl implements DataCollector {
 
     // Constants -------------------------------------------------------------------------------------------------------
-
-    private static final Logger log = LoggerFactory.getLogger(MainLoop.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private Configuration configuration;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MainLoop(Configuration conf) {
-        this.configuration = conf;
+    // DataCollectorImpl implementation --------------------------------------------------------------------------------
+
+    @Override
+    public TimedEvent read() {
+        throw new RuntimeException("read() NOT YET IMPLEMENTED");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    /**
-     * This is supposed to loop in the background "forever", and very fast. Must not throw any kind of exception,
-     * because if it does, the background process will exit.
-     */
-    public void run() {
-
-        while(true) {
-
-            System.out.println(".");
-
-            try {
-                Thread.sleep(configuration.getSamplingInterval() * 1000L);
-            }
-            catch(InterruptedException e) {
-                log.debug("main thread interrupted");
-            }
-        }
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

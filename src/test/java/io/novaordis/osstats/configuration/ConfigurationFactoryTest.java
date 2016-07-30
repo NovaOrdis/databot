@@ -66,7 +66,7 @@ public class ConfigurationFactoryTest {
 
             Configuration c = ConfigurationFactory.buildInstance(new String[0]);
 
-            assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingInterval());
+            assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingIntervalSec());
             assertFalse(c.isForeground());
         }
         finally {
@@ -116,7 +116,7 @@ public class ConfigurationFactoryTest {
         Configuration c = ConfigurationFactory.buildInstance(new String[] {
                 "-c", configFile.getAbsolutePath() });
 
-        assertEquals(20, c.getSamplingInterval());
+        assertEquals(20, c.getSamplingIntervalSec());
         assertFalse(c.isForeground());
     }
 
@@ -131,7 +131,7 @@ public class ConfigurationFactoryTest {
         Configuration c = ConfigurationFactory.buildInstance(new String[] {
                 "--configuration="+configFile.getAbsolutePath() });
 
-        assertEquals(20, c.getSamplingInterval());
+        assertEquals(20, c.getSamplingIntervalSec());
         assertFalse(c.isForeground());
     }
 
@@ -201,7 +201,7 @@ public class ConfigurationFactoryTest {
 
         Configuration c = ConfigurationFactory.buildInstance(configFile.getAbsolutePath(), false);
 
-        assertEquals(20, c.getSamplingInterval());
+        assertEquals(20, c.getSamplingIntervalSec());
     }
 
     @Test

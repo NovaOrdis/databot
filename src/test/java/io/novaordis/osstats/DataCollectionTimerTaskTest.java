@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.configuration;
+package io.novaordis.osstats;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/27/16
+ * @since 7/29/16
  */
-public abstract class ConfigurationTest {
+public class DataCollectionTimerTaskTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -37,43 +34,19 @@ public abstract class ConfigurationTest {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    /**
-     * The default configuration represents built-in values, values that are available when no external configuration
-     * file is specified, or when no specific values are present in the configuration file.
-     */
     @Test
-    public void defaultConfiguration() throws Exception {
+    public void lifecycle() throws Exception {
 
-        Configuration c = getConfigurationToTest(false);
+        DataCollectionTimerTask t = new DataCollectionTimerTask(null, null);
 
-        assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingIntervalSec());
-        assertEquals(Configuration.DEFAULT_OUTPUT_FILE_NAME, c.getOutputFileName());
-    }
+        t.run();
 
-    /**
-     * The reference configuration is represented by files in ${basedir}/src/test/resources/data/configuration
-     */
-    @Test
-    public void referenceConfiguration() throws Exception {
-
-        Configuration c = getConfigurationToTest(true);
-
-        assertEquals(20, c.getSamplingIntervalSec());
-        assertNotEquals(20, Configuration.DEFAULT_SAMPLING_INTERVAL_SEC);
-
-        assertEquals("/tmp/test.csv", c.getOutputFileName());
-        assertNotEquals("/tmp/test.csv", Configuration.DEFAULT_OUTPUT_FILE_NAME);
+        throw new RuntimeException("RETURN HERE");
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
-
-    /**
-     * @param useReferenceFile if true, use the corresponding reference file from under src/test/resources/data, if
-     *                         false, don't use any file, but expect built-in values.
-     */
-    protected abstract Configuration getConfigurationToTest(boolean useReferenceFile) throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

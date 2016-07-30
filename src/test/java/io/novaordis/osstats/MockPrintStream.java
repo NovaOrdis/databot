@@ -16,11 +16,16 @@
 
 package io.novaordis.osstats;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.LinkedList;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/27/16
+ * @since 7/29/16
  */
-public class MainLoopTest {
+public class MockPrintStream extends PrintStream {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -28,9 +33,43 @@ public class MainLoopTest {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    private LinkedList<String> lines;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
+    public MockPrintStream() {
+
+        super(new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                throw new RuntimeException("write() NOT YET IMPLEMENTED");
+            }
+        });
+
+        lines = new LinkedList<>();
+    }
+
+    // Overrides -------------------------------------------------------------------------------------------------------
+
+    @Override
+    public void println(String s) {
+
+        lines.add(s);
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
+
+    /**
+     * retrieves (and removes) the current line or null if no line is available
+     */
+    public String getLine() {
+
+        if (lines.isEmpty()) {
+            return null;
+        }
+
+        return lines.removeFirst();
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

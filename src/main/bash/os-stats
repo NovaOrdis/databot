@@ -95,7 +95,7 @@ function status() {
     local pids
     pids=$(get-pids) || fail "failed to get pids"
     [ -z "${pids}" ] && { echo "no os-stats background processes running on $(uname -n)"; exit 0; }
-    echo "${pids} running"
+    echo "os-status with pid ${pids} running"
 }
 
 debug_args=""
@@ -115,7 +115,7 @@ while [ "$1" != "" ]; do
         verbose=true
     elif [ "$1" = "--verbose" -o "$1" = "-v" ]; then
         verbose=true
-    elif [ "$1" = "--foreground" ]; then
+    elif [ "$1" = "--foreground" -o "$1"= "-fg" ]; then
         foreground=true
         #
         # also pass it as a java process argument, to let it know to ignore output.file

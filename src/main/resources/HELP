@@ -8,8 +8,8 @@ from the file specified by the configuration option.  More details  on the synta
 file are available under the "Configuration" section.
 
 To start an instance that runs in foreground, use --foreground command line option.  In foreground
-mode,  the output is switched automatically to  /dev/stdout and the output.file configuration,  as
-described below, is ignored.
+mode, the output is switched automatically from the configured file destination to /dev/stdout and
+the output.file configuration, as described below, is ignored.
 
 os-stats  can  also  be  used  as a command line  manager  of  the os-stats process running in the
 background. The commands that can be used are:
@@ -22,6 +22,11 @@ background. The commands that can be used are:
     is found running, the command provides more information about it (such as the PID).
 
   stop - stop the background os-stats process, if running.
+
+Command line options:
+
+  --foreground, -fg -  run the command in foreground and  automatically switch the output from the
+    configured file destination to /dev/stdout.
 
 Configuration ------------------------------------------------------------------------------------
 

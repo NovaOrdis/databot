@@ -106,7 +106,7 @@ public class PropertiesConfigurationFile implements Configuration {
     }
 
     @Override
-    public int getSamplingInterval() {
+    public int getSamplingIntervalSec() {
 
         return samplingInterval;
     }

@@ -16,9 +16,15 @@
 
 package io.novaordis.osstats;
 
+import io.novaordis.events.core.event.Event;
+import io.novaordis.events.core.event.TimedEvent;
 import io.novaordis.osstats.configuration.Configuration;
 import io.novaordis.osstats.configuration.ConfigurationFactory;
 import io.novaordis.utilities.UserErrorException;
+
+import java.util.Timer;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -28,6 +34,8 @@ public class Main {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
+    public static final int DEFAULT_EVENT_QUEUE_SIZE = 10;
+
     // Static ----------------------------------------------------------------------------------------------------------
 
     public static void main(String[] args) {
@@ -35,8 +43,17 @@ public class Main {
         try {
 
             Configuration conf = ConfigurationFactory.buildInstance(args);
-            MainLoop mainLoop = new MainLoop(conf);
-            mainLoop.run();
+
+            final BlockingQueue<Event> eventBuffer = new ArrayBlockingQueue<>(DEFAULT_EVENT_QUEUE_SIZE);
+
+            AsynchronousCsvLineWriter aw = new AsynchronousCsvLineWriter(eventBuffer, conf);
+            aw.start();
+
+            Timer timer = new Timer();
+            DataCollector dataCollector = new DataCollectorImpl();
+            DataCollectionTimerTask t = new DataCollectionTimerTask(eventBuffer, dataCollector);
+            timer.schedule(t, 0, conf.getSamplingIntervalSec() * 1000L);
+
         }
         catch(UserErrorException e) {
 
