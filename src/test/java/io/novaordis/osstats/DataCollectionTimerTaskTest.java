@@ -16,7 +16,17 @@
 
 package io.novaordis.osstats;
 
+import io.novaordis.events.core.event.Event;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -25,6 +35,8 @@ import org.junit.Test;
 public class DataCollectionTimerTaskTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
+
+    private static final Logger log = LoggerFactory.getLogger(DataCollectionTimerTaskTest.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -35,13 +47,58 @@ public class DataCollectionTimerTaskTest {
     // Public ----------------------------------------------------------------------------------------------------------
 
     @Test
+    public void theTimerTaskDoesNotThrowUncheckedExceptions() throws Exception {
+
+        MockDataCollector mdc = new MockDataCollector();
+        mdc.setBroken(true);
+
+        DataCollectionTimerTask t = new DataCollectionTimerTask(null, mdc);
+
+        // this MUST NOT throw any exception
+        t.run();
+
+        log.info("we're good");
+    }
+
+    @Test
     public void lifecycle() throws Exception {
 
-        DataCollectionTimerTask t = new DataCollectionTimerTask(null, null);
+        MockDataCollector mdc = new MockDataCollector();
+        BlockingQueue<Event> queue = new ArrayBlockingQueue<>(1);
+
+        DataCollectionTimerTask t = new DataCollectionTimerTask(queue, mdc);
 
         t.run();
 
-        throw new RuntimeException("RETURN HERE");
+        // pick the mock event from the queue
+
+        MockTimedEvent mte = (MockTimedEvent)queue.take();
+
+        assertNotNull(mte);
+    }
+
+    @Test
+    public void failureToOfferTheEventToTheQueue() throws Exception {
+
+        MockDataCollector mdc = new MockDataCollector();
+
+        // one element queue, the second will block
+        BlockingQueue<Event> queue = new ArrayBlockingQueue<>(1);
+        assertTrue(queue.isEmpty());
+
+        DataCollectionTimerTask t = new DataCollectionTimerTask(queue, mdc);
+
+        t.run();
+
+        assertEquals(1, queue.size());
+
+        //
+        // the queue is full now, run() one more time so the queue won't accept the event
+        //
+
+        t.run();
+
+        log.info("we're good");
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

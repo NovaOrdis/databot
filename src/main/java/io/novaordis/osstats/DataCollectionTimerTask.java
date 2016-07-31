@@ -56,17 +56,31 @@ public class DataCollectionTimerTask extends TimerTask {
     @Override
     public void run() {
 
-        TimedEvent te = dataCollector.read();
+        try {
 
-        boolean sent = eventQueue.offer(te);
+            TimedEvent te = dataCollector.read();
 
-        if (!sent) {
+            boolean sent = eventQueue.offer(te);
+
+            if (!sent) {
+
+                log.warn("os-stats internal queue is full, which means events are not flushed to their destination");
+
+                //
+                // ... and just drop the event on the floor
+                //
+            }
+        }
+        catch(Throwable t) {
 
             //
+            // IMPORTANT: an unchecked exception cancels the timer, and we don't want that, so log it and swallow it
             //
-            //
-            log.warn("'...");
-            throw new RuntimeException("NYE");
+            String message = t.getMessage();
+            message = message != null ? message : t.getClass().getSimpleName();
+            message = "failed to collect data: " + message;
+            log.warn(message);
+            log.debug(message, t);
         }
     }
 

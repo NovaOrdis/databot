@@ -115,7 +115,7 @@ while [ "$1" != "" ]; do
         verbose=true
     elif [ "$1" = "--verbose" -o "$1" = "-v" ]; then
         verbose=true
-    elif [ "$1" = "--foreground" -o "$1"= "-fg" ]; then
+    elif [ "$1" = "--foreground" -o "$1" = "-fg" ]; then
         foreground=true
         #
         # also pass it as a java process argument, to let it know to ignore output.file
