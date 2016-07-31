@@ -36,3 +36,6 @@ Configuration ------------------------------------------------------------------
     /tmp/os-stats.csv.  Note that if --foreground option is used, the output will forcibly send to
     /dev/stdout, regardless of the value of 'output.file' configuration parameter.
 
+  output.file.append  -  true/false. Indicates whether to append to an already existing file or to
+    overwrite the file. The default value is "true" (append).
+

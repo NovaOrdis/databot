@@ -16,79 +16,80 @@
 
 package io.novaordis.osstats;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.novaordis.events.core.event.MeasureUnit;
+import io.novaordis.events.core.event.Property;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.LinkedList;
+import java.text.Format;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 7/31/16
  */
-public class MockPrintStream extends PrintStream {
+public class MockProperty implements Property {
 
     // Constants -------------------------------------------------------------------------------------------------------
-
-    private static final Logger log = LoggerFactory.getLogger(MockPrintStream.class);
-
 
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private LinkedList<String> lines;
-    private boolean closed;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockPrintStream() {
-
-        super(new OutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-                throw new RuntimeException("write() NOT YET IMPLEMENTED");
-            }
-        });
-
-        lines = new LinkedList<>();
-    }
-
-    // Overrides -------------------------------------------------------------------------------------------------------
+    // Property implementation -----------------------------------------------------------------------------------------
 
     @Override
-    public void println(String s) {
+    public String getName() {
 
-        lines.add(s);
+        return "MockProperty";
     }
 
     @Override
-    public void close() {
-
-        this.closed = true;
-        log.info(this + " closed");
+    public Object getValue() {
+        throw new RuntimeException("getValue() NOT YET IMPLEMENTED");
     }
 
+    @Override
+    public void setValue(Object value) {
+        throw new RuntimeException("setValue() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public Class getType() {
+        throw new RuntimeException("getType() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public MeasureUnit getMeasureUnit() {
+        throw new RuntimeException("getMeasureUnit() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public Format getFormat() {
+        throw new RuntimeException("getFormat() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public Property fromString(String s) throws IllegalArgumentException {
+        throw new RuntimeException("fromString() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public String externalizeValue() {
+
+        return "mock-value";
+    }
+
+    @Override
+    public String externalizeType() {
+        throw new RuntimeException("externalizeType() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public int compareTo(Property o) {
+        throw new RuntimeException("compareTo() NOT YET IMPLEMENTED");
+    }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    /**
-     * retrieves (and removes) the current line or null if no line is available
-     */
-    public String getLine() {
-
-        if (lines.isEmpty()) {
-            return null;
-        }
-
-        return lines.removeFirst();
-    }
-
-    public boolean isClosed() {
-        return closed;
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

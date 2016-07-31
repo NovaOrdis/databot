@@ -17,23 +17,21 @@
 package io.novaordis.osstats;
 
 import io.novaordis.events.core.event.BooleanProperty;
+import io.novaordis.events.core.event.Event;
 import io.novaordis.events.core.event.IntegerProperty;
 import io.novaordis.events.core.event.ListProperty;
 import io.novaordis.events.core.event.LongProperty;
 import io.novaordis.events.core.event.MapProperty;
 import io.novaordis.events.core.event.Property;
 import io.novaordis.events.core.event.StringProperty;
-import io.novaordis.events.core.event.TimedEvent;
-import io.novaordis.utilities.time.Timestamp;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/30/16
  */
-public class MockTimedEvent implements TimedEvent {
+public class MockEvent implements Event {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -41,39 +39,13 @@ public class MockTimedEvent implements TimedEvent {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private long time;
-    private Set<Property> properties;
-
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockTimedEvent() {
-
-        time = System.currentTimeMillis();
-        this.properties = new HashSet<>();
-        this.properties.add(new MockProperty());
-    }
-
-    // TimedEvent implementation ---------------------------------------------------------------------------------------
-
-    @Override
-    public Long getTime() {
-        return time;
-    }
-
-    @Override
-    public Timestamp getTimestamp() {
-        throw new RuntimeException("getTimestamp() NOT YET IMPLEMENTED");
-    }
-
-    @Override
-    public void setTimestamp(Timestamp timestamp) {
-        throw new RuntimeException("setTimestamp() NOT YET IMPLEMENTED");
-    }
+    // Event implementation --------------------------------------------------------------------------------------------
 
     @Override
     public Set<Property> getProperties() {
-        return properties;
+        throw new RuntimeException("getProperties() NOT YET IMPLEMENTED");
     }
 
     @Override

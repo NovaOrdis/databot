@@ -19,6 +19,7 @@ package io.novaordis.osstats.configuration;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 
 /**
@@ -48,6 +49,7 @@ public abstract class ConfigurationTest {
 
         assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingIntervalSec());
         assertEquals(Configuration.DEFAULT_OUTPUT_FILE_NAME, c.getOutputFileName());
+        assertEquals(Configuration.DEFAULT_OUTPUT_FILE_APPEND, c.isOutputFileAppend());
     }
 
     /**
@@ -60,6 +62,7 @@ public abstract class ConfigurationTest {
 
         assertEquals(20, c.getSamplingIntervalSec());
         assertNotEquals(20, Configuration.DEFAULT_SAMPLING_INTERVAL_SEC);
+        assertFalse(c.isOutputFileAppend());
 
         assertEquals("/tmp/test.csv", c.getOutputFileName());
         assertNotEquals("/tmp/test.csv", Configuration.DEFAULT_OUTPUT_FILE_NAME);

@@ -81,6 +81,26 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
         }
     }
 
+    @Test
+    public void readConfiguration_InvalidOutputFileAppend() throws Exception {
+
+        PropertiesConfigurationFile p = new PropertiesConfigurationFile();
+
+        Properties props = new Properties();
+        props.setProperty(PropertiesConfigurationFile.OUTPUT_FILE_APPEND_PROPERTY_NAME, "blah");
+
+        try {
+
+            p.readConfiguration(props);
+        }
+        catch(UserErrorException e) {
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("invalid '" + PropertiesConfigurationFile.OUTPUT_FILE_APPEND_PROPERTY_NAME +
+                    "' boolean value: \"blah\"", msg);
+        }
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------

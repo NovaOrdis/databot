@@ -29,6 +29,8 @@ public class MockConfiguration implements Configuration {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     private boolean foreground;
+    private String outputFileName;
+    private boolean outputFileOverwrite;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -47,13 +49,26 @@ public class MockConfiguration implements Configuration {
 
     @Override
     public String getOutputFileName() {
-        throw new RuntimeException("getOutputFileName() NOT YET IMPLEMENTED");
+        return outputFileName;
+    }
+
+    @Override
+    public boolean isOutputFileAppend() {
+        return outputFileOverwrite;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
     public void setForeground(boolean b) {
         this.foreground = b;
+    }
+
+    public void setOutputFileName(String s) {
+        this.outputFileName = s;
+    }
+
+    public void setOutputFileAppend(boolean b) {
+        this.outputFileOverwrite = b;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

@@ -26,6 +26,7 @@ public interface Configuration {
 
     int DEFAULT_SAMPLING_INTERVAL_SEC = 10;
     String DEFAULT_OUTPUT_FILE_NAME = "/tmp/os-stats.csv";
+    boolean DEFAULT_OUTPUT_FILE_APPEND = true;
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -47,5 +48,11 @@ public interface Configuration {
      * file.
      */
     String getOutputFileName();
+
+    /**
+     * @return true if the process is to append to a file that already exists, or false if to overwrite.
+     */
+
+    boolean isOutputFileAppend();
 
 }

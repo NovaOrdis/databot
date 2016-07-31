@@ -39,6 +39,7 @@ public class PropertiesConfigurationFile implements Configuration {
 
     public static final String SAMPLING_INTERVAL_PROPERTY_NAME = "sampling.interval";
     public static final String OUTPUT_FILE_PROPERTY_NAME = "output.file";
+    public static final String OUTPUT_FILE_APPEND_PROPERTY_NAME = "output.file.append";
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -46,6 +47,7 @@ public class PropertiesConfigurationFile implements Configuration {
 
     private int samplingInterval;
     private String outputFileName;
+    private boolean outputFileAppend;
     private boolean foreground;
 
     // Constructors ----------------------------------------------------------------------------------------------------
@@ -94,6 +96,7 @@ public class PropertiesConfigurationFile implements Configuration {
 
         this.samplingInterval = DEFAULT_SAMPLING_INTERVAL_SEC;
         this.outputFileName = DEFAULT_OUTPUT_FILE_NAME;
+        this.outputFileAppend = true;
         this.foreground = false;
     }
 
@@ -115,6 +118,12 @@ public class PropertiesConfigurationFile implements Configuration {
     public String getOutputFileName() {
 
         return outputFileName;
+    }
+
+    @Override
+    public boolean isOutputFileAppend() {
+
+        return outputFileAppend;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
@@ -144,6 +153,25 @@ public class PropertiesConfigurationFile implements Configuration {
         if (s != null) {
 
             outputFileName = s;
+        }
+
+        s = properties.getProperty(OUTPUT_FILE_APPEND_PROPERTY_NAME);
+
+        if (s != null) {
+
+            String ls = s;
+            ls = ls.trim().toLowerCase();
+
+            if ("true".equals(ls) || "yes".equals(ls)) {
+                this.outputFileAppend = true;
+            }
+            else if ("false".equals(ls) || "no".equals(ls)) {
+                this.outputFileAppend = false;
+            }
+            else {
+                throw new UserErrorException(
+                        "invalid '" + OUTPUT_FILE_APPEND_PROPERTY_NAME + "' boolean value: \"" + s + "\"");
+            }
         }
     }
 

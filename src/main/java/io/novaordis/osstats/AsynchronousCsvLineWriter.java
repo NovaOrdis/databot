@@ -16,6 +16,8 @@
 
 package io.novaordis.osstats;
 
+import io.novaordis.events.core.ClosedException;
+import io.novaordis.events.core.CsvOutputFormatter;
 import io.novaordis.events.core.event.Event;
 import io.novaordis.events.core.event.ShutdownEvent;
 import io.novaordis.events.core.event.TimedEvent;
@@ -23,6 +25,7 @@ import io.novaordis.osstats.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.concurrent.BlockingQueue;
 
@@ -48,18 +51,41 @@ public class AsynchronousCsvLineWriter implements Runnable {
     private Thread thread;
     private PrintStream printStream;
 
+    // may be null if the statistic collector was configured to run in foreground
+    private String outputFileName;
+
+    private CsvOutputFormatter csvFormatter;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public AsynchronousCsvLineWriter(BlockingQueue<Event> eq, Configuration configuration) {
+    public AsynchronousCsvLineWriter(BlockingQueue<Event> eq, Configuration configuration) throws Exception {
+
+        if (configuration == null) {
+            throw new IllegalArgumentException("null configuration");
+        }
 
         this.eventQueue = eq;
 
         if (configuration.isForeground()) {
             printStream = System.out;
         }
-        else {
-            throw new RuntimeException("NOT YET IMPLEMENTED");
+        else if ((outputFileName = configuration.getOutputFileName()) != null) {
+
+            boolean append = configuration.isOutputFileAppend();
+            FileOutputStream fos = new FileOutputStream(outputFileName, append);
+            printStream = new PrintStream(fos);
         }
+        else {
+
+            //
+            // not foreground and output file name is null - allow for the possibility that the print stream will
+            // be later installed with setPrintStream()
+            //
+
+            log.debug("print stream must be installed later");
+        }
+
+        csvFormatter = new CsvOutputFormatter();
     }
 
     // Runnable implementation -----------------------------------------------------------------------------------------
@@ -89,16 +115,17 @@ public class AsynchronousCsvLineWriter implements Runnable {
                 continue;
             }
 
-            if (event == null) {
-
-            }
-            else if (event instanceof ShutdownEvent) {
+            if (event instanceof ShutdownEvent) {
 
                 //
                 // clean up and shutdown
                 //
+
+                log.debug(this + " shutting down");
+
                 synchronized (this) {
                     thread = null;
+                    cleanup();
                     return;
                 }
 
@@ -142,17 +169,62 @@ public class AsynchronousCsvLineWriter implements Runnable {
         return thread != null;
     }
 
+    public PrintStream getPrintStream() {
+
+        return printStream;
+    }
+
+    public BlockingQueue<Event> getEventQueue() {
+        return eventQueue;
+    }
+
+    @Override
+    public String toString() {
+
+        return "AsynchronousCsvLineWriter:" +
+                (printStream == null ? "null" :
+                        (printStream.equals(System.out) ? "/dev/stdout" : outputFileName));
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     void write(TimedEvent e) {
 
-        long time = e.getTime();
-        printStream.println("" + time);
+        try {
+
+            if (csvFormatter.process(e)) {
+                String content = new String(csvFormatter.getBytes());
+                printStream.println(content);
+            }
+        }
+        catch (ClosedException ce) {
+            //
+            // ignore
+            //
+            log.warn(csvFormatter + " closed");
+        }
+    }
+
+    void setPrintStream(PrintStream ps) {
+        this.printStream = ps;
     }
 
     // Protected -------------------------------------------------------------------------------------------------------
 
     // Private ---------------------------------------------------------------------------------------------------------
+
+    private void cleanup() {
+
+        if (System.out.equals(printStream)) {
+            return;
+        }
+
+        //
+        // close the print stream - this will close the underlying stream
+        //
+
+        printStream.close();
+    }
 
     // Inner classes ---------------------------------------------------------------------------------------------------
 
