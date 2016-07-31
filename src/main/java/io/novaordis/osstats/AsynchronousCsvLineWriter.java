@@ -77,6 +77,7 @@ public class AsynchronousCsvLineWriter implements Runnable {
             Event event;
 
             try {
+
                 event = eventQueue.take();
             }
             catch(InterruptedException e) {

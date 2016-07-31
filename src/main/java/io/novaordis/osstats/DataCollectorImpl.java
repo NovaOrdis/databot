@@ -16,6 +16,7 @@
 
 package io.novaordis.osstats;
 
+import io.novaordis.events.core.event.GenericTimedEvent;
 import io.novaordis.events.core.event.TimedEvent;
 
 /**
@@ -36,7 +37,13 @@ public class DataCollectorImpl implements DataCollector {
 
     @Override
     public TimedEvent read() {
-        throw new RuntimeException("read() NOT YET IMPLEMENTED");
+
+        long readingBegins = System.currentTimeMillis();
+        long readingEnds = System.currentTimeMillis();
+
+
+        long t = readingBegins + (readingEnds - readingBegins) / 2;
+        return new GenericTimedEvent(t);
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
