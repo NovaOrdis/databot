@@ -4,8 +4,10 @@ Only one os-stats instance per VM is necessary.   os-stats reads  O/S level metr
 writes them in a CSV file. If an os-stats process is already running in the background, an attempt
 to start another os-stats instance will fail. The program reads its configuration from the default
 location $OS_STATS_CONFIG_DIR/os-stats.conf or, if configured at startup with -c|--configuration=,
-from the file specified by the configuration option.  More details  on the syntax of configuration
-file are available under the "Configuration" section.
+from  the  file  specified  by  the configuration option.  If no  OS_STATS_CONFIG_DIR  environment
+variable is declared  and no configuration file is specified  at startup with -c|--configuration=,
+the program will fail to start.  More details  on the syntax  of configuration file  are available
+under the "Configuration" section.
 
 To start an instance that runs in foreground, use --foreground command line option.  In foreground
 mode, the output is switched automatically from the configured file destination to /dev/stdout and

@@ -443,7 +443,8 @@ public class AsynchronousCsvLineWriterTest {
 
         String line = mps.getLine();
         assertFalse(line.isEmpty());
-        assertNull(mps.getLine());
+        line = mps.getLine();
+        assertNull(line);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

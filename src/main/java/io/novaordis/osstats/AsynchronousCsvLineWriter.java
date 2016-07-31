@@ -194,7 +194,10 @@ public class AsynchronousCsvLineWriter implements Runnable {
 
             if (csvFormatter.process(e)) {
                 String content = new String(csvFormatter.getBytes());
-                printStream.println(content);
+                //
+                // the formatter already appends a new line to the content
+                //
+                printStream.print(content);
             }
         }
         catch (ClosedException ce) {

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.LinkedList;
+import java.util.StringTokenizer;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -40,6 +41,7 @@ public class MockPrintStream extends PrintStream {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     private LinkedList<String> lines;
+    private String openLine;
     private boolean closed;
 
     // Constructors ----------------------------------------------------------------------------------------------------
@@ -61,7 +63,38 @@ public class MockPrintStream extends PrintStream {
     @Override
     public void println(String s) {
 
-        lines.add(s);
+        print(s + "\n");
+    }
+
+    @Override
+    public void print(String s) {
+
+        StringTokenizer st = new StringTokenizer(s, "\n", true);
+
+        while(st.hasMoreTokens()) {
+
+            String tok = st.nextToken();
+
+            if ("\n".equals(tok)) {
+
+                if (openLine != null) {
+                    lines.add(openLine);
+                    openLine = null;
+                }
+                else {
+                    lines.add("");
+                }
+            }
+            else {
+
+                if (openLine == null) {
+                    openLine = tok;
+                }
+                else {
+                    openLine += tok;
+                }
+            }
+        }
     }
 
     @Override
