@@ -72,7 +72,7 @@ public class VmstatTest {
         assertNull(ip.getMeasureUnit());
 
         ip = (IntegerProperty)properties.remove(0);
-        assertEquals("Uniterruptible Sleep Process Count", ip.getName());
+        assertEquals("Uninterruptible Sleep Process Count", ip.getName());
         assertEquals(2, ip.getValue());
         assertNull(ip.getMeasureUnit());
 

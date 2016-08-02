@@ -43,7 +43,16 @@ public class MockOS implements OS {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    private boolean breakOnAnyCommand;
+    private String nativeExecutionExceptionMessageOnBrokenCommand;
+    private Throwable causeOfBrokenCommand;
+
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    public MockOS() {
+
+        this.breakOnAnyCommand = false;
+    }
 
     // OS implementation -----------------------------------------------------------------------------------------------
 
@@ -54,6 +63,11 @@ public class MockOS implements OS {
 
     @Override
     public NativeExecutionResult execute(String command) throws NativeExecutionException {
+
+        if (breakOnAnyCommand) {
+
+            throw new NativeExecutionException(nativeExecutionExceptionMessageOnBrokenCommand, causeOfBrokenCommand);
+        }
 
         if ("vmstat".equals(command)) {
 
@@ -78,6 +92,13 @@ public class MockOS implements OS {
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    public void breakOnAnyCommand(String msg, Throwable cause) {
+
+        this.breakOnAnyCommand = true;
+        this.nativeExecutionExceptionMessageOnBrokenCommand = msg;
+        this.causeOfBrokenCommand = cause;
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

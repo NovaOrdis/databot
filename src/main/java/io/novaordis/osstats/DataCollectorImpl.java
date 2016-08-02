@@ -27,7 +27,7 @@ import io.novaordis.utilities.os.OS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -81,11 +81,13 @@ public class DataCollectorImpl implements DataCollector {
      */
     List<Property> readProperties() {
 
+        List<Property> properties = new ArrayList<>();
+
         //
         // the current implementation reads the O/S level statistics as provided by Linux vmstat
         //
 
-        String vmstatOutput;
+        String vmstatOutput = null;
 
         try {
 
@@ -99,18 +101,32 @@ public class DataCollectorImpl implements DataCollector {
         }
         catch(NativeExecutionException e) {
 
-            throw new RuntimeException("readProperties() NativeExecutionException NOT YET IMPLEMENTED");
+            String msg = e.getMessage();
+            String warningMsg = msg != null ? msg : "";
+            Throwable cause = e.getCause();
+            if (cause != null) {
+                String causeMsg = cause.getClass().getSimpleName();
+                if (cause.getMessage() != null) {
+                    causeMsg += ": " + cause.getMessage();
+                }
+                warningMsg += ", " + causeMsg;
+            }
+            log.warn(warningMsg);
         }
 
         try {
-            //noinspection UnnecessaryLocalVariable
-            List<Property> properties = Vmstat.parseCommandOutput(vmstatOutput);
-            return properties;
+
+            if (vmstatOutput != null) {
+                //noinspection UnnecessaryLocalVariable
+                List<Property> ps = Vmstat.parseCommandOutput(vmstatOutput);
+                properties.addAll(ps);
+            }
         }
         catch(InvalidExecutionOutputException e) {
             log.warn("failed to parse vmstam output, " + e.getMessage());
-            return Collections.emptyList();
         }
+
+        return properties;
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

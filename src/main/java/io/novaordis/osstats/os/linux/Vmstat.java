@@ -42,9 +42,9 @@ public class Vmstat {
 
             // vmstat output literal, property name,       type,          multiplication factor NAME, measure unit
 
-            {"r",    "Runnable Process Count",             Integer.class, null,                null},
-            {"b",    "Uniterruptible Sleep Process Count", Integer.class, null,                null},
-            {"swpd", "Memory Swapped Out to Disk",         Long.class,    OS_MEMORY_PAGE_SIZE, MemoryMeasureUnit.BYTE},
+            {"r",    "Runnable Process Count",              Integer.class, null,                null},
+            {"b",    "Uninterruptible Sleep Process Count", Integer.class, null,                null},
+            {"swpd", "Memory Swapped Out to Disk",          Long.class,    OS_MEMORY_PAGE_SIZE, MemoryMeasureUnit.BYTE},
 
     };
 
@@ -85,7 +85,7 @@ public class Vmstat {
             osConfiguration = OS.getInstance().getConfiguration();
         }
         catch(Exception e) {
-            throw new InvalidExecutionOutputException("failed to get underlying OS configuration", e);
+            throw new InvalidExecutionOutputException("failed to get the OS configuration", e);
         }
 
         for(i = 0; i < CONTENT.length; i ++) {

@@ -17,6 +17,8 @@
 package io.novaordis.osstats;
 
 import io.novaordis.events.core.event.TimedEvent;
+import io.novaordis.osstats.os.MockOS;
+import io.novaordis.utilities.os.OS;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
@@ -40,7 +42,9 @@ public abstract class DataCollectorTest {
     @Test
     public void read() throws Exception {
 
-        DataCollector c = getDataCollectorToTest();
+        MockOS mos = new MockOS();
+
+        DataCollector c = getDataCollectorToTest(mos);
 
         long t0 = System.currentTimeMillis();
 
@@ -56,7 +60,7 @@ public abstract class DataCollectorTest {
 
     // Protected -------------------------------------------------------------------------------------------------------
 
-    protected abstract DataCollector getDataCollectorToTest() throws Exception;
+    protected abstract DataCollector getDataCollectorToTest(OS os) throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

@@ -24,6 +24,7 @@ import org.junit.Test;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -53,14 +54,32 @@ public class DataCollectorImplTest extends DataCollectorTest {
         assertFalse(properties.isEmpty());
     }
 
+    @Test
+    public void readProperties_NativeCallThrowsNativeExecutionException() throws Exception {
+
+        MockOS mos = new MockOS();
+
+        //
+        // configure MockOS to throw native execution exception on any command
+        //
+
+        mos.breakOnAnyCommand("SYNTHETIC NativeExecutionException message", new RuntimeException("SYNTHETIC RUNTIME"));
+
+        DataCollectorImpl dc = new DataCollectorImpl(mos);
+
+        List<Property> properties = dc.readProperties();
+
+        assertTrue(properties.isEmpty());
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
 
     @Override
-    protected DataCollectorImpl getDataCollectorToTest() throws Exception {
+    protected DataCollectorImpl getDataCollectorToTest(OS os) throws Exception {
 
-        return new DataCollectorImpl(OS.getInstance());
+        return new DataCollectorImpl(os);
     }
 
     // Private ---------------------------------------------------------------------------------------------------------
