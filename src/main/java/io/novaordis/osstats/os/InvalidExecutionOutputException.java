@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
-
-import io.novaordis.events.core.event.Property;
-import io.novaordis.osstats.os.MockOS;
-import io.novaordis.utilities.os.OS;
-import org.junit.Test;
-
-import java.util.List;
-
-import static org.junit.Assert.assertFalse;
+package io.novaordis.osstats.os;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 7/31/16
  */
-public class DataCollectorImplTest extends DataCollectorTest {
+public class InvalidExecutionOutputException extends Exception {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -39,29 +30,19 @@ public class DataCollectorImplTest extends DataCollectorTest {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // Public ----------------------------------------------------------------------------------------------------------
-
-    @Test
-    public void readProperties() throws Exception {
-
-        MockOS mos = new MockOS();
-
-        DataCollectorImpl dc = new DataCollectorImpl(mos);
-
-        List<Property> properties = dc.readProperties();
-
-        assertFalse(properties.isEmpty());
+    public InvalidExecutionOutputException(String message) {
+        super(message);
     }
+
+    public InvalidExecutionOutputException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    // Public ----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
-
-    @Override
-    protected DataCollectorImpl getDataCollectorToTest() throws Exception {
-
-        return new DataCollectorImpl(OS.getInstance());
-    }
 
     // Private ---------------------------------------------------------------------------------------------------------
 

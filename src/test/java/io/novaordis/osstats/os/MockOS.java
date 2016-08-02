@@ -14,24 +14,30 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
+package io.novaordis.osstats.os;
 
-import io.novaordis.events.core.event.Property;
-import io.novaordis.osstats.os.MockOS;
+import io.novaordis.utilities.Files;
+import io.novaordis.utilities.os.NativeExecutionException;
+import io.novaordis.utilities.os.NativeExecutionResult;
 import io.novaordis.utilities.os.OS;
-import org.junit.Test;
+import io.novaordis.utilities.os.OSConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.io.File;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 7/31/16
  */
-public class DataCollectorImplTest extends DataCollectorTest {
+public class MockOS implements OS {
 
     // Constants -------------------------------------------------------------------------------------------------------
+
+    private static final Logger log = LoggerFactory.getLogger(MockOS.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -39,29 +45,43 @@ public class DataCollectorImplTest extends DataCollectorTest {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // Public ----------------------------------------------------------------------------------------------------------
+    // OS implementation -----------------------------------------------------------------------------------------------
 
-    @Test
-    public void readProperties() throws Exception {
-
-        MockOS mos = new MockOS();
-
-        DataCollectorImpl dc = new DataCollectorImpl(mos);
-
-        List<Property> properties = dc.readProperties();
-
-        assertFalse(properties.isEmpty());
+    @Override
+    public OSConfiguration getConfiguration() {
+        throw new RuntimeException("getConfiguration() NOT YET IMPLEMENTED");
     }
+
+    @Override
+    public NativeExecutionResult execute(String command) throws NativeExecutionException {
+
+        if ("vmstat".equals(command)) {
+
+            File f = new File(System.getProperty("basedir"), "src/test/resources/data/os/vmstat.out");
+            assertTrue(f.isFile());
+            String content = null;
+
+            try {
+                content = Files.read(f);
+            }
+            catch (Exception ex) {
+
+                log.error("failed to read the content of " + f, ex);
+                fail("failed to read the content of " + f);
+            }
+
+            return new NativeExecutionResult(0, content, null);
+        }
+        else {
+            throw new RuntimeException("do not know how to handle command " + command);
+        }
+    }
+
+    // Public ----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
-
-    @Override
-    protected DataCollectorImpl getDataCollectorToTest() throws Exception {
-
-        return new DataCollectorImpl(OS.getInstance());
-    }
 
     // Private ---------------------------------------------------------------------------------------------------------
 

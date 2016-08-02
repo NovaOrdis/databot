@@ -20,6 +20,7 @@ import io.novaordis.events.core.event.Event;
 import io.novaordis.osstats.configuration.Configuration;
 import io.novaordis.osstats.configuration.ConfigurationFactory;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.os.OS;
 
 import java.util.Timer;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -51,8 +52,9 @@ public class Main {
             AsynchronousCsvLineWriter aw = new AsynchronousCsvLineWriter(eventBuffer, conf);
             aw.start();
 
+            OS os = OS.getInstance();
+            DataCollector dataCollector = new DataCollectorImpl(os);
             Timer timer = new Timer();
-            DataCollector dataCollector = new DataCollectorImpl();
             DataCollectionTimerTask t = new DataCollectionTimerTask(eventBuffer, dataCollector);
             timer.scheduleAtFixedRate(t, 0, conf.getSamplingIntervalSec() * 1000L);
 
