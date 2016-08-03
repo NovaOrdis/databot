@@ -47,6 +47,14 @@ public abstract class MemoryMetricDefinitionTest extends MetricDefinitionTest {
         assertEquals(MemoryMeasureUnit.BYTE, mm);
     }
 
+    @Test
+    public void getDefaulType() throws Exception {
+
+        MemoryMetricDefinition mmd = getMetricDefinitionToTest();
+        Class c = mmd.getType();
+        assertEquals(Long.class, c);
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     @Override

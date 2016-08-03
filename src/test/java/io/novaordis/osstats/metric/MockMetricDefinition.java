@@ -49,6 +49,11 @@ public class MockMetricDefinition implements MetricDefinition {
         throw new RuntimeException("getDescription() NOT YET IMPLEMENTED");
     }
 
+    @Override
+    public Class getType() {
+        throw new RuntimeException("getType() NOT YET IMPLEMENTED");
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------

@@ -43,6 +43,11 @@ public abstract class MemoryMetricDefinitionBase extends MetricDefinitionBase im
         return MemoryMeasureUnit.BYTE;
     }
 
+    @Override
+    public Class getType() {
+        return Long.class;
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------

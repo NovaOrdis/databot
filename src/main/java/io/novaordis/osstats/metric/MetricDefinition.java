@@ -44,4 +44,9 @@ public interface MetricDefinition {
      */
     String getDescription();
 
+    /**
+     * The types for values corresponding to this metric definition. Typical: Integer, Long, Double.
+     */
+    Class getType();
+
 }
