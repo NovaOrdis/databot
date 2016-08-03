@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
+package io.novaordis.osstats.metric.memory;
 
-import io.novaordis.events.core.event.TimedEvent;
 import io.novaordis.osstats.metric.MetricDefinition;
-
-import java.util.List;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/30/16
+ * @since 8/3/16
  */
-public class MockDataCollector implements DataCollector {
+public abstract class MetricDefinitionBase implements MetricDefinition {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,28 +30,17 @@ public class MockDataCollector implements DataCollector {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean broken;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // DataCollector implementation ------------------------------------------------------------------------------------
+    // MetricDefinition implementation ---------------------------------------------------------------------------------
 
     @Override
-    public TimedEvent read(List<MetricDefinition> metrics) {
+    public String getName() {
 
-        if (broken) {
-            throw new RuntimeException("SYNTHETIC EXCEPTION");
-        }
-
-        return new MockTimedEvent();
+        return getClass().getSimpleName();
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    public void setBroken(boolean b) {
-
-        this.broken = b;
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

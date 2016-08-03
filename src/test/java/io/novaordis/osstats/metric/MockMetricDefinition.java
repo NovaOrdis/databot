@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
+package io.novaordis.osstats.metric;
 
-import io.novaordis.events.core.event.TimedEvent;
-import io.novaordis.osstats.metric.MetricDefinition;
-
-import java.util.List;
+import io.novaordis.events.core.event.MeasureUnit;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/30/16
+ * @since 8/3/16
  */
-public class MockDataCollector implements DataCollector {
+public class MockMetricDefinition implements MetricDefinition {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,28 +30,26 @@ public class MockDataCollector implements DataCollector {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean broken;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // DataCollector implementation ------------------------------------------------------------------------------------
+    // MetricDefinition implementation ---------------------------------------------------------------------------------
 
     @Override
-    public TimedEvent read(List<MetricDefinition> metrics) {
+    public String getName() {
+        throw new RuntimeException("getName() NOT YET IMPLEMENTED");
+    }
 
-        if (broken) {
-            throw new RuntimeException("SYNTHETIC EXCEPTION");
-        }
+    @Override
+    public MeasureUnit getMeasureUnit() {
+        throw new RuntimeException("getMeasureUnit() NOT YET IMPLEMENTED");
+    }
 
-        return new MockTimedEvent();
+    @Override
+    public String getDescription() {
+        throw new RuntimeException("getDescription() NOT YET IMPLEMENTED");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    public void setBroken(boolean b) {
-
-        this.broken = b;
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

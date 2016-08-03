@@ -16,6 +16,10 @@
 
 package io.novaordis.osstats.configuration;
 
+import io.novaordis.osstats.metric.MetricDefinition;
+
+import java.util.List;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/29/16
@@ -55,6 +59,11 @@ public class MockConfiguration implements Configuration {
     @Override
     public boolean isOutputFileAppend() {
         return outputFileOverwrite;
+    }
+
+    @Override
+    public List<MetricDefinition> getMetrics() {
+        throw new RuntimeException("getMetrics() NOT YET IMPLEMENTED");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

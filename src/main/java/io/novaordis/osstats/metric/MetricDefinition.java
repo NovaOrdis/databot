@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
+package io.novaordis.osstats.metric;
 
-import io.novaordis.events.core.event.TimedEvent;
-import io.novaordis.osstats.metric.MetricDefinition;
-
-import java.util.List;
+import io.novaordis.events.core.event.MeasureUnit;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/3/16
  */
-public interface DataCollector {
+public interface MetricDefinition {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -34,9 +31,17 @@ public interface DataCollector {
     // Public ----------------------------------------------------------------------------------------------------------
 
     /**
-     * Take a reading and returns the most current values for specified metrics. May return null if external
-     * circumstances prevented the collector to read data.
+     * The metric name, the shortest possible string that designates this metric in a conventional context. For example
+     * when we are describing a Linux system memory status, we are talking about MemTotal which is defined in
+     * /proc/meminfo. By default, it should be the simple name of the class implementing the metric.
      */
-    TimedEvent read(List<MetricDefinition> metrics);
+    String getName();
+
+    MeasureUnit getMeasureUnit();
+
+    /**
+     * The human readable text that explains what this metric represents
+     */
+    String getDescription();
 
 }

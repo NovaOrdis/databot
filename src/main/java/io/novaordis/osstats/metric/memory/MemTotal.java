@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
-
-import io.novaordis.events.core.event.TimedEvent;
-import io.novaordis.osstats.metric.MetricDefinition;
-
-import java.util.List;
+package io.novaordis.osstats.metric.memory;
 
 /**
+ * See https://kb.novaordis.com/index.php/Proc-meminfo#MemTotal
+ *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/30/16
+ * @since 8/3/16
  */
-public class MockDataCollector implements DataCollector {
+public class MemTotal extends MemoryMetricDefinitionBase {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,28 +30,19 @@ public class MockDataCollector implements DataCollector {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean broken;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // DataCollector implementation ------------------------------------------------------------------------------------
+    // MemoryMetricDefinition implementation ---------------------------------------------------------------------------
 
     @Override
-    public TimedEvent read(List<MetricDefinition> metrics) {
+    public String getDescription() {
 
-        if (broken) {
-            throw new RuntimeException("SYNTHETIC EXCEPTION");
-        }
-
-        return new MockTimedEvent();
+        return
+                "Total amount of usable RAM, which is the amount of physical RAM installed on the system minus a " +
+                        "number of reserved bits and the kernel binary code.";
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    public void setBroken(boolean b) {
-
-        this.broken = b;
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

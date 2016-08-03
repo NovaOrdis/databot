@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
+package io.novaordis.osstats.metric;
 
-import io.novaordis.events.core.event.TimedEvent;
-import io.novaordis.osstats.metric.MetricDefinition;
+import org.junit.Test;
 
-import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/30/16
+ * @since 8/3/16
  */
-public class MockDataCollector implements DataCollector {
+public abstract class MetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,32 +34,36 @@ public class MockDataCollector implements DataCollector {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean broken;
-
     // Constructors ----------------------------------------------------------------------------------------------------
-
-    // DataCollector implementation ------------------------------------------------------------------------------------
-
-    @Override
-    public TimedEvent read(List<MetricDefinition> metrics) {
-
-        if (broken) {
-            throw new RuntimeException("SYNTHETIC EXCEPTION");
-        }
-
-        return new MockTimedEvent();
-    }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public void setBroken(boolean b) {
+    @Test
+    public void getName() throws Exception {
 
-        this.broken = b;
+        MetricDefinition d = getMetricDefinitionToTest();
+
+        //
+        // default behavior
+        //
+        assertEquals(d.getClass().getSimpleName(), d.getName());
+    }
+
+    @Test
+    public void getDescription() throws Exception {
+
+        MetricDefinition d = getMetricDefinitionToTest();
+
+        String desc = d.getDescription();
+        assertNotNull(desc);
+        assertFalse(desc.isEmpty());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    protected abstract MetricDefinition getMetricDefinitionToTest() throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

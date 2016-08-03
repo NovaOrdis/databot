@@ -19,6 +19,7 @@ package io.novaordis.osstats;
 import io.novaordis.events.core.event.GenericTimedEvent;
 import io.novaordis.events.core.event.Property;
 import io.novaordis.events.core.event.TimedEvent;
+import io.novaordis.osstats.metric.MetricDefinition;
 import io.novaordis.osstats.os.InvalidExecutionOutputException;
 import io.novaordis.osstats.os.linux.Vmstat;
 import io.novaordis.utilities.os.NativeExecutionException;
@@ -55,7 +56,7 @@ public class DataCollectorImpl implements DataCollector {
     // DataCollectorImpl implementation --------------------------------------------------------------------------------
 
     @Override
-    public TimedEvent read() {
+    public TimedEvent read(List<MetricDefinition> metrics) {
 
         long readingBegins = System.currentTimeMillis();
         List<Property> properties = readProperties();
@@ -95,7 +96,8 @@ public class DataCollectorImpl implements DataCollector {
 
             if (result.isSuccess()) {
                 vmstatOutput = result.getStdout();
-            } else {
+            }
+            else {
                 throw new RuntimeException("readProperties() failure NOT YET IMPLEMENTED");
             }
         }

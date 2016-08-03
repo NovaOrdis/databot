@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
+package io.novaordis.osstats.metric.memory;
 
-import io.novaordis.events.core.event.TimedEvent;
-import io.novaordis.osstats.metric.MetricDefinition;
-
-import java.util.List;
+import io.novaordis.events.core.event.MeasureUnit;
+import io.novaordis.events.core.event.MemoryMeasureUnit;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/30/16
+ * @since 8/3/16
  */
-public class MockDataCollector implements DataCollector {
+public abstract class MemoryMetricDefinitionBase extends MetricDefinitionBase implements MemoryMetricDefinition {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,28 +31,19 @@ public class MockDataCollector implements DataCollector {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean broken;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // DataCollector implementation ------------------------------------------------------------------------------------
+    // MetricDefinitionBase implementation -----------------------------------------------------------------------------
 
+    /**
+     * All memory metrics are by default expressed in bytes.
+     */
     @Override
-    public TimedEvent read(List<MetricDefinition> metrics) {
-
-        if (broken) {
-            throw new RuntimeException("SYNTHETIC EXCEPTION");
-        }
-
-        return new MockTimedEvent();
+    public MeasureUnit getMeasureUnit() {
+        return MemoryMeasureUnit.BYTE;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    public void setBroken(boolean b) {
-
-        this.broken = b;
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

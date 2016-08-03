@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
+package io.novaordis.osstats.metric.memory;
 
-import io.novaordis.events.core.event.TimedEvent;
-import io.novaordis.osstats.metric.MetricDefinition;
+import io.novaordis.events.core.event.MeasureUnit;
+import io.novaordis.events.core.event.MemoryMeasureUnit;
+import io.novaordis.osstats.metric.MetricDefinitionTest;
+import org.junit.Test;
 
-import java.util.List;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/30/16
+ * @since 8/3/16
  */
-public class MockDataCollector implements DataCollector {
+public abstract class MemoryMetricDefinitionTest extends MetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,30 +35,22 @@ public class MockDataCollector implements DataCollector {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean broken;
-
     // Constructors ----------------------------------------------------------------------------------------------------
-
-    // DataCollector implementation ------------------------------------------------------------------------------------
-
-    @Override
-    public TimedEvent read(List<MetricDefinition> metrics) {
-
-        if (broken) {
-            throw new RuntimeException("SYNTHETIC EXCEPTION");
-        }
-
-        return new MockTimedEvent();
-    }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public void setBroken(boolean b) {
+    @Test
+    public void getDefaultMeasureUnit() throws Exception {
 
-        this.broken = b;
+        MemoryMetricDefinition mmd = getMetricDefinitionToTest();
+        MeasureUnit mm = mmd.getMeasureUnit();
+        assertEquals(MemoryMeasureUnit.BYTE, mm);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
+
+    @Override
+    protected abstract MemoryMetricDefinition getMetricDefinitionToTest() throws Exception;
 
     // Protected -------------------------------------------------------------------------------------------------------
 

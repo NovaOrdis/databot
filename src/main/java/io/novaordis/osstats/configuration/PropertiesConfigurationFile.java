@@ -16,6 +16,7 @@
 
 package io.novaordis.osstats.configuration;
 
+import io.novaordis.osstats.metric.MetricDefinition;
 import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -124,6 +126,11 @@ public class PropertiesConfigurationFile implements Configuration {
     public boolean isOutputFileAppend() {
 
         return outputFileAppend;
+    }
+
+    @Override
+    public List<MetricDefinition> getMetrics() {
+        throw new RuntimeException("getMetrics() NOT YET IMPLEMENTED");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

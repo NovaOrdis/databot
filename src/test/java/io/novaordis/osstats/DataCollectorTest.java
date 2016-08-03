@@ -17,9 +17,14 @@
 package io.novaordis.osstats;
 
 import io.novaordis.events.core.event.TimedEvent;
+import io.novaordis.osstats.metric.MetricDefinition;
+import io.novaordis.osstats.metric.MockMetricDefinition;
 import io.novaordis.osstats.os.MockOS;
 import io.novaordis.utilities.os.OS;
 import org.junit.Test;
+
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
@@ -48,7 +53,9 @@ public abstract class DataCollectorTest {
 
         long t0 = System.currentTimeMillis();
 
-        TimedEvent te = c.read();
+        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
+
+        TimedEvent te = c.read(metrics);
 
         long t1 = System.currentTimeMillis();
 

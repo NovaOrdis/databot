@@ -17,10 +17,14 @@
 package io.novaordis.osstats;
 
 import io.novaordis.events.core.event.Event;
+import io.novaordis.osstats.metric.MetricDefinition;
+import io.novaordis.osstats.metric.MockMetricDefinition;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -51,8 +55,9 @@ public class DataCollectionTimerTaskTest {
 
         MockDataCollector mdc = new MockDataCollector();
         mdc.setBroken(true);
+        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
 
-        DataCollectionTimerTask t = new DataCollectionTimerTask(null, mdc);
+        DataCollectionTimerTask t = new DataCollectionTimerTask(null, mdc, metrics);
 
         // this MUST NOT throw any exception
         t.run();
@@ -65,8 +70,9 @@ public class DataCollectionTimerTaskTest {
 
         MockDataCollector mdc = new MockDataCollector();
         BlockingQueue<Event> queue = new ArrayBlockingQueue<>(1);
+        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
 
-        DataCollectionTimerTask t = new DataCollectionTimerTask(queue, mdc);
+        DataCollectionTimerTask t = new DataCollectionTimerTask(queue, mdc, metrics);
 
         t.run();
 
@@ -86,7 +92,9 @@ public class DataCollectionTimerTaskTest {
         BlockingQueue<Event> queue = new ArrayBlockingQueue<>(1);
         assertTrue(queue.isEmpty());
 
-        DataCollectionTimerTask t = new DataCollectionTimerTask(queue, mdc);
+        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
+
+        DataCollectionTimerTask t = new DataCollectionTimerTask(queue, mdc, metrics);
 
         t.run();
 

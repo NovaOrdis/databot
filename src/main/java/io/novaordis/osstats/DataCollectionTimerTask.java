@@ -18,9 +18,12 @@ package io.novaordis.osstats;
 
 import io.novaordis.events.core.event.Event;
 import io.novaordis.events.core.event.TimedEvent;
+import io.novaordis.osstats.metric.MetricDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 
@@ -42,13 +45,15 @@ public class DataCollectionTimerTask extends TimerTask {
 
     private BlockingQueue<Event> eventQueue;
     private DataCollector dataCollector;
+    private List<MetricDefinition> metrics;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public DataCollectionTimerTask(BlockingQueue<Event> eq, DataCollector dc) {
+    public DataCollectionTimerTask(BlockingQueue<Event> eq, DataCollector dc, List<MetricDefinition> metrics) {
 
         this.eventQueue = eq;
         this.dataCollector = dc;
+        this.metrics = new ArrayList<>(metrics);
     }
 
     // TimerTask overrides ---------------------------------------------------------------------------------------------
@@ -60,7 +65,7 @@ public class DataCollectionTimerTask extends TimerTask {
 
             log.debug("before the reading");
 
-            TimedEvent te = dataCollector.read();
+            TimedEvent te = dataCollector.read(metrics);
 
             log.debug("after the reading");
 

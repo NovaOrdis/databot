@@ -16,6 +16,10 @@
 
 package io.novaordis.osstats.configuration;
 
+import io.novaordis.osstats.metric.MetricDefinition;
+
+import java.util.List;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/27/16
@@ -54,5 +58,10 @@ public interface Configuration {
      */
 
     boolean isOutputFileAppend();
+
+    /**
+     * @return the list of metric definitions to collect and log.
+     */
+    List<MetricDefinition> getMetrics();
 
 }
