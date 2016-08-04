@@ -18,10 +18,12 @@ package io.novaordis.osstats.os;
 
 import io.novaordis.events.core.event.Property;
 import io.novaordis.events.core.event.PropertyFactory;
+import io.novaordis.osstats.metric.cpu.CpuHardwareInterruptTime;
 import io.novaordis.osstats.metric.cpu.CpuIdleTime;
 import io.novaordis.osstats.metric.cpu.CpuIoWaitTime;
 import io.novaordis.osstats.metric.cpu.CpuKernelTime;
 import io.novaordis.osstats.metric.cpu.CpuNiceTime;
+import io.novaordis.osstats.metric.cpu.CpuSoftwareInterruptTime;
 import io.novaordis.osstats.metric.cpu.CpuUserTime;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastFiveMinutes;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastMinute;
@@ -156,7 +158,16 @@ public class Top {
                 tok = tok.substring(0, i).trim();
                 result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
             }
-
+            else if ((i = tok.indexOf("hi")) != -1) {
+                CpuHardwareInterruptTime m = new CpuHardwareInterruptTime();
+                tok = tok.substring(0, i).trim();
+                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
+            }
+            else if ((i = tok.indexOf("si")) != -1) {
+                CpuSoftwareInterruptTime m = new CpuSoftwareInterruptTime();
+                tok = tok.substring(0, i).trim();
+                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
+            }
         }
 
         return result;

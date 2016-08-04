@@ -26,7 +26,7 @@ import static org.junit.Assert.assertNotNull;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public class CpuHardwareInterruptTest extends CpuMetricDefinitionTest {
+public class CpuSoftwareInterruptTest extends CpuMetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -43,15 +43,15 @@ public class CpuHardwareInterruptTest extends CpuMetricDefinitionTest {
     @Test
     public void getInstance() throws Exception {
 
-        CpuHardwareInterruptTime m = (CpuHardwareInterruptTime)MetricDefinition.getInstance("CpuHardwareInterruptTime");
+        CpuSoftwareInterruptTime m = (CpuSoftwareInterruptTime)MetricDefinition.getInstance("CpuSoftwareInterruptTime");
         assertNotNull(m);
     }
 
     @Test
     public void getName() throws Exception {
 
-        CpuHardwareInterruptTime m = new CpuHardwareInterruptTime();
-        assertEquals("CPU Hardware Interrupt Time", m.getName());
+        CpuSoftwareInterruptTime m = new CpuSoftwareInterruptTime();
+        assertEquals("CPU Software Interrupt Time", m.getName());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
@@ -61,7 +61,7 @@ public class CpuHardwareInterruptTest extends CpuMetricDefinitionTest {
     @Override
     protected CpuMetricDefinition getMetricDefinitionToTest() throws Exception {
 
-        return new CpuHardwareInterruptTime();
+        return new CpuSoftwareInterruptTime();
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

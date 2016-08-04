@@ -19,10 +19,12 @@ package io.novaordis.osstats.os;
 import io.novaordis.events.core.event.FloatProperty;
 import io.novaordis.events.core.event.Percentage;
 import io.novaordis.events.core.event.Property;
+import io.novaordis.osstats.metric.cpu.CpuHardwareInterruptTime;
 import io.novaordis.osstats.metric.cpu.CpuIdleTime;
 import io.novaordis.osstats.metric.cpu.CpuIoWaitTime;
 import io.novaordis.osstats.metric.cpu.CpuKernelTime;
 import io.novaordis.osstats.metric.cpu.CpuNiceTime;
+import io.novaordis.osstats.metric.cpu.CpuSoftwareInterruptTime;
 import io.novaordis.osstats.metric.cpu.CpuUserTime;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastFiveMinutes;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastMinute;
@@ -111,7 +113,7 @@ public class TopTest {
         List<Property> props = Top.parseLinuxCpuInfo(
                 "  1.1 us,  2.2 sy,  3.3 ni, 44.4 id,  5.5 wa,  6.6 hi,  7.7 si,  8.8 st");
 
-        assertEquals(5, props.size());
+        assertEquals(7, props.size());
 
         CpuUserTime metric = new CpuUserTime();
         FloatProperty p = (FloatProperty)props.get(0);
@@ -147,6 +149,20 @@ public class TopTest {
         assertEquals(metric5.getName(), p5.getName());
         assertEquals(5.5f, p5.getFloat().floatValue(), 0.00001);
         assertEquals(Float.class, p5.getType());
+
+        CpuHardwareInterruptTime metric6 = new CpuHardwareInterruptTime();
+        FloatProperty p6 = (FloatProperty)props.get(5);
+        assertEquals(Percentage.getInstance(), p6.getMeasureUnit());
+        assertEquals(metric6.getName(), p6.getName());
+        assertEquals(6.6f, p6.getFloat().floatValue(), 0.00001);
+        assertEquals(Float.class, p6.getType());
+
+        CpuSoftwareInterruptTime metric7 = new CpuSoftwareInterruptTime();
+        FloatProperty p7 = (FloatProperty)props.get(6);
+        assertEquals(Percentage.getInstance(), p7.getMeasureUnit());
+        assertEquals(metric7.getName(), p7.getName());
+        assertEquals(7.7f, p7.getFloat().floatValue(), 0.00001);
+        assertEquals(Float.class, p7.getType());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

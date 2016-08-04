@@ -16,17 +16,12 @@
 
 package io.novaordis.osstats.metric.cpu;
 
-import io.novaordis.osstats.metric.MetricDefinition;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public class CpuHardwareInterruptTest extends CpuMetricDefinitionTest {
+public class CpuSoftwareInterruptTime extends CpuMetricDefinitionBase {
+
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -36,33 +31,23 @@ public class CpuHardwareInterruptTest extends CpuMetricDefinitionTest {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
+    // CpuMetricDefinition implementation ------------------------------------------------------------------------------
+
+    @Override
+    public String getName() {
+        return "CPU Software Interrupt Time";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Percentage of total CPU time spent time spent spent servicing software interrupts.";
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
-
-    // getInstance() ---------------------------------------------------------------------------------------------------
-
-    @Test
-    public void getInstance() throws Exception {
-
-        CpuHardwareInterruptTime m = (CpuHardwareInterruptTime)MetricDefinition.getInstance("CpuHardwareInterruptTime");
-        assertNotNull(m);
-    }
-
-    @Test
-    public void getName() throws Exception {
-
-        CpuHardwareInterruptTime m = new CpuHardwareInterruptTime();
-        assertEquals("CPU Hardware Interrupt Time", m.getName());
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
-
-    @Override
-    protected CpuMetricDefinition getMetricDefinitionToTest() throws Exception {
-
-        return new CpuHardwareInterruptTime();
-    }
 
     // Private ---------------------------------------------------------------------------------------------------------
 

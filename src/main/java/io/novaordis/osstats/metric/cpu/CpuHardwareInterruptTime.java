@@ -35,12 +35,12 @@ public class CpuHardwareInterruptTime extends CpuMetricDefinitionBase {
 
     @Override
     public String getName() {
-        return "CPU Idle Time";
+        return "CPU Hardware Interrupt Time";
     }
 
     @Override
     public String getDescription() {
-        return "Percentage of total CPU time spent idle.";
+        return "Percentage of total CPU time spent time spent spent servicing hardware interrupts.";
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
