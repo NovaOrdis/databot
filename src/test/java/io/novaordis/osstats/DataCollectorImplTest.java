@@ -42,6 +42,8 @@ public class DataCollectorImplTest extends DataCollectorTest {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
+    // readProperties() ------------------------------------------------------------------------------------------------
+
     @Test
     public void readProperties() throws Exception {
 
@@ -71,6 +73,25 @@ public class DataCollectorImplTest extends DataCollectorTest {
 
         assertTrue(properties.isEmpty());
     }
+
+    @Test
+    public void readProperties_NativeCallFailsWithNonZero() throws Exception {
+
+        MockOS mos = new MockOS();
+
+        //
+        // configure MockOS to fail on any command
+        //
+
+        mos.failOnAnyCommand("SYNTHETIC stderr CONTENT", "SYNTHETIC stdout CONTENT");
+
+        DataCollectorImpl dc = new DataCollectorImpl(mos);
+
+        List<Property> properties = dc.readProperties();
+
+        assertTrue(properties.isEmpty());
+    }
+
 
     // Package protected -----------------------------------------------------------------------------------------------
 

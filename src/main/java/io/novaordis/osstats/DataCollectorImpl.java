@@ -89,16 +89,17 @@ public class DataCollectorImpl implements DataCollector {
         //
 
         String vmstatOutput = null;
+        String commandName = "vmstat";
 
         try {
 
-            NativeExecutionResult result = os.execute("vmstat");
+            NativeExecutionResult result = os.execute(commandName);
 
             if (result.isSuccess()) {
                 vmstatOutput = result.getStdout();
             }
             else {
-                throw new RuntimeException("readProperties() failure NOT YET IMPLEMENTED");
+                log.warn("'" + commandName + "' execution failed: " + result.getStderr());
             }
         }
         catch(NativeExecutionException e) {
