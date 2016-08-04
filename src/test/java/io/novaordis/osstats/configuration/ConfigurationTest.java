@@ -16,11 +16,17 @@
 
 package io.novaordis.osstats.configuration;
 
+import io.novaordis.osstats.metric.MetricDefinition;
+import io.novaordis.osstats.metric.memory.MemTotal;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -50,6 +56,7 @@ public abstract class ConfigurationTest {
         assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingIntervalSec());
         assertEquals(Configuration.DEFAULT_OUTPUT_FILE_NAME, c.getOutputFileName());
         assertEquals(Configuration.DEFAULT_OUTPUT_FILE_APPEND, c.isOutputFileAppend());
+        assertTrue(c.getMetrics().isEmpty());
     }
 
     /**
@@ -66,6 +73,13 @@ public abstract class ConfigurationTest {
 
         assertEquals("/tmp/test.csv", c.getOutputFileName());
         assertNotEquals("/tmp/test.csv", Configuration.DEFAULT_OUTPUT_FILE_NAME);
+
+        List<MetricDefinition> metrics = c.getMetrics();
+
+        assertEquals(3, metrics.size());
+
+        MemTotal mt = (MemTotal)metrics.get(0);
+        assertNotNull(mt);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

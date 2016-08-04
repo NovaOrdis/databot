@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.metric.memory;
+package io.novaordis.osstats.metric.cpu;
 
-import io.novaordis.osstats.metric.MetricDefinition;
+import io.novaordis.events.core.event.Percentage;
+import io.novaordis.osstats.metric.MetricDefinitionBase;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public abstract class MetricDefinitionBase implements MetricDefinition {
+public abstract class CpuMetricDefinitionBase extends MetricDefinitionBase implements CpuMetricDefinition {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -32,12 +33,17 @@ public abstract class MetricDefinitionBase implements MetricDefinition {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // MetricDefinition implementation ---------------------------------------------------------------------------------
+    // CpuMetricDefinition implementation ------------------------------------------------------------------------------
 
     @Override
-    public String getName() {
+    public Percentage getMeasureUnit() {
 
-        return getClass().getSimpleName();
+        return Percentage.getInstance();
+    }
+
+    @Override
+    public Class getType() {
+        return Float.class;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -42,6 +43,7 @@ public class PropertiesConfigurationFile implements Configuration {
     public static final String SAMPLING_INTERVAL_PROPERTY_NAME = "sampling.interval";
     public static final String OUTPUT_FILE_PROPERTY_NAME = "output.file";
     public static final String OUTPUT_FILE_APPEND_PROPERTY_NAME = "output.file.append";
+    public static final String METRICS_PROPERTY_NAME = "metrics";
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -51,6 +53,7 @@ public class PropertiesConfigurationFile implements Configuration {
     private String outputFileName;
     private boolean outputFileAppend;
     private boolean foreground;
+    private List<MetricDefinition> metrics;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -100,6 +103,7 @@ public class PropertiesConfigurationFile implements Configuration {
         this.outputFileName = DEFAULT_OUTPUT_FILE_NAME;
         this.outputFileAppend = true;
         this.foreground = false;
+        this.metrics = new ArrayList<>();
     }
 
     // Configuration implementation ------------------------------------------------------------------------------------
@@ -130,7 +134,8 @@ public class PropertiesConfigurationFile implements Configuration {
 
     @Override
     public List<MetricDefinition> getMetrics() {
-        throw new RuntimeException("getMetrics() NOT YET IMPLEMENTED");
+
+        return metrics;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

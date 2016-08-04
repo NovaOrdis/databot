@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.metric.memory;
+package io.novaordis.osstats.metric;
 
-import io.novaordis.events.core.event.MeasureUnit;
-import io.novaordis.events.core.event.MemoryMeasureUnit;
-import io.novaordis.osstats.metric.MetricDefinitionBase;
+import io.novaordis.osstats.metric.MetricDefinition;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public abstract class MemoryMetricDefinitionBase extends MetricDefinitionBase implements MemoryMetricDefinition {
+public abstract class MetricDefinitionBase implements MetricDefinition {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -34,19 +32,12 @@ public abstract class MemoryMetricDefinitionBase extends MetricDefinitionBase im
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // MetricDefinitionBase implementation -----------------------------------------------------------------------------
-
-    /**
-     * All memory metrics are by default expressed in bytes.
-     */
-    @Override
-    public MeasureUnit getMeasureUnit() {
-        return MemoryMeasureUnit.BYTE;
-    }
+    // MetricDefinition implementation ---------------------------------------------------------------------------------
 
     @Override
-    public Class getType() {
-        return Long.class;
+    public String getName() {
+
+        return getClass().getSimpleName();
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

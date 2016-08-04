@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.metric.memory;
-
-import io.novaordis.events.core.event.MeasureUnit;
-import io.novaordis.events.core.event.MemoryMeasureUnit;
-import io.novaordis.osstats.metric.MetricDefinitionBase;
+package io.novaordis.osstats.metric.cpu;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public abstract class MemoryMetricDefinitionBase extends MetricDefinitionBase implements MemoryMetricDefinition {
+public class CpuUserTimeTest extends CpuMetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -34,26 +30,17 @@ public abstract class MemoryMetricDefinitionBase extends MetricDefinitionBase im
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // MetricDefinitionBase implementation -----------------------------------------------------------------------------
-
-    /**
-     * All memory metrics are by default expressed in bytes.
-     */
-    @Override
-    public MeasureUnit getMeasureUnit() {
-        return MemoryMeasureUnit.BYTE;
-    }
-
-    @Override
-    public Class getType() {
-        return Long.class;
-    }
-
     // Public ----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    @Override
+    protected CpuMetricDefinition getMetricDefinitionToTest() throws Exception {
+
+        return new CpuUserTime();
+    }
 
     // Private ---------------------------------------------------------------------------------------------------------
 
