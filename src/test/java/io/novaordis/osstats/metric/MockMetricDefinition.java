@@ -17,6 +17,9 @@
 package io.novaordis.osstats.metric;
 
 import io.novaordis.events.core.event.MeasureUnit;
+import io.novaordis.utilities.os.OS;
+
+import java.util.List;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -52,6 +55,11 @@ public class MockMetricDefinition implements MetricDefinition {
     @Override
     public Class getType() {
         throw new RuntimeException("getType() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public List<String> getSources(OS os) {
+        throw new RuntimeException("getSources() NOT YET IMPLEMENTED");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

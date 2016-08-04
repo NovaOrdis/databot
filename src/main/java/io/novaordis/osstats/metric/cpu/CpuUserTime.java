@@ -16,6 +16,11 @@
 
 package io.novaordis.osstats.metric.cpu;
 
+import io.novaordis.utilities.os.OS;
+
+import java.util.Collections;
+import java.util.List;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16

@@ -18,8 +18,11 @@ package io.novaordis.osstats.metric;
 
 import io.novaordis.events.core.event.MeasureUnit;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.os.OS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -101,5 +104,11 @@ public interface MetricDefinition {
      * The types for values corresponding to this metric definition. Typical: Integer, Long, Double.
      */
     Class getType();
+
+    /**
+     * @return a list of source hints, in the descending order of their priority. This is to make the minimal
+     * amount of external invocations.
+     */
+    List<String> getSources(OS os);
 
 }

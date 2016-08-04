@@ -16,6 +16,11 @@
 
 package io.novaordis.osstats.metric;
 
+import io.novaordis.utilities.os.OS;
+
+import java.util.Collections;
+import java.util.List;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
@@ -32,7 +37,32 @@ public abstract class MetricDefinitionBase implements MetricDefinition {
 
     // MetricDefinition implementation ---------------------------------------------------------------------------------
 
+    @Override
+    public List<String> getSources(OS os) {
+
+        if (os == null) {
+            throw new IllegalArgumentException("null os");
+        }
+
+        if ("MacOS".equals(os.getName())) {
+
+            return Collections.singletonList("top");
+        }
+        else if ("Linux".equals(os.getName())) {
+
+            return Collections.singletonList("top");
+        }
+        else {
+            throw new IllegalArgumentException("unknown operating system " + os);
+        }
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

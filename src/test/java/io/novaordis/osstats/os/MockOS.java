@@ -91,6 +91,11 @@ public class MockOS implements OS {
         }
     }
 
+    @Override
+    public String getName() {
+        return "MockOS";
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
 
     public void breakOnAnyCommand(String msg, Throwable cause) {

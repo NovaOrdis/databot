@@ -16,6 +16,7 @@
 
 package io.novaordis.osstats.metric;
 
+import io.novaordis.osstats.os.MockOS;
 import io.novaordis.utilities.UserErrorException;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -63,6 +65,36 @@ public abstract class MetricDefinitionTest {
         String desc = d.getDescription();
         assertNotNull(desc);
         assertFalse(desc.isEmpty());
+    }
+
+    @Test
+    public void getSources_NullOS() throws Exception {
+
+        MetricDefinition d = getMetricDefinitionToTest();
+
+        try {
+            d.getSources(null);
+            fail("should throw exception");
+        }
+        catch(IllegalArgumentException iae) {
+            log.info(iae.getMessage());
+        }
+    }
+
+    @Test
+    public void getSources_UnknownOS() throws Exception {
+
+        MetricDefinition d = getMetricDefinitionToTest();
+
+        try {
+            d.getSources(new MockOS());
+            fail("should throw exception");
+        }
+        catch(IllegalArgumentException iae) {
+            String msg = iae.getMessage();
+            log.info(msg);
+            assertTrue(msg.startsWith("unknown operating system"));
+        }
     }
 
     // getInstance() ---------------------------------------------------------------------------------------------------
