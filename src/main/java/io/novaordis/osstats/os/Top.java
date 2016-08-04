@@ -18,6 +18,7 @@ package io.novaordis.osstats.os;
 
 import io.novaordis.events.core.event.Property;
 import io.novaordis.events.core.event.PropertyFactory;
+import io.novaordis.osstats.metric.cpu.CpuIdleTime;
 import io.novaordis.osstats.metric.cpu.CpuKernelTime;
 import io.novaordis.osstats.metric.cpu.CpuNiceTime;
 import io.novaordis.osstats.metric.cpu.CpuUserTime;
@@ -141,6 +142,11 @@ public class Top {
             }
             else if ((i = tok.indexOf("ni")) != -1) {
                 CpuNiceTime m = new CpuNiceTime();
+                tok = tok.substring(0, i).trim();
+                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
+            }
+            else if ((i = tok.indexOf("id")) != -1) {
+                CpuIdleTime m = new CpuIdleTime();
                 tok = tok.substring(0, i).trim();
                 result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
             }
