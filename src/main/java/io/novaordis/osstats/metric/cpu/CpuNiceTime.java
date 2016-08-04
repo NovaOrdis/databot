@@ -16,16 +16,11 @@
 
 package io.novaordis.osstats.metric.cpu;
 
-import io.novaordis.utilities.os.OS;
-
-import java.util.Collections;
-import java.util.List;
-
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public class CpuUserTime extends CpuMetricDefinitionBase {
+public class CpuNiceTime extends CpuMetricDefinitionBase {
 
 
     // Constants -------------------------------------------------------------------------------------------------------
@@ -40,12 +35,12 @@ public class CpuUserTime extends CpuMetricDefinitionBase {
 
     @Override
     public String getName() {
-        return "CPU User Time";
+        return "CPU Nice Time";
     }
 
     @Override
     public String getDescription() {
-        return "Percentage of total CPU time spent running non-kernel code (user time, not including nice time).";
+        return "Percentage of total CPU time spent running niced user processes.";
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

@@ -16,17 +16,17 @@
 
 package io.novaordis.osstats.metric.cpu;
 
-import io.novaordis.utilities.os.OS;
+import io.novaordis.osstats.metric.MetricDefinition;
+import org.junit.Test;
 
-import java.util.Collections;
-import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public class CpuUserTime extends CpuMetricDefinitionBase {
-
+public class CpuNiceTimeTest extends CpuMetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -36,23 +36,33 @@ public class CpuUserTime extends CpuMetricDefinitionBase {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // CpuMetricDefinition implementation ------------------------------------------------------------------------------
-
-    @Override
-    public String getName() {
-        return "CPU User Time";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Percentage of total CPU time spent running non-kernel code (user time, not including nice time).";
-    }
-
     // Public ----------------------------------------------------------------------------------------------------------
+
+    // getInstance() ---------------------------------------------------------------------------------------------------
+
+    @Test
+    public void getInstance() throws Exception {
+
+        CpuNiceTime m = (CpuNiceTime)MetricDefinition.getInstance("CpuNiceTime");
+        assertNotNull(m);
+    }
+
+    @Test
+    public void getName() throws Exception {
+
+        CpuNiceTime m = new CpuNiceTime();
+        assertEquals("CPU Nice Time", m.getName());
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    @Override
+    protected CpuMetricDefinition getMetricDefinitionToTest() throws Exception {
+
+        return new CpuNiceTime();
+    }
 
     // Private ---------------------------------------------------------------------------------------------------------
 

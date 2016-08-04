@@ -20,6 +20,7 @@ import io.novaordis.events.core.event.FloatProperty;
 import io.novaordis.events.core.event.Percentage;
 import io.novaordis.events.core.event.Property;
 import io.novaordis.osstats.metric.cpu.CpuKernelTime;
+import io.novaordis.osstats.metric.cpu.CpuNiceTime;
 import io.novaordis.osstats.metric.cpu.CpuUserTime;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastFiveMinutes;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastMinute;
@@ -108,7 +109,7 @@ public class TopTest {
         List<Property> props = Top.parseLinuxCpuInfo(
                 "  1.1 us,  2.2 sy,  3.3 ni, 44.4 id,  5.5 wa,  6.6 hi,  7.7 si,  8.8 st");
 
-        assertEquals(2, props.size());
+        assertEquals(3, props.size());
 
         CpuUserTime metric = new CpuUserTime();
         FloatProperty p = (FloatProperty)props.get(0);
@@ -123,6 +124,14 @@ public class TopTest {
         assertEquals(metric2.getName(), p2.getName());
         assertEquals(2.2f, p2.getFloat().floatValue(), 0.00001);
         assertEquals(Float.class, p2.getType());
+
+        CpuNiceTime metric3 = new CpuNiceTime();
+        FloatProperty p3 = (FloatProperty)props.get(2);
+        assertEquals(Percentage.getInstance(), p3.getMeasureUnit());
+        assertEquals(metric3.getName(), p3.getName());
+        assertEquals(3.3f, p3.getFloat().floatValue(), 0.00001);
+        assertEquals(Float.class, p3.getType());
+
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
