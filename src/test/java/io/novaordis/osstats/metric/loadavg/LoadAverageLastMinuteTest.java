@@ -14,42 +14,35 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.metric;
-
-import io.novaordis.events.core.event.MeasureUnit;
+package io.novaordis.osstats.metric.loadavg;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public interface MetricDefinition {
+public class LoadAverageLastMinuteTest extends LoadAverageMetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
     // Static ----------------------------------------------------------------------------------------------------------
 
+    // Attributes ------------------------------------------------------------------------------------------------------
+
+    // Constructors ----------------------------------------------------------------------------------------------------
+
     // Public ----------------------------------------------------------------------------------------------------------
 
-    /**
-     * The metric name, the shortest possible string that designates this metric in a conventional context. For example
-     * when we are describing a Linux system memory status, we are talking about MemTotal which is defined in
-     * /proc/meminfo. By default, it should be the simple name of the class implementing the metric.
-     */
-    String getName();
+    // Package protected -----------------------------------------------------------------------------------------------
 
-    /**
-     * May return null if the metric is non-dimensional (for example load average).
-     */
-    MeasureUnit getMeasureUnit();
+    // Protected -------------------------------------------------------------------------------------------------------
 
-    /**
-     * The human readable text that explains what this metric represents
-     */
-    String getDescription();
+    @Override
+    protected LoadAverageMetricDefinition getMetricDefinitionToTest() throws Exception {
+        return new LoadAverageLastMinute();
+    }
 
-    /**
-     * The types for values corresponding to this metric definition. Typical: Integer, Long, Double.
-     */
-    Class getType();
+    // Private ---------------------------------------------------------------------------------------------------------
+
+    // Inner classes ---------------------------------------------------------------------------------------------------
 
 }

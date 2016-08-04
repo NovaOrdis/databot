@@ -14,42 +14,20 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.metric;
+package io.novaordis.osstats.metric.loadavg;
 
-import io.novaordis.events.core.event.MeasureUnit;
+import io.novaordis.osstats.metric.MetricDefinition;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public interface MetricDefinition {
+public interface LoadAverageMetricDefinition extends MetricDefinition {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    /**
-     * The metric name, the shortest possible string that designates this metric in a conventional context. For example
-     * when we are describing a Linux system memory status, we are talking about MemTotal which is defined in
-     * /proc/meminfo. By default, it should be the simple name of the class implementing the metric.
-     */
-    String getName();
-
-    /**
-     * May return null if the metric is non-dimensional (for example load average).
-     */
-    MeasureUnit getMeasureUnit();
-
-    /**
-     * The human readable text that explains what this metric represents
-     */
-    String getDescription();
-
-    /**
-     * The types for values corresponding to this metric definition. Typical: Integer, Long, Double.
-     */
-    Class getType();
 
 }
