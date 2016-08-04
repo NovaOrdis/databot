@@ -24,6 +24,7 @@ import io.novaordis.osstats.metric.cpu.CpuIoWaitTime;
 import io.novaordis.osstats.metric.cpu.CpuKernelTime;
 import io.novaordis.osstats.metric.cpu.CpuNiceTime;
 import io.novaordis.osstats.metric.cpu.CpuSoftwareInterruptTime;
+import io.novaordis.osstats.metric.cpu.CpuStolenTime;
 import io.novaordis.osstats.metric.cpu.CpuUserTime;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastFiveMinutes;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastMinute;
@@ -127,8 +128,6 @@ public class Top {
 
         StringTokenizer st = new StringTokenizer(s, ",");
 
-        //   0.0 us,  0.1 sy,  0.0 ni, 99.8 id,  0.0 wa,  0.0 hi,  0.0 si,  0.1 st
-
         while(st.hasMoreTokens()) {
 
             String tok = st.nextToken();
@@ -165,6 +164,11 @@ public class Top {
             }
             else if ((i = tok.indexOf("si")) != -1) {
                 CpuSoftwareInterruptTime m = new CpuSoftwareInterruptTime();
+                tok = tok.substring(0, i).trim();
+                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
+            }
+            else if ((i = tok.indexOf("st")) != -1) {
+                CpuStolenTime m = new CpuStolenTime();
                 tok = tok.substring(0, i).trim();
                 result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
             }
