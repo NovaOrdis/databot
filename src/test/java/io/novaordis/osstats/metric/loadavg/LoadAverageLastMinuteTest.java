@@ -16,6 +16,13 @@
 
 package io.novaordis.osstats.metric.loadavg;
 
+import io.novaordis.osstats.metric.MetricDefinition;
+import io.novaordis.osstats.metric.cpu.CpuUserTime;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
@@ -31,6 +38,22 @@ public class LoadAverageLastMinuteTest extends LoadAverageMetricDefinitionTest {
     // Constructors ----------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    // getInstance() ---------------------------------------------------------------------------------------------------
+
+    @Test
+    public void getInstance() throws Exception {
+
+        LoadAverageLastMinute m = (LoadAverageLastMinute) MetricDefinition.getInstance("LoadAverageLastMinute");
+        assertNotNull(m);
+    }
+
+    @Test
+    public void getName() throws Exception {
+
+        LoadAverageLastMinute m = new LoadAverageLastMinute();
+        assertEquals("Last Minute Load Average", m.getName());
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

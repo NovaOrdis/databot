@@ -16,6 +16,12 @@
 
 package io.novaordis.osstats.metric.memory;
 
+import io.novaordis.osstats.metric.MetricDefinition;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
@@ -31,6 +37,22 @@ public class MemTotalTest extends MemoryMetricDefinitionTest {
     // Constructors ----------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    // getInstance() ---------------------------------------------------------------------------------------------------
+
+    @Test
+    public void getInstance() throws Exception {
+
+        MemTotal m = (MemTotal) MetricDefinition.getInstance("MemTotal");
+        assertNotNull(m);
+    }
+
+    @Test
+    public void getName() throws Exception {
+
+        MemTotal m = new MemTotal();
+        assertEquals("Total Memory", m.getName());
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

@@ -16,8 +16,6 @@
 
 package io.novaordis.osstats.metric;
 
-import io.novaordis.osstats.metric.MetricDefinition;
-
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
@@ -33,12 +31,6 @@ public abstract class MetricDefinitionBase implements MetricDefinition {
     // Constructors ----------------------------------------------------------------------------------------------------
 
     // MetricDefinition implementation ---------------------------------------------------------------------------------
-
-    @Override
-    public String getName() {
-
-        return getClass().getSimpleName();
-    }
 
     // Public ----------------------------------------------------------------------------------------------------------
 

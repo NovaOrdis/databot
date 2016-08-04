@@ -16,6 +16,12 @@
 
 package io.novaordis.osstats.metric.cpu;
 
+import io.novaordis.osstats.metric.MetricDefinition;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
@@ -31,6 +37,22 @@ public class CpuUserTimeTest extends CpuMetricDefinitionTest {
     // Constructors ----------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    // getInstance() ---------------------------------------------------------------------------------------------------
+
+    @Test
+    public void getInstance() throws Exception {
+
+        CpuUserTime m = (CpuUserTime)MetricDefinition.getInstance("CpuUserTime");
+        assertNotNull(m);
+    }
+
+    @Test
+    public void getName() throws Exception {
+
+        CpuUserTime m = new CpuUserTime();
+        assertEquals("CPU User Time", m.getName());
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

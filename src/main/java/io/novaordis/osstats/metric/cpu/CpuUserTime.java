@@ -34,6 +34,11 @@ public class CpuUserTime extends CpuMetricDefinitionBase {
     // CpuMetricDefinition implementation ------------------------------------------------------------------------------
 
     @Override
+    public String getName() {
+        return "CPU User Time";
+    }
+
+    @Override
     public String getDescription() {
         return "Percentage of total CPU time spent running non-kernel code (user time, including nice time).";
     }

@@ -16,9 +16,6 @@
 
 package io.novaordis.osstats.metric.loadavg;
 
-import io.novaordis.events.core.event.MeasureUnit;
-import io.novaordis.osstats.metric.MetricDefinitionBase;
-
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
@@ -39,6 +36,11 @@ public class LoadAverageLastMinute extends  LoadAverageMetricDefinitionBase impl
     public String getDescription() {
 
         return "CPU and IO utilization during the last minute.";
+    }
+
+    @Override
+    public String getName() {
+        return "Last Minute Load Average";
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

@@ -17,6 +17,8 @@
 package io.novaordis.osstats.configuration;
 
 import io.novaordis.osstats.metric.MetricDefinition;
+import io.novaordis.osstats.metric.cpu.CpuUserTime;
+import io.novaordis.osstats.metric.loadavg.LoadAverageLastMinute;
 import io.novaordis.osstats.metric.memory.MemTotal;
 import org.junit.Test;
 
@@ -80,6 +82,12 @@ public abstract class ConfigurationTest {
 
         MemTotal mt = (MemTotal)metrics.get(0);
         assertNotNull(mt);
+
+        CpuUserTime ct = (CpuUserTime)metrics.get(1);
+        assertNotNull(ct);
+
+        LoadAverageLastMinute lm = (LoadAverageLastMinute)metrics.get(2);
+        assertNotNull(lm);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

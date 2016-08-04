@@ -17,6 +17,9 @@
 package io.novaordis.osstats.metric;
 
 import io.novaordis.events.core.event.MeasureUnit;
+import io.novaordis.utilities.UserErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -26,14 +29,61 @@ public interface MetricDefinition {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
+    Logger log = LoggerFactory.getLogger(MetricDefinition.class);
+
     // Static ----------------------------------------------------------------------------------------------------------
+
+    static MetricDefinition getInstance(String s) throws UserErrorException {
+
+        //
+        // TODO naive implementation, come up with something better
+        //
+
+        String[] packages = {
+
+                "io.novaordis.osstats.metric.cpu",
+                "io.novaordis.osstats.metric.memory",
+                "io.novaordis.osstats.metric.loadavg",
+        };
+
+        String fqcn = null;
+        Class c = null;
+
+        for(String p : packages) {
+
+            fqcn = p + "." + s;
+
+            try {
+
+                c = Class.forName(fqcn);
+                if (c != null) {
+                    break;
+                }
+            }
+            catch (Exception e) {
+
+                log.debug("no such metric implementation: " + fqcn);
+            }
+        }
+
+        if (c == null) {
+            throw new UserErrorException("unknown metric " + s);
+        }
+
+        try {
+            return (MetricDefinition)c.newInstance();
+        }
+        catch(Exception e) {
+
+            throw new UserErrorException(fqcn + " exists, but it cannot be instantiated", e);
+        }
+    }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
     /**
-     * The metric name, the shortest possible string that designates this metric in a conventional context. For example
-     * when we are describing a Linux system memory status, we are talking about MemTotal which is defined in
-     * /proc/meminfo. By default, it should be the simple name of the class implementing the metric.
+     * The metric name, a human readable string, possibly space separated. For example, the /proc/meminfo MemTotal's
+     * name is "Total Memory".
      */
     String getName();
 

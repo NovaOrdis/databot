@@ -16,11 +16,15 @@
 
 package io.novaordis.osstats.metric;
 
+import io.novaordis.utilities.UserErrorException;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -29,6 +33,8 @@ import static org.junit.Assert.assertNotNull;
 public abstract class MetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
+
+    private static final Logger log = LoggerFactory.getLogger(MetricDefinitionTest.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -57,6 +63,21 @@ public abstract class MetricDefinitionTest {
         String desc = d.getDescription();
         assertNotNull(desc);
         assertFalse(desc.isEmpty());
+    }
+
+    // getInstance() ---------------------------------------------------------------------------------------------------
+
+    @Test
+    public void getInstance_UnknownInstance() throws Exception {
+
+        try {
+            MetricDefinition.getInstance("we are pretty sure there's no such metric");
+            fail("should throw exception");
+        }
+        catch(UserErrorException e) {
+            String msg = e.getMessage();
+            log.info(msg);
+        }
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
 /**
  * A configuration instance backed by a property file.
@@ -183,6 +184,18 @@ public class PropertiesConfigurationFile implements Configuration {
             else {
                 throw new UserErrorException(
                         "invalid '" + OUTPUT_FILE_APPEND_PROPERTY_NAME + "' boolean value: \"" + s + "\"");
+            }
+        }
+
+        s = properties.getProperty(METRICS_PROPERTY_NAME);
+
+        if (s != null) {
+
+            StringTokenizer st = new StringTokenizer(s, ", ");
+            while(st.hasMoreTokens()) {
+                String tok = st.nextToken();
+                MetricDefinition md = MetricDefinition.getInstance(tok);
+                metrics.add(md);
             }
         }
     }

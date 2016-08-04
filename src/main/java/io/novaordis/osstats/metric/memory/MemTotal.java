@@ -35,6 +35,12 @@ public class MemTotal extends MemoryMetricDefinitionBase {
     // MemoryMetricDefinition implementation ---------------------------------------------------------------------------
 
     @Override
+    public String getName() {
+
+        return "Total Memory";
+    }
+
+    @Override
     public String getDescription() {
 
         return
