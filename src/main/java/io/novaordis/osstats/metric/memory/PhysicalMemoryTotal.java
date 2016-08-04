@@ -22,7 +22,7 @@ package io.novaordis.osstats.metric.memory;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public class MemoryTotal extends MemoryMetricDefinitionBase {
+public class PhysicalMemoryTotal extends MemoryMetricDefinitionBase {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -37,15 +37,15 @@ public class MemoryTotal extends MemoryMetricDefinitionBase {
     @Override
     public String getName() {
 
-        return "Total Memory";
+        return "Total Physical Memory";
     }
 
     @Override
     public String getDescription() {
 
         return
-                "Total amount of usable RAM, which is the amount of physical RAM installed on the system minus a " +
-                        "number of reserved bits and the kernel binary code.";
+                "Total amount of usable physical memory, which is the amount of physical memory installed on the " +
+                        "system minus a number of reserved bits and the kernel binary code.";
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

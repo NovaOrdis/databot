@@ -17,12 +17,12 @@
 package io.novaordis.osstats.metric.memory;
 
 /**
- * See https://kb.novaordis.com/index.php/Proc-meminfo#MemFree
+ * See https://kb.novaordis.com/index.php/Proc-meminfo#Physical_Memory_Used_by_Processes
  *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public class MemoryFree extends MemoryMetricDefinitionBase {
+public class PhysicalMemoryUsed extends MemoryMetricDefinitionBase {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -37,13 +37,13 @@ public class MemoryFree extends MemoryMetricDefinitionBase {
     @Override
     public String getName() {
 
-        return "Free Memory";
+        return "Used Physical Memory";
     }
 
     @Override
     public String getDescription() {
 
-        return "The amount of physical RAM, left unused by the system.";
+        return "The amount of physical memory used by the processes running on the system.";
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

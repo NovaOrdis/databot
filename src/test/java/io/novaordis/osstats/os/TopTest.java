@@ -32,8 +32,9 @@ import io.novaordis.osstats.metric.cpu.CpuUserTime;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastFiveMinutes;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastMinute;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastTenMinutes;
-import io.novaordis.osstats.metric.memory.MemoryFree;
-import io.novaordis.osstats.metric.memory.MemoryTotal;
+import io.novaordis.osstats.metric.memory.PhysicalMemoryFree;
+import io.novaordis.osstats.metric.memory.PhysicalMemoryTotal;
+import io.novaordis.osstats.metric.memory.PhysicalMemoryUsed;
 import io.novaordis.osstats.metric.memory.SwapTotal;
 import io.novaordis.utilities.Files;
 import org.junit.Test;
@@ -188,22 +189,28 @@ public class TopTest {
         List<Property> props = Top.parseLinuxMemoryInfo(
                 "  1015944 total,   802268 free,    86860 used,   126816 buff/cache");
 
-        assertEquals(4, props.size());
+        assertEquals(3, props.size());
 
-        MemoryTotal metric = new MemoryTotal();
+        PhysicalMemoryTotal metric = new PhysicalMemoryTotal();
         LongProperty p = (LongProperty)props.get(0);
         assertEquals(MemoryMeasureUnit.BYTE, p.getMeasureUnit());
         assertEquals(metric.getName(), p.getName());
         assertEquals(1015944l * 1024, p.getLong().longValue());
         assertEquals(Long.class, p.getType());
 
-        MemoryFree metric2 = new MemoryFree();
-        LongProperty p2 = (LongProperty)props.get(0);
+        PhysicalMemoryFree metric2 = new PhysicalMemoryFree();
+        LongProperty p2 = (LongProperty)props.get(1);
         assertEquals(MemoryMeasureUnit.BYTE, p2.getMeasureUnit());
         assertEquals(metric2.getName(), p2.getName());
         assertEquals(802268L * 1024, p2.getLong().longValue());
         assertEquals(Long.class, p2.getType());
 
+        PhysicalMemoryUsed metric3 = new PhysicalMemoryUsed();
+        LongProperty p3 = (LongProperty)props.get(2);
+        assertEquals(MemoryMeasureUnit.BYTE, p3.getMeasureUnit());
+        assertEquals(metric3.getName(), p3.getName());
+        assertEquals(86860L * 1024, p3.getLong().longValue());
+        assertEquals(Long.class, p3.getType());
     }
 
     @Test

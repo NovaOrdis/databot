@@ -29,8 +29,9 @@ import io.novaordis.osstats.metric.cpu.CpuUserTime;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastFiveMinutes;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastMinute;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastTenMinutes;
-import io.novaordis.osstats.metric.memory.MemoryFree;
-import io.novaordis.osstats.metric.memory.MemoryTotal;
+import io.novaordis.osstats.metric.memory.PhysicalMemoryFree;
+import io.novaordis.osstats.metric.memory.PhysicalMemoryTotal;
+import io.novaordis.osstats.metric.memory.PhysicalMemoryUsed;
 import io.novaordis.osstats.metric.memory.SwapTotal;
 
 import java.util.ArrayList;
@@ -200,15 +201,24 @@ public class Top {
             String tok = st.nextToken();
             int i;
             if ((i = tok.indexOf("total")) != -1) {
-                MemoryTotal m = new MemoryTotal();
+                PhysicalMemoryTotal m = new PhysicalMemoryTotal();
                 tok = tok.substring(0, i).trim();
                 result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, 1024, m.getMeasureUnit()));
             }
             else if ((i = tok.indexOf("free")) != -1) {
-                MemoryFree m = new MemoryFree();
+                PhysicalMemoryFree m = new PhysicalMemoryFree();
                 tok = tok.substring(0, i).trim();
                 result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, 1024, m.getMeasureUnit()));
             }
+            else if ((i = tok.indexOf("used")) != -1) {
+                PhysicalMemoryUsed m = new PhysicalMemoryUsed();
+                tok = tok.substring(0, i).trim();
+                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, 1024, m.getMeasureUnit()));
+            }
+
+            //
+            // we're ignoring buff/cache for the time being
+            //
 
         }
 

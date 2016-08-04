@@ -85,7 +85,7 @@ public interface MetricDefinition {
     // Public ----------------------------------------------------------------------------------------------------------
 
     /**
-     * The metric name, a human readable string, possibly space separated. For example, the /proc/meminfo MemoryTotal's
+     * The metric name, a human readable string, possibly space separated. For example, the /proc/meminfo PhysicalMemoryTotal's
      * name is "Total Memory".
      */
     String getName();

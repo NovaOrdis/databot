@@ -26,7 +26,7 @@ import static org.junit.Assert.assertNotNull;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public class MemoryFreeTest extends MemoryMetricDefinitionTest {
+public class PhysicalMemoryTotalTest extends MemoryMetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -43,15 +43,15 @@ public class MemoryFreeTest extends MemoryMetricDefinitionTest {
     @Test
     public void getInstance() throws Exception {
 
-        MemoryFree m = (MemoryFree) MetricDefinition.getInstance("MemoryFree");
+        PhysicalMemoryTotal m = (PhysicalMemoryTotal) MetricDefinition.getInstance("PhysicalMemoryTotal");
         assertNotNull(m);
     }
 
     @Test
     public void getName() throws Exception {
 
-        MemoryFree m = new MemoryFree();
-        assertEquals("Free Memory", m.getName());
+        PhysicalMemoryTotal m = new PhysicalMemoryTotal();
+        assertEquals("Total Physical Memory", m.getName());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
@@ -59,8 +59,8 @@ public class MemoryFreeTest extends MemoryMetricDefinitionTest {
     // Protected -------------------------------------------------------------------------------------------------------
 
     @Override
-    protected MemoryFree getMetricDefinitionToTest() throws Exception {
-        return new MemoryFree();
+    protected PhysicalMemoryTotal getMetricDefinitionToTest() throws Exception {
+        return new PhysicalMemoryTotal();
     }
 
     // Private ---------------------------------------------------------------------------------------------------------
