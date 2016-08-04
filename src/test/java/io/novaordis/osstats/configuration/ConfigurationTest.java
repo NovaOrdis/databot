@@ -19,7 +19,7 @@ package io.novaordis.osstats.configuration;
 import io.novaordis.osstats.metric.MetricDefinition;
 import io.novaordis.osstats.metric.cpu.CpuUserTime;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastMinute;
-import io.novaordis.osstats.metric.memory.MemTotal;
+import io.novaordis.osstats.metric.memory.MemoryTotal;
 import org.junit.Test;
 
 import java.util.List;
@@ -80,7 +80,7 @@ public abstract class ConfigurationTest {
 
         assertEquals(3, metrics.size());
 
-        MemTotal mt = (MemTotal)metrics.get(0);
+        MemoryTotal mt = (MemoryTotal)metrics.get(0);
         assertNotNull(mt);
 
         CpuUserTime ct = (CpuUserTime)metrics.get(1);

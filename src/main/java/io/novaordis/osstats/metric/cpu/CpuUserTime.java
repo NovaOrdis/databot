@@ -16,12 +16,8 @@
 
 package io.novaordis.osstats.metric.cpu;
 
-import io.novaordis.utilities.os.OS;
-
-import java.util.Collections;
-import java.util.List;
-
 /**
+ * See https://kb.novaordis.com/index.php/Vmstat#us
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */

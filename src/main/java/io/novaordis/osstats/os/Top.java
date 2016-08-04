@@ -29,6 +29,9 @@ import io.novaordis.osstats.metric.cpu.CpuUserTime;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastFiveMinutes;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastMinute;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastTenMinutes;
+import io.novaordis.osstats.metric.memory.MemoryFree;
+import io.novaordis.osstats.metric.memory.MemoryTotal;
+import io.novaordis.osstats.metric.memory.SwapTotal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,19 +76,23 @@ public class Top {
                 List<Property> loadAverage = parseLinuxLoadAverage(line.substring(i + "load average:".length()));
                 result.addAll(loadAverage);
             }
-
-            if (line.matches("^%Cpu.+:")) {
+            else if (line.matches("^%Cpu.+:")) {
                 i = line.indexOf(":");
                 List<Property> loadAverage = parseLinuxCpuInfo(line.substring(i + 1));
                 result.addAll(loadAverage);
             }
-
-//            KiB Mem :  1015944 total,   802268 free,    86860 used,   126816 buff/cache
-//            KiB Swap:        0 total,        0 free,        0 used.   791404 avail Mem
+            else if (line.matches("Mem +:")) {
+                i = line.indexOf(":");
+                List<Property> loadAverage = parseLinuxMemoryInfo(line.substring(i + 1));
+                result.addAll(loadAverage);
+            }
+            else if (line.matches("Swap +:")) {
+                i = line.indexOf(":");
+                List<Property> loadAverage = parseLinuxSwapInfo(line.substring(i + 1));
+                result.addAll(loadAverage);
+            }
         }
-
         return result;
-
     }
 
     public static List<Property> parseMacCommandOutput(String output) throws InvalidExecutionOutputException {
@@ -171,6 +178,62 @@ public class Top {
                 CpuStolenTime m = new CpuStolenTime();
                 tok = tok.substring(0, i).trim();
                 result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Parses "1015944 total,   802268 free,    86860 used,   126816 buff/cache" (line usually starts with  KiB Mem :"
+     */
+    public static List<Property> parseLinuxMemoryInfo(String s) throws InvalidExecutionOutputException {
+
+        List<Property> result = new ArrayList<>();
+
+        StringTokenizer st = new StringTokenizer(s, ",");
+
+        while(st.hasMoreTokens()) {
+
+            //            1015944 total,   802268 free,    86860 used,   126816 buff/cache
+
+            String tok = st.nextToken();
+            int i;
+            if ((i = tok.indexOf("total")) != -1) {
+                MemoryTotal m = new MemoryTotal();
+                tok = tok.substring(0, i).trim();
+                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, 1024, m.getMeasureUnit()));
+            }
+            else if ((i = tok.indexOf("free")) != -1) {
+                MemoryFree m = new MemoryFree();
+                tok = tok.substring(0, i).trim();
+                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, 1024, m.getMeasureUnit()));
+            }
+
+        }
+
+        return result;
+    }
+
+    /**
+     * Parses "10 total,        10 free,        10 used.   791404 avail Mem" (line usually starts with  KiB Swap :"
+     */
+    public static List<Property> parseLinuxSwapInfo(String s) throws InvalidExecutionOutputException {
+
+        List<Property> result = new ArrayList<>();
+
+        StringTokenizer st = new StringTokenizer(s, ",");
+
+        while(st.hasMoreTokens()) {
+
+            //  10 total,        10 free,        10 used.   791404 avail Mem
+
+            String tok = st.nextToken();
+            int i;
+            if ((i = tok.indexOf("total")) != -1) {
+                SwapTotal m = new SwapTotal();
+                tok = tok.substring(0, i).trim();
+                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, 1024, m.getMeasureUnit()));
             }
         }
 

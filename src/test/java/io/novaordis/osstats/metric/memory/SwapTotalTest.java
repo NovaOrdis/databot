@@ -16,13 +16,17 @@
 
 package io.novaordis.osstats.metric.memory;
 
+import io.novaordis.osstats.metric.MetricDefinition;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 /**
- * See https://kb.novaordis.com/index.php/Proc-meminfo#MemTotal
- *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public class MemTotal extends MemoryMetricDefinitionBase {
+public class SwapTotalTest extends MemoryMetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -32,27 +36,32 @@ public class MemTotal extends MemoryMetricDefinitionBase {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // MemoryMetricDefinition implementation ---------------------------------------------------------------------------
-
-    @Override
-    public String getName() {
-
-        return "Total Memory";
-    }
-
-    @Override
-    public String getDescription() {
-
-        return
-                "Total amount of usable RAM, which is the amount of physical RAM installed on the system minus a " +
-                        "number of reserved bits and the kernel binary code.";
-    }
-
     // Public ----------------------------------------------------------------------------------------------------------
+
+    // getInstance() ---------------------------------------------------------------------------------------------------
+
+    @Test
+    public void getInstance() throws Exception {
+
+        SwapTotal m = (SwapTotal) MetricDefinition.getInstance("SwapTotal");
+        assertNotNull(m);
+    }
+
+    @Test
+    public void getName() throws Exception {
+
+        SwapTotal m = new SwapTotal();
+        assertEquals("Total Swap", m.getName());
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    @Override
+    protected SwapTotal getMetricDefinitionToTest() throws Exception {
+        return new SwapTotal();
+    }
 
     // Private ---------------------------------------------------------------------------------------------------------
 

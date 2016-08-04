@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.metric.cpu;
+package io.novaordis.osstats.metric.memory;
 
 /**
- * See https://kb.novaordis.com/index.php/Vmstat#si_2
+ * See https://kb.novaordis.com/index.php/Proc-meminfo#MemTotal
  *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public class CpuSoftwareInterruptTime extends CpuMetricDefinitionBase {
-
+public class MemoryTotal extends MemoryMetricDefinitionBase {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,16 +32,20 @@ public class CpuSoftwareInterruptTime extends CpuMetricDefinitionBase {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // CpuMetricDefinition implementation ------------------------------------------------------------------------------
+    // MemoryMetricDefinition implementation ---------------------------------------------------------------------------
 
     @Override
     public String getName() {
-        return "CPU Software Interrupt Time";
+
+        return "Total Memory";
     }
 
     @Override
     public String getDescription() {
-        return "Percentage of total CPU time spent time spent spent servicing software interrupts.";
+
+        return
+                "Total amount of usable RAM, which is the amount of physical RAM installed on the system minus a " +
+                        "number of reserved bits and the kernel binary code.";
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.metric.cpu;
+package io.novaordis.osstats.metric.memory;
 
 /**
- * See https://kb.novaordis.com/index.php/Vmstat#si_2
+ * See https://kb.novaordis.com/index.php/Proc-meminfo#SwapTotal
  *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public class CpuSoftwareInterruptTime extends CpuMetricDefinitionBase {
-
+public class SwapTotal extends MemoryMetricDefinitionBase {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,16 +32,18 @@ public class CpuSoftwareInterruptTime extends CpuMetricDefinitionBase {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // CpuMetricDefinition implementation ------------------------------------------------------------------------------
+    // MemoryMetricDefinition implementation ---------------------------------------------------------------------------
 
     @Override
     public String getName() {
-        return "CPU Software Interrupt Time";
+
+        return "Total Swap";
     }
 
     @Override
     public String getDescription() {
-        return "Percentage of total CPU time spent time spent spent servicing software interrupts.";
+
+        return "The total amount of swap available.";
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

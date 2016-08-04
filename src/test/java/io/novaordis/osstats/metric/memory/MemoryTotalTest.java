@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.metric.cpu;
+package io.novaordis.osstats.metric.memory;
+
+import io.novaordis.osstats.metric.MetricDefinition;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
- * See https://kb.novaordis.com/index.php/Vmstat#si_2
- *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public class CpuSoftwareInterruptTime extends CpuMetricDefinitionBase {
-
+public class MemoryTotalTest extends MemoryMetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,23 +36,32 @@ public class CpuSoftwareInterruptTime extends CpuMetricDefinitionBase {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // CpuMetricDefinition implementation ------------------------------------------------------------------------------
-
-    @Override
-    public String getName() {
-        return "CPU Software Interrupt Time";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Percentage of total CPU time spent time spent spent servicing software interrupts.";
-    }
-
     // Public ----------------------------------------------------------------------------------------------------------
+
+    // getInstance() ---------------------------------------------------------------------------------------------------
+
+    @Test
+    public void getInstance() throws Exception {
+
+        MemoryTotal m = (MemoryTotal) MetricDefinition.getInstance("MemoryTotal");
+        assertNotNull(m);
+    }
+
+    @Test
+    public void getName() throws Exception {
+
+        MemoryTotal m = new MemoryTotal();
+        assertEquals("Total Memory", m.getName());
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    @Override
+    protected MemoryTotal getMetricDefinitionToTest() throws Exception {
+        return new MemoryTotal();
+    }
 
     // Private ---------------------------------------------------------------------------------------------------------
 

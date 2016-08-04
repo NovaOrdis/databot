@@ -17,6 +17,8 @@
 package io.novaordis.osstats.os;
 
 import io.novaordis.events.core.event.FloatProperty;
+import io.novaordis.events.core.event.LongProperty;
+import io.novaordis.events.core.event.MemoryMeasureUnit;
 import io.novaordis.events.core.event.Percentage;
 import io.novaordis.events.core.event.Property;
 import io.novaordis.osstats.metric.cpu.CpuHardwareInterruptTime;
@@ -30,6 +32,9 @@ import io.novaordis.osstats.metric.cpu.CpuUserTime;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastFiveMinutes;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastMinute;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastTenMinutes;
+import io.novaordis.osstats.metric.memory.MemoryFree;
+import io.novaordis.osstats.metric.memory.MemoryTotal;
+import io.novaordis.osstats.metric.memory.SwapTotal;
 import io.novaordis.utilities.Files;
 import org.junit.Test;
 
@@ -37,8 +42,10 @@ import java.io.File;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -68,17 +75,19 @@ public class TopTest {
 //        throw new RuntimeException("RETURN HERE");
 //    }
 //
-//    @Test
-//    public void parseMacCommandOutput() throws Exception {
-//
-//        File f = new File(System.getProperty("basedir"), "src/test/resources/data/os/top-mac.out");
-//        assertTrue(f.isFile());
-//        String content = Files.read(f);
-//
-//        List<Property> properties = Top.parseMacCommandOutput(content);
-//
-//        throw new RuntimeException("RETURN HERE");
-//    }
+    @Test
+    public void parseMacCommandOutput() throws Exception {
+
+        File f = new File(System.getProperty("basedir"), "src/test/resources/data/os/top-mac.out");
+        assertTrue(f.isFile());
+        String content = Files.read(f);
+
+        List<Property> properties = Top.parseMacCommandOutput(content);
+
+        assertNotNull(properties);
+
+        fail("return here");
+    }
 
     @Test
     public void parseLinuxLoadAverage() throws Exception {
@@ -171,6 +180,46 @@ public class TopTest {
         assertEquals(metric8.getName(), p8.getName());
         assertEquals(8.8f, p8.getFloat().floatValue(), 0.00001);
         assertEquals(Float.class, p8.getType());
+    }
+
+    @Test
+    public void parseLinuxMemoryInfo() throws Exception {
+
+        List<Property> props = Top.parseLinuxMemoryInfo(
+                "  1015944 total,   802268 free,    86860 used,   126816 buff/cache");
+
+        assertEquals(4, props.size());
+
+        MemoryTotal metric = new MemoryTotal();
+        LongProperty p = (LongProperty)props.get(0);
+        assertEquals(MemoryMeasureUnit.BYTE, p.getMeasureUnit());
+        assertEquals(metric.getName(), p.getName());
+        assertEquals(1015944l * 1024, p.getLong().longValue());
+        assertEquals(Long.class, p.getType());
+
+        MemoryFree metric2 = new MemoryFree();
+        LongProperty p2 = (LongProperty)props.get(0);
+        assertEquals(MemoryMeasureUnit.BYTE, p2.getMeasureUnit());
+        assertEquals(metric2.getName(), p2.getName());
+        assertEquals(802268L * 1024, p2.getLong().longValue());
+        assertEquals(Long.class, p2.getType());
+
+    }
+
+    @Test
+    public void parseLinuxSwapInfo() throws Exception {
+
+        List<Property> props = Top.parseLinuxSwapInfo(
+                "  10 total,        10 free,        10 used.   791404 avail Mem");
+
+        assertEquals(4, props.size());
+
+        SwapTotal metric = new SwapTotal();
+        LongProperty p = (LongProperty)props.get(0);
+        assertEquals(MemoryMeasureUnit.BYTE, p.getMeasureUnit());
+        assertEquals(metric.getName(), p.getName());
+        assertEquals(10L * 1024, p.getLong().longValue());
+        assertEquals(Long.class, p.getType());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

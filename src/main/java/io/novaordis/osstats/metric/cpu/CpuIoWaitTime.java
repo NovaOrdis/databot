@@ -17,6 +17,7 @@
 package io.novaordis.osstats.metric.cpu;
 
 /**
+ * See https://kb.novaordis.com/index.php/Vmstat#wa
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
