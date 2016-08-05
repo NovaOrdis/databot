@@ -1,8 +1,8 @@
 top - 00:25:20 up  2:22,  1 user,  load average: 0.11, 0.22, 0.33
 Tasks:   1 total,   1 running,   0 sleeping,   0 stopped,   0 zombie
-%Cpu(s):  0.0 us,  0.1 sy,  0.0 ni, 99.8 id,  0.0 wa,  0.0 hi,  0.0 si,  0.1 st
+%Cpu(s):  0.0 us,  0.1 sy,  0.2 ni, 99.8 id,  0.3 wa,  0.4 hi,  0.5 si,  0.6 st
 KiB Mem :  1015944 total,   802268 free,    86860 used,   126816 buff/cache
-KiB Swap:        0 total,        0 free,        0 used.   791404 avail Mem
+KiB Swap:        3 total,        2 free,        1 used.   791404 avail Mem
 
   PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND
  2246 ec2-user  20   0  129756   1492   1196 R  0.0  0.1   0:00.00 top

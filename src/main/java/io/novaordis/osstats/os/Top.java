@@ -18,10 +18,12 @@ package io.novaordis.osstats.os;
 
 import io.novaordis.events.core.event.Property;
 import io.novaordis.events.core.event.PropertyFactory;
+import io.novaordis.osstats.metric.MetricDefinition;
 import io.novaordis.osstats.metric.cpu.CpuHardwareInterruptTime;
 import io.novaordis.osstats.metric.cpu.CpuIdleTime;
 import io.novaordis.osstats.metric.cpu.CpuIoWaitTime;
 import io.novaordis.osstats.metric.cpu.CpuKernelTime;
+import io.novaordis.osstats.metric.cpu.CpuMetricDefinition;
 import io.novaordis.osstats.metric.cpu.CpuNiceTime;
 import io.novaordis.osstats.metric.cpu.CpuSoftwareInterruptTime;
 import io.novaordis.osstats.metric.cpu.CpuStolenTime;
@@ -29,10 +31,13 @@ import io.novaordis.osstats.metric.cpu.CpuUserTime;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastFiveMinutes;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastMinute;
 import io.novaordis.osstats.metric.loadavg.LoadAverageLastTenMinutes;
+import io.novaordis.osstats.metric.loadavg.LoadAverageMetricDefinition;
 import io.novaordis.osstats.metric.memory.PhysicalMemoryFree;
 import io.novaordis.osstats.metric.memory.PhysicalMemoryTotal;
 import io.novaordis.osstats.metric.memory.PhysicalMemoryUsed;
+import io.novaordis.osstats.metric.memory.SwapFree;
 import io.novaordis.osstats.metric.memory.SwapTotal;
+import io.novaordis.osstats.metric.memory.SwapUsed;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,114 +79,85 @@ public class Top {
             int i = line.indexOf("load average:");
             if (i != -1) {
 
-                List<Property> loadAverage = parseLinuxLoadAverage(line.substring(i + "load average:".length()));
+                List<Property> loadAverage = parseLoadAverage(line.substring(i + "load average:".length()));
                 result.addAll(loadAverage);
             }
-            else if (line.matches("^%Cpu.+:")) {
+            else if (line.matches("^%Cpu.*:.*")) {
                 i = line.indexOf(":");
-                List<Property> loadAverage = parseLinuxCpuInfo(line.substring(i + 1));
-                result.addAll(loadAverage);
+                List<Property> cpu = parseLinuxCpuInfo(line.substring(i + 1));
+                result.addAll(cpu);
             }
-            else if (line.matches("Mem +:")) {
+            else if (line.matches(".*Mem.*:.*")) {
                 i = line.indexOf(":");
-                List<Property> loadAverage = parseLinuxMemoryInfo(line.substring(i + 1));
-                result.addAll(loadAverage);
+                List<Property> memory = parseLinuxMemoryInfo(line.substring(i + 1));
+                result.addAll(memory);
             }
-            else if (line.matches("Swap +:")) {
+            else if (line.matches(".*Swap.*:.*")) {
                 i = line.indexOf(":");
-                List<Property> loadAverage = parseLinuxSwapInfo(line.substring(i + 1));
-                result.addAll(loadAverage);
+                List<Property> swap = parseLinuxSwapInfo(line.substring(i + 1));
+                result.addAll(swap);
             }
         }
         return result;
     }
 
-    public static List<Property> parseMacCommandOutput(String output) throws InvalidExecutionOutputException {
-
-        throw new RuntimeException("parseMacCommandOutput() NOT YET IMPLEMENTED");
-    }
-
-    public static List<Property> parseLinuxLoadAverage(String s) throws InvalidExecutionOutputException {
+    /**
+     * Works both on Linux and Mac.
+     * @param s - expected format " 1.57, 1.59, 1.69"
+     */
+    public static List<Property> parseLoadAverage(String s) throws InvalidExecutionOutputException {
 
         List<Property> result = new ArrayList<>();
-
         StringTokenizer st = new StringTokenizer(s, ", ");
+        LoadAverageMetricDefinition[] expected = new LoadAverageMetricDefinition[] {
+                new LoadAverageLastMinute(),
+                new LoadAverageLastFiveMinutes(),
+                new LoadAverageLastTenMinutes()
+        };
 
-        if (st.hasMoreTokens()) {
-            LoadAverageLastMinute m = new LoadAverageLastMinute();
-            String tok = st.nextToken();
-            Property p = PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit());
-            result.add(p);
-        }
-
-        if (st.hasMoreTokens()) {
-            LoadAverageLastFiveMinutes m = new LoadAverageLastFiveMinutes();
-            String tok = st.nextToken();
-            Property p = PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit());
-            result.add(p);
-        }
-
-        if (st.hasMoreTokens()) {
-            LoadAverageLastTenMinutes m = new LoadAverageLastTenMinutes();
-            String tok = st.nextToken();
-            Property p = PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit());
-            result.add(p);
+        for(LoadAverageMetricDefinition m: expected) {
+            if (st.hasMoreTokens()) {
+                String tok = st.nextToken();
+                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
+            }
         }
         return result;
     }
 
     public static List<Property> parseLinuxCpuInfo(String s) throws InvalidExecutionOutputException {
 
-        List<Property> result = new ArrayList<>();
+        Object[][] expected = new Object[][] {
+                { "us", new CpuUserTime()},
+                { "sy",  new CpuKernelTime()},
+                { "ni",  new CpuNiceTime()},
+                { "id", new CpuIdleTime()},
+                { "wa", new CpuIoWaitTime()},
+                { "hi", new CpuHardwareInterruptTime()},
+                { "si", new CpuSoftwareInterruptTime()},
+                { "st", new CpuStolenTime()},
+        };
 
+        return parseCpuInfo(s, expected);
+    }
+
+    private static List<Property> parseCpuInfo(String s, Object[][] expectedLabelsAndMetrics)
+            throws InvalidExecutionOutputException {
+
+        List<Property> result = new ArrayList<>();
         StringTokenizer st = new StringTokenizer(s, ",");
 
         while(st.hasMoreTokens()) {
-
             String tok = st.nextToken();
-            int i;
-            if ((i = tok.indexOf("us")) != -1) {
-                CpuUserTime m = new CpuUserTime();
-                tok = tok.substring(0, i).trim();
-                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
-            }
-            else if ((i = tok.indexOf("sy")) != -1) {
-                CpuKernelTime m = new CpuKernelTime();
-                tok = tok.substring(0, i).trim();
-                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
-            }
-            else if ((i = tok.indexOf("ni")) != -1) {
-                CpuNiceTime m = new CpuNiceTime();
-                tok = tok.substring(0, i).trim();
-                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
-            }
-            else if ((i = tok.indexOf("id")) != -1) {
-                CpuIdleTime m = new CpuIdleTime();
-                tok = tok.substring(0, i).trim();
-                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
-            }
-            else if ((i = tok.indexOf("wa")) != -1) {
-                CpuIoWaitTime m = new CpuIoWaitTime();
-                tok = tok.substring(0, i).trim();
-                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
-            }
-            else if ((i = tok.indexOf("hi")) != -1) {
-                CpuHardwareInterruptTime m = new CpuHardwareInterruptTime();
-                tok = tok.substring(0, i).trim();
-                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
-            }
-            else if ((i = tok.indexOf("si")) != -1) {
-                CpuSoftwareInterruptTime m = new CpuSoftwareInterruptTime();
-                tok = tok.substring(0, i).trim();
-                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
-            }
-            else if ((i = tok.indexOf("st")) != -1) {
-                CpuStolenTime m = new CpuStolenTime();
-                tok = tok.substring(0, i).trim();
-                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
+            for (Object[] e : expectedLabelsAndMetrics) {
+                String label = (String) e[0];
+                CpuMetricDefinition m = (CpuMetricDefinition) e[1];
+                int i = tok.indexOf(label);
+                if (i != -1) {
+                    tok = tok.substring(0, i).replace("%", "").trim();
+                    result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
+                }
             }
         }
-
         return result;
     }
 
@@ -195,8 +171,6 @@ public class Top {
         StringTokenizer st = new StringTokenizer(s, ",");
 
         while(st.hasMoreTokens()) {
-
-            //            1015944 total,   802268 free,    86860 used,   126816 buff/cache
 
             String tok = st.nextToken();
             int i;
@@ -245,23 +219,111 @@ public class Top {
                 tok = tok.substring(0, i).trim();
                 result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, 1024, m.getMeasureUnit()));
             }
+            else if ((i = tok.indexOf("free")) != -1) {
+                SwapFree m = new SwapFree();
+                tok = tok.substring(0, i).trim();
+                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, 1024, m.getMeasureUnit()));
+            }
+            else if ((i = tok.indexOf("used")) != -1) {
+                SwapUsed m = new SwapUsed();
+                tok = tok.substring(0, i).trim();
+                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, 1024, m.getMeasureUnit()));
+            }
+
+            //
+            // we're ignoring avail Mem for the time being
+            //
         }
 
         return result;
     }
 
-    // Attributes ------------------------------------------------------------------------------------------------------
+    public static List<Property> parseMacCommandOutput(String output) throws InvalidExecutionOutputException {
 
-    // Constructors ----------------------------------------------------------------------------------------------------
+        List<Property> result = new ArrayList<>();
 
-    // Public ----------------------------------------------------------------------------------------------------------
+        StringTokenizer st = new StringTokenizer(output, "\n");
+        while(st.hasMoreTokens()) {
 
-    // Package protected -----------------------------------------------------------------------------------------------
+            String line = st.nextToken();
 
-    // Protected -------------------------------------------------------------------------------------------------------
+            if (line.startsWith("Load Avg:")) {
+                result.addAll(parseLoadAverage(line.substring("Load Avg:".length())));
+            }
+            else if (line.startsWith("CPU usage:")) {
+                result.addAll(parseMacCpuInfo(line.substring("CPU usage:".length())));
+            }
+            else if (line.startsWith("PhysMem:")) {
+                result.addAll(parseMacMemoryInfo(line.substring("PhysMem:".length())));
+            }
+        }
+        return result;
+    }
 
-    // Private ---------------------------------------------------------------------------------------------------------
+    /**
+     * @param s expected format "2.94% user, 10.29% sys, 86.76% idle"
+     */
+    public static List<Property> parseMacCpuInfo(String s) throws InvalidExecutionOutputException {
 
-    // Inner classes ---------------------------------------------------------------------------------------------------
+        Object[][] expected = new Object[][] {
+                { "user", new CpuUserTime()},
+                { "sys",  new CpuKernelTime()},
+                { "idle", new CpuIdleTime()},
+        };
+        return parseCpuInfo(s, expected);
+    }
+
+    /**
+     * Parses "13G used (1470M wired), 2563M unused"
+     */
+    public static List<Property> parseMacMemoryInfo(String s) throws InvalidExecutionOutputException {
+
+        List<Property> result = new ArrayList<>();
+        Object[][] expected = new Object[][] {
+                { "used", new PhysicalMemoryUsed()},
+                { "unused",  new PhysicalMemoryFree()},
+        };
+        for(Object[] e: expected) {
+            String label = (String)e[0];
+            MetricDefinition m = (MetricDefinition)e[1];
+            int i = s.indexOf(" " + label);
+            if (i == -1) {
+                continue;
+            }
+            String ms = s.substring(0, i);
+            i = ms.lastIndexOf(' ');
+            ms = i == -1 ? ms : ms.substring(i);
+            int multiplicationFactor;
+            if (ms.endsWith("G")) {
+                multiplicationFactor = 1024 * 1024 * 1024;
+            }
+            else if (ms.endsWith("M")) {
+                multiplicationFactor = 1024 * 1024;
+            }
+            else {
+                throw new InvalidExecutionOutputException(
+                        "not handling yet '" + ms.charAt(ms.length() - 1));
+            }
+            ms = ms.substring(0, ms.length() - 1).trim();
+            result.add(PropertyFactory.createInstance(
+                    m.getName(), m.getType(), ms, multiplicationFactor, m.getMeasureUnit()));
+        }
+        return result;
+    }
+
+
+// Attributes ------------------------------------------------------------------------------------------------------
+
+// Constructors ----------------------------------------------------------------------------------------------------
+
+// Public ----------------------------------------------------------------------------------------------------------
+
+// Package protected -----------------------------------------------------------------------------------------------
+
+// Protected -------------------------------------------------------------------------------------------------------
+
+// Private ---------------------------------------------------------------------------------------------------------
+
+// Inner classes ---------------------------------------------------------------------------------------------------
 
 }

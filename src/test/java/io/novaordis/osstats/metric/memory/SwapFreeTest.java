@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.metric.loadavg;
+package io.novaordis.osstats.metric.memory;
+
+import io.novaordis.osstats.metric.MetricDefinition;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public class LoadAverageLastMinute extends LoadAverageMetricDefinitionBase implements LoadAverageMetricDefinition {
+public class SwapFreeTest extends MemoryMetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -30,24 +36,32 @@ public class LoadAverageLastMinute extends LoadAverageMetricDefinitionBase imple
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // LoadAverageMetricDefinition implementation ----------------------------------------------------------------------
-
-    @Override
-    public String getDescription() {
-
-        return "CPU and IO utilization during the last minute.";
-    }
-
-    @Override
-    public String getName() {
-        return "Last Minute Load Average";
-    }
-
     // Public ----------------------------------------------------------------------------------------------------------
+
+    // getInstance() ---------------------------------------------------------------------------------------------------
+
+    @Test
+    public void getInstance() throws Exception {
+
+        SwapFree m = (SwapFree) MetricDefinition.getInstance("SwapFree");
+        assertNotNull(m);
+    }
+
+    @Test
+    public void getName() throws Exception {
+
+        SwapFree m = new SwapFree();
+        assertEquals("Free Swap", m.getName());
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    @Override
+    protected SwapFree getMetricDefinitionToTest() throws Exception {
+        return new SwapFree();
+    }
 
     // Private ---------------------------------------------------------------------------------------------------------
 

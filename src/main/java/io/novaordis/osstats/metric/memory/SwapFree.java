@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.metric.loadavg;
+package io.novaordis.osstats.metric.memory;
 
 /**
+ * See https://kb.novaordis.com/index.php/Proc-meminfo#SwapFree
+ *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public class LoadAverageLastMinute extends LoadAverageMetricDefinitionBase implements LoadAverageMetricDefinition {
+public class SwapFree extends MemoryMetricDefinitionBase {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -30,17 +32,18 @@ public class LoadAverageLastMinute extends LoadAverageMetricDefinitionBase imple
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // LoadAverageMetricDefinition implementation ----------------------------------------------------------------------
+    // MemoryMetricDefinition implementation ---------------------------------------------------------------------------
+
+    @Override
+    public String getName() {
+
+        return "Free Swap";
+    }
 
     @Override
     public String getDescription() {
 
-        return "CPU and IO utilization during the last minute.";
-    }
-
-    @Override
-    public String getName() {
-        return "Last Minute Load Average";
+        return "The total amount of free swap.";
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
