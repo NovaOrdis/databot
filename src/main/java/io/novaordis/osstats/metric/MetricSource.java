@@ -14,29 +14,22 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
-
-import io.novaordis.events.core.event.TimedEvent;
-import io.novaordis.osstats.metric.MetricDefinition;
-
-import java.util.List;
+package io.novaordis.osstats.metric;
 
 /**
+ * The source for metrics. Can represent a native O/S command, a file, etc.
+ *
+ * The implementations must correctly implement equals() and hashCode()
+ *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/4/16
  */
-public interface DataCollector {
+public interface MetricSource {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    /**
-     * Take a reading and return a timed event containing the most current values for specified metrics. May return null
-     * if external circumstances prevented the collector to read data.
-     */
-    TimedEvent read(List<MetricDefinition> metrics);
 
 }

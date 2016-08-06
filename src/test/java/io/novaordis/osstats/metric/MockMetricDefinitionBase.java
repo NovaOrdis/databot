@@ -16,21 +16,13 @@
 
 package io.novaordis.osstats.metric;
 
-import io.novaordis.utilities.os.OS;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.novaordis.events.core.event.MeasureUnit;
 
 /**
- * Not thread-safe, access synchronization must be implemented externally.
- *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 8/3/16
+ * @since 8/4/16
  */
-public abstract class MetricDefinitionBase implements MetricDefinition {
+abstract class MockMetricDefinitionBase extends MetricDefinitionBase implements MetricDefinition {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -38,64 +30,26 @@ public abstract class MetricDefinitionBase implements MetricDefinition {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private Map<OS, List<MetricSource>> sources;
-
     // Constructors ----------------------------------------------------------------------------------------------------
-
-    public MetricDefinitionBase() {
-        this.sources = new HashMap<>();
-    }
 
     // MetricDefinition implementation ---------------------------------------------------------------------------------
 
-    /**
-     * The implementation returns a copy of the internal list.
-     */
     @Override
-    public List<MetricSource> getSources(OS os) {
-
-        if (os == null) {
-            throw new IllegalArgumentException("null os");
-        }
-
-        List<MetricSource> sl = sources.get(os);
-
-        if (sl == null) {
-            return Collections.emptyList();
-        }
-
-        return new ArrayList<>(sl);
+    public MeasureUnit getMeasureUnit() {
+        throw new RuntimeException("getMeasureUnit() NOT YET IMPLEMENTED");
     }
 
-    /**
-     * Not thread safe.
-     */
     @Override
-    public boolean addSource(OS os, MetricSource source) {
+    public String getDescription() {
+        throw new RuntimeException("getDescription() NOT YET IMPLEMENTED");
+    }
 
-        List<MetricSource> sl = sources.get(os);
-
-        if (sl == null) {
-
-            sl = new ArrayList<>();
-            sources.put(os, sl);
-        }
-
-        if (sl.contains(source)) {
-            return false;
-        }
-
-        sl.add(source);
-
-        return true;
+    @Override
+    public Class getType() {
+        throw new RuntimeException("getType() NOT YET IMPLEMENTED");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    @Override
-    public String toString() {
-        return getName();
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

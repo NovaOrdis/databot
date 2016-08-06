@@ -25,7 +25,7 @@ import java.util.List;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public class MockMetricDefinition implements MetricDefinition {
+public class MockMetricDefinition extends MockMetricDefinitionBase {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -39,27 +39,7 @@ public class MockMetricDefinition implements MetricDefinition {
 
     @Override
     public String getName() {
-        throw new RuntimeException("getName() NOT YET IMPLEMENTED");
-    }
-
-    @Override
-    public MeasureUnit getMeasureUnit() {
-        throw new RuntimeException("getMeasureUnit() NOT YET IMPLEMENTED");
-    }
-
-    @Override
-    public String getDescription() {
-        throw new RuntimeException("getDescription() NOT YET IMPLEMENTED");
-    }
-
-    @Override
-    public Class getType() {
-        throw new RuntimeException("getType() NOT YET IMPLEMENTED");
-    }
-
-    @Override
-    public List<String> getSources(OS os) {
-        throw new RuntimeException("getSources() NOT YET IMPLEMENTED");
+        return "Mock Metric Definition";
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

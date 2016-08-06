@@ -106,9 +106,21 @@ public interface MetricDefinition {
     Class getType();
 
     /**
-     * @return a list of source hints, in the descending order of their priority. This is to make the minimal
-     * amount of external invocations.
+     * @return a list of sources for this metric, in the descending order of their priority. The data collection layer
+     * will use this information to minimize the number of native calls or the number of file reads: if all required
+     * metrics can be obtained from a common source, only run that specific native command (or read that file).
+     *
+     * If no sources for the specified OS instance exist, the method will return an empty list, never null.
      */
-    List<String> getSources(OS os);
+    List<MetricSource> getSources(OS os);
+
+    /**
+     * Add a source for this metric. Subsequent additions establish priority: the first added source (for a specific
+     * os) takes precedence over the second added source, for the same os, etc. If a source is already present, it won't
+     * be added and the method will return false.
+     *
+     * @return true if the source was indeed added (no duplicate found)
+     */
+    boolean addSource(OS os, MetricSource source);
 
 }

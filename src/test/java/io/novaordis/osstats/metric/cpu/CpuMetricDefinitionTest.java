@@ -18,6 +18,7 @@ package io.novaordis.osstats.metric.cpu;
 
 import io.novaordis.events.core.event.MeasureUnit;
 import io.novaordis.events.core.event.Percentage;
+import io.novaordis.osstats.metric.MetricDefinitionTest;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -26,7 +27,7 @@ import static org.junit.Assert.assertEquals;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public abstract class CpuMetricDefinitionTest {
+public abstract class CpuMetricDefinitionTest extends MetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -62,6 +63,7 @@ public abstract class CpuMetricDefinitionTest {
 
     // Protected -------------------------------------------------------------------------------------------------------
 
+    @Override
     protected abstract CpuMetricDefinition getMetricDefinitionToTest() throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
