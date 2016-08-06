@@ -56,7 +56,7 @@ public abstract class DataCollectorTest {
 
         MockMetricDefinition mmd = new MockMetricDefinition("TEST");
         MockMetricSource mms = new MockMetricSource();
-        assertTrue(mmd.addSource(mos, mms));
+        assertTrue(mmd.addSource(mos.getName(), mms));
 
         mms.mockMetricGeneration(mos, new MockProperty("TEST"));
 

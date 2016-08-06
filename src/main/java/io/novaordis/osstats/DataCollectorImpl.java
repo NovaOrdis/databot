@@ -48,9 +48,12 @@ public class DataCollectorImpl implements DataCollector {
      * The method looks at the definitions of the metrics we need and determines the minimal amount of native
      * command executions and file system reads necessary in order to gather all the metrics.
      *
+     * @param osName one of OS.Linux, OS.MacOS, OS.Windows
+     *
      * @exception DataCollectionException if at least one metric has no source defined.
      */
-    static Set<MetricSource> establishSources(List<MetricDefinition> metrics, OS os) throws DataCollectionException {
+    static Set<MetricSource> establishSources(List<MetricDefinition> metrics, String osName)
+            throws DataCollectionException {
 
         //
         // find the common source of any possible pair
@@ -65,13 +68,13 @@ public class DataCollectorImpl implements DataCollector {
                     continue;
                 }
 
-                List<MetricSource> sl = d.getSources(os);
+                List<MetricSource> sl = d.getSources(osName);
 
                 if (sl.isEmpty()) {
                     throw new DataCollectionException(d + " has no declared sources");
                 }
 
-                List<MetricSource> sl2 = d2.getSources(os);
+                List<MetricSource> sl2 = d2.getSources(osName);
 
                 if (sl2.isEmpty()) {
                     throw new DataCollectionException(d2 + " has no declared sources");
@@ -93,7 +96,7 @@ public class DataCollectorImpl implements DataCollector {
         //
         metricLoop: for(MetricDefinition d: metrics) {
 
-            for(MetricSource s: d.getSources(os)) {
+            for(MetricSource s: d.getSources(osName)) {
 
                 if (sources.contains(s)) {
                     //
@@ -106,7 +109,7 @@ public class DataCollectorImpl implements DataCollector {
             //
             // add the preferred source
             //
-            sources.add(d.getSources(os).get(0));
+            sources.add(d.getSources(osName).get(0));
         }
 
         return sources;
@@ -154,7 +157,7 @@ public class DataCollectorImpl implements DataCollector {
      */
     List<Property> readMetrics(List<MetricDefinition> metricDefinitions) throws DataCollectionException {
 
-        Set<MetricSource> sources = establishSources(metricDefinitions, os);
+        Set<MetricSource> sources = establishSources(metricDefinitions, os.getName());
 
         Set<Property> allProperties = new HashSet<>();
 

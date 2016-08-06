@@ -32,6 +32,12 @@ public class PhysicalMemoryTotal extends MemoryMetricDefinitionBase {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
+    public PhysicalMemoryTotal() {
+
+//        addSource(OS.MacOS, new Top());
+//        addSource(OS.Linux, new Top());
+    }
+
     // MemoryMetricDefinition implementation ---------------------------------------------------------------------------
 
     @Override

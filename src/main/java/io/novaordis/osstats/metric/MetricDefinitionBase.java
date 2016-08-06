@@ -16,8 +16,6 @@
 
 package io.novaordis.osstats.metric;
 
-import io.novaordis.utilities.os.OS;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,7 +36,8 @@ public abstract class MetricDefinitionBase implements MetricDefinition {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private Map<OS, List<MetricSource>> sources;
+    // <String (os name), List<MetricSource>>
+    private Map<String, List<MetricSource>> sources;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -52,13 +51,13 @@ public abstract class MetricDefinitionBase implements MetricDefinition {
      * The implementation returns a copy of the internal list.
      */
     @Override
-    public List<MetricSource> getSources(OS os) {
+    public List<MetricSource> getSources(String  osName) {
 
-        if (os == null) {
-            throw new IllegalArgumentException("null os");
+        if (osName == null) {
+            throw new IllegalArgumentException("null OS name");
         }
 
-        List<MetricSource> sl = sources.get(os);
+        List<MetricSource> sl = sources.get(osName);
 
         if (sl == null) {
             return Collections.emptyList();
@@ -71,14 +70,14 @@ public abstract class MetricDefinitionBase implements MetricDefinition {
      * Not thread safe.
      */
     @Override
-    public boolean addSource(OS os, MetricSource source) {
+    public boolean addSource(String osName, MetricSource source) {
 
-        List<MetricSource> sl = sources.get(os);
+        List<MetricSource> sl = sources.get(osName);
 
         if (sl == null) {
 
             sl = new ArrayList<>();
-            sources.put(os, sl);
+            sources.put(osName, sl);
         }
 
         if (sl.contains(source)) {

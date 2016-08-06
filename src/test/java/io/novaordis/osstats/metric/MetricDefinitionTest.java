@@ -72,7 +72,7 @@ public abstract class MetricDefinitionTest {
     // metric source tests ---------------------------------------------------------------------------------------------
 
     @Test
-    public void getSources_NullOS() throws Exception {
+    public void getSources_NullOSName() throws Exception {
 
         MetricDefinition d = getMetricDefinitionToTest();
 
@@ -90,7 +90,7 @@ public abstract class MetricDefinitionTest {
 
         MetricDefinition d = getMetricDefinitionToTest();
 
-        List<MetricSource> source = d.getSources(new MockOS());
+        List<MetricSource> source = d.getSources(MockOS.NAME);
 
         assertTrue(source.isEmpty());
     }
@@ -102,26 +102,26 @@ public abstract class MetricDefinitionTest {
 
         MockOS mos = new MockOS();
 
-        assertTrue(d.getSources(mos).isEmpty());
+        assertTrue(d.getSources(mos.getName()).isEmpty());
 
         MetricSource source = new MockMetricSource();
 
-        assertTrue(d.addSource(mos, source));
+        assertTrue(d.addSource(mos.getName(), source));
 
-        List<MetricSource> sources = d.getSources(mos);
+        List<MetricSource> sources = d.getSources(mos.getName());
 
         assertEquals(1, sources.size());
         assertEquals(source, sources.get(0));
 
         MetricSource source2 = new MockMetricSource();
 
-        assertTrue(d.addSource(mos, source2));
+        assertTrue(d.addSource(mos.getName(), source2));
 
         //
         // make sure the order is preserved
         //
 
-        List<MetricSource> sources2 = d.getSources(mos);
+        List<MetricSource> sources2 = d.getSources(mos.getName());
         assertEquals(2, sources2.size());
         assertEquals(source, sources2.get(0));
         assertEquals(source2, sources2.get(1));
@@ -130,9 +130,9 @@ public abstract class MetricDefinitionTest {
         // attempt to add a duplicate
         //
 
-        assertFalse(d.addSource(mos, source));
+        assertFalse(d.addSource(mos.getName(), source));
 
-        List<MetricSource> sources3 = d.getSources(mos);
+        List<MetricSource> sources3 = d.getSources(mos.getName());
         assertEquals(2, sources3.size());
         assertEquals(source, sources3.get(0));
         assertEquals(source2, sources3.get(1));

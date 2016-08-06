@@ -39,6 +39,8 @@ public class MockOS implements OS {
 
     private static final Logger log = LoggerFactory.getLogger(MockOS.class);
 
+    public static final String NAME = "MockOS";
+
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
@@ -102,7 +104,7 @@ public class MockOS implements OS {
 
     @Override
     public String getName() {
-        return "MockOS";
+        return NAME;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

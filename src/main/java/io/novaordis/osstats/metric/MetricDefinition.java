@@ -18,7 +18,6 @@ package io.novaordis.osstats.metric;
 
 import io.novaordis.events.core.event.MeasureUnit;
 import io.novaordis.utilities.UserErrorException;
-import io.novaordis.utilities.os.OS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,16 +110,20 @@ public interface MetricDefinition {
      * metrics can be obtained from a common source, only run that specific native command (or read that file).
      *
      * If no sources for the specified OS instance exist, the method will return an empty list, never null.
+     *
+     * @param osName one of OS.Linux, OS.MacOS, OS.Windows
      */
-    List<MetricSource> getSources(OS os);
+    List<MetricSource> getSources(String osName);
 
     /**
      * Add a source for this metric. Subsequent additions establish priority: the first added source (for a specific
      * os) takes precedence over the second added source, for the same os, etc. If a source is already present, it won't
      * be added and the method will return false.
      *
+     * @param osName one of OS.Linux, OS.MacOS, OS.Windows
+     *
      * @return true if the source was indeed added (no duplicate found)
      */
-    boolean addSource(OS os, MetricSource source);
+    boolean addSource(String osName, MetricSource source);
 
 }

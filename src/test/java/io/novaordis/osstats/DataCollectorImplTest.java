@@ -65,18 +65,18 @@ public class DataCollectorImplTest extends DataCollectorTest {
         MockMetricDefinition d = new MockMetricDefinition();
 
         MockMetricSource source = new MockMetricSource();
-        assertTrue(d.addSource(mos, source));
+        assertTrue(d.addSource(mos.getName(), source));
         MockMetricSource source2 = new MockMetricSource();
-        assertTrue(d.addSource(mos, source2));
+        assertTrue(d.addSource(mos.getName(), source2));
 
         MockMetricDefinition d2 = new MockMetricDefinition();
-        assertTrue(d2.addSource(mos, source2));
+        assertTrue(d2.addSource(mos.getName(), source2));
 
         MockMetricSource source3 = new MockMetricSource();
-        assertTrue(d2.addSource(mos, source3));
+        assertTrue(d2.addSource(mos.getName(), source3));
 
         List<MetricDefinition> metrics = new ArrayList<>(Arrays.asList(d, d2));
-        Set<MetricSource> sources = DataCollectorImpl.establishSources(metrics, mos);
+        Set<MetricSource> sources = DataCollectorImpl.establishSources(metrics, mos.getName());
 
         assertEquals(1, sources.size());
         MetricSource s = sources.iterator().next();
@@ -91,18 +91,18 @@ public class DataCollectorImplTest extends DataCollectorTest {
         MockMetricDefinition d = new MockMetricDefinition();
 
         MockMetricSource source = new MockMetricSource();
-        assertTrue(d.addSource(mos, source));
+        assertTrue(d.addSource(mos.getName(), source));
         MockMetricSource source2 = new MockMetricSource();
-        assertTrue(d.addSource(mos, source2));
+        assertTrue(d.addSource(mos.getName(), source2));
 
         MockMetricDefinition d2 = new MockMetricDefinition();
         MockMetricSource source3 = new MockMetricSource();
-        assertTrue(d2.addSource(mos, source3));
+        assertTrue(d2.addSource(mos.getName(), source3));
         MockMetricSource source4 = new MockMetricSource();
-        assertTrue(d2.addSource(mos, source4));
+        assertTrue(d2.addSource(mos.getName(), source4));
 
         List<MetricDefinition> metrics = new ArrayList<>(Arrays.asList(d, d2));
-        Set<MetricSource> sources = DataCollectorImpl.establishSources(metrics, mos);
+        Set<MetricSource> sources = DataCollectorImpl.establishSources(metrics, mos.getName());
 
         assertEquals(2, sources.size());
         assertTrue(sources.contains(source));
@@ -117,7 +117,7 @@ public class DataCollectorImplTest extends DataCollectorTest {
         MockMetricDefinition d = new MockMetricDefinition();
 
         MockMetricSource source = new MockMetricSource();
-        assertTrue(d.addSource(mos, source));
+        assertTrue(d.addSource(mos.getName(), source));
 
         // this metric has no source
         MockMetricDefinition d2 = new MockMetricDefinition();
@@ -125,7 +125,7 @@ public class DataCollectorImplTest extends DataCollectorTest {
         List<MetricDefinition> metrics = new ArrayList<>(Arrays.asList(d, d2));
 
         try {
-            DataCollectorImpl.establishSources(metrics, mos);
+            DataCollectorImpl.establishSources(metrics, mos.getName());
             fail("should throw exception");
         }
         catch(DataCollectionException e) {
@@ -149,7 +149,7 @@ public class DataCollectorImplTest extends DataCollectorTest {
 
         MockMetricSource mms = new MockMetricSource();
 
-        mmd.addSource(mos, mms);
+        mmd.addSource(mos.getName(), mms);
 
         MockProperty mp = new MockProperty();
         mp.setName("TEST");
@@ -173,7 +173,7 @@ public class DataCollectorImplTest extends DataCollectorTest {
 
         MockMetricDefinition mmd = new MockMetricDefinition();
         MockMetricSource mms = new MockMetricSource();
-        mmd.addSource(mos, mms);
+        mmd.addSource(mos.getName(), mms);
 
         mms.breakOnCollectMetrics();
 
