@@ -33,14 +33,24 @@ public class MockProperty implements Property {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    private String name;
+
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    public MockProperty() {
+        this("MockProperty");
+    }
+
+    public MockProperty(String name) {
+        this.name = name;
+    }
 
     // Property implementation -----------------------------------------------------------------------------------------
 
     @Override
     public String getName() {
 
-        return "MockProperty";
+        return name;
     }
 
     @Override
@@ -90,6 +100,15 @@ public class MockProperty implements Property {
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    public void setName(String s) {
+        this.name = s;
+    }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

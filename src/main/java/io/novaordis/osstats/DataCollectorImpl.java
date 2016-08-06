@@ -21,10 +21,6 @@ import io.novaordis.events.core.event.Property;
 import io.novaordis.events.core.event.TimedEvent;
 import io.novaordis.osstats.metric.MetricDefinition;
 import io.novaordis.osstats.metric.MetricSource;
-import io.novaordis.osstats.os.InvalidExecutionOutputException;
-import io.novaordis.osstats.os.linux.Vmstat;
-import io.novaordis.utilities.os.NativeExecutionException;
-import io.novaordis.utilities.os.NativeExecutionResult;
 import io.novaordis.utilities.os.OS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +47,10 @@ public class DataCollectorImpl implements DataCollector {
     /**
      * The method looks at the definitions of the metrics we need and determines the minimal amount of native
      * command executions and file system reads necessary in order to gather all the metrics.
+     *
+     * @exception DataCollectionException if at least one metric has no source defined.
      */
-    static Set<MetricSource> establishSources(List<MetricDefinition> metrics, OS os) {
+    static Set<MetricSource> establishSources(List<MetricDefinition> metrics, OS os) throws DataCollectionException {
 
         //
         // find the common source of any possible pair
@@ -68,7 +66,16 @@ public class DataCollectorImpl implements DataCollector {
                 }
 
                 List<MetricSource> sl = d.getSources(os);
+
+                if (sl.isEmpty()) {
+                    throw new DataCollectionException(d + " has no declared sources");
+                }
+
                 List<MetricSource> sl2 = d2.getSources(os);
+
+                if (sl2.isEmpty()) {
+                    throw new DataCollectionException(d2 + " has no declared sources");
+                }
 
                 for(MetricSource s: sl) {
                     for(MetricSource s2: sl2) {
@@ -113,12 +120,13 @@ public class DataCollectorImpl implements DataCollector {
 
     public DataCollectorImpl(OS os) {
         this.os = os;
+        log.debug(this + " created");
     }
 
     // DataCollectorImpl implementation --------------------------------------------------------------------------------
 
     @Override
-    public TimedEvent read(List<MetricDefinition> metrics) {
+    public TimedEvent read(List<MetricDefinition> metrics) throws DataCollectionException {
 
         long readingBegins = System.currentTimeMillis();
         List<Property> properties = readMetrics(metrics);
@@ -141,53 +149,40 @@ public class DataCollectorImpl implements DataCollector {
      *
      * @return a list of properties. Order matters, and the event will preserve the order as it is processed downstream.
      * A reading or parsing failure will be logged as warning and an empty property list will be returned.
+     *
+     * @exception DataCollectionException must carry a human-readable message, as the message will be displayed in logs.
      */
-    List<Property> readMetrics(List<MetricDefinition> metrics) {
+    List<Property> readMetrics(List<MetricDefinition> metricDefinitions) throws DataCollectionException {
 
-        Set<MetricSource> sources = establishSources(metrics, os);
+        Set<MetricSource> sources = establishSources(metricDefinitions, os);
+
+        Set<Property> allProperties = new HashSet<>();
+
+        for(MetricSource source: sources) {
+
+            List<Property> props = source.collectMetrics(os);
+            allProperties.addAll(props);
+        }
 
         List<Property> properties = new ArrayList<>();
 
+        metricLoop: for(MetricDefinition m: metricDefinitions) {
 
-        String vmstatOutput = null;
-        String commandName = "vmstat";
+            //noinspection Convert2streamapi
+            for(Property p: allProperties) {
 
-        try {
-
-            NativeExecutionResult result = os.execute(commandName);
-
-            if (result.isSuccess()) {
-                vmstatOutput = result.getStdout();
-            }
-            else {
-                log.warn("'" + commandName + "' execution failed: " + result.getStderr());
-            }
-        }
-        catch(NativeExecutionException e) {
-
-            String msg = e.getMessage();
-            String warningMsg = msg != null ? msg : "";
-            Throwable cause = e.getCause();
-            if (cause != null) {
-                String causeMsg = cause.getClass().getSimpleName();
-                if (cause.getMessage() != null) {
-                    causeMsg += ": " + cause.getMessage();
+                if (p.getName().equals(m.getName())) {
+                    properties.add(p);
+                    continue metricLoop;
                 }
-                warningMsg += ", " + causeMsg;
             }
-            log.warn(warningMsg);
-        }
 
-        try {
+            //
+            // this is not supposed to happen, we must find at least one property that corresponds to the given
+            // metric, if that is not the case, it means the metric was configured with the incorrect sources
+            //
 
-            if (vmstatOutput != null) {
-                //noinspection UnnecessaryLocalVariable
-                List<Property> ps = Vmstat.parseCommandOutput(vmstatOutput);
-                properties.addAll(ps);
-            }
-        }
-        catch(InvalidExecutionOutputException e) {
-            log.warn("failed to parse vmstam output, " + e.getMessage());
+            throw new IllegalStateException("NOT YET IMPLEMENTED");
         }
 
         return properties;

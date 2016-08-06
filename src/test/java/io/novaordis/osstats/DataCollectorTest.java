@@ -19,6 +19,7 @@ package io.novaordis.osstats;
 import io.novaordis.events.core.event.TimedEvent;
 import io.novaordis.osstats.metric.MetricDefinition;
 import io.novaordis.osstats.metric.MockMetricDefinition;
+import io.novaordis.osstats.metric.MockMetricSource;
 import io.novaordis.osstats.os.MockOS;
 import io.novaordis.utilities.os.OS;
 import org.junit.Test;
@@ -53,7 +54,13 @@ public abstract class DataCollectorTest {
 
         long t0 = System.currentTimeMillis();
 
-        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
+        MockMetricDefinition mmd = new MockMetricDefinition("TEST");
+        MockMetricSource mms = new MockMetricSource();
+        assertTrue(mmd.addSource(mos, mms));
+
+        mms.mockMetricGeneration(mos, new MockProperty("TEST"));
+
+        List<MetricDefinition> metrics = Collections.singletonList(mmd);
 
         TimedEvent te = c.read(metrics);
 

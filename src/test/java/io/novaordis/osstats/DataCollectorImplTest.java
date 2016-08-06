@@ -24,6 +24,8 @@ import io.novaordis.osstats.metric.MockMetricSource;
 import io.novaordis.osstats.os.MockOS;
 import io.novaordis.utilities.os.OS;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,8 +34,8 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -42,6 +44,8 @@ import static org.junit.Assert.assertTrue;
 public class DataCollectorImplTest extends DataCollectorTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
+
+    private static final Logger log = LoggerFactory.getLogger(DataCollectorImplTest.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -105,6 +109,32 @@ public class DataCollectorImplTest extends DataCollectorTest {
         assertTrue(sources.contains(source3));
     }
 
+    @Test
+    public void establishSources_MetricHasNoSource() throws Exception {
+
+        MockOS mos = new MockOS();
+
+        MockMetricDefinition d = new MockMetricDefinition();
+
+        MockMetricSource source = new MockMetricSource();
+        assertTrue(d.addSource(mos, source));
+
+        // this metric has no source
+        MockMetricDefinition d2 = new MockMetricDefinition();
+
+        List<MetricDefinition> metrics = new ArrayList<>(Arrays.asList(d, d2));
+
+        try {
+            DataCollectorImpl.establishSources(metrics, mos);
+            fail("should throw exception");
+        }
+        catch(DataCollectionException e) {
+            String msg = e.getMessage();
+            log.info(msg);
+            assertTrue(msg.contains("has no declared sources"));
+        }
+    }
+
     // readMetrics() ---------------------------------------------------------------------------------------------------
 
     @Test
@@ -115,46 +145,48 @@ public class DataCollectorImplTest extends DataCollectorTest {
         DataCollectorImpl dc = new DataCollectorImpl(mos);
 
         MockMetricDefinition mmd = new MockMetricDefinition();
+        mmd.setName("TEST");
+
+        MockMetricSource mms = new MockMetricSource();
+
+        mmd.addSource(mos, mms);
+
+        MockProperty mp = new MockProperty();
+        mp.setName("TEST");
+
+        mms.mockMetricGeneration(mos, mp);
 
         List<Property> properties = dc.readMetrics(Collections.singletonList(mmd));
 
-        assertFalse(properties.isEmpty());
+        assertEquals(1, properties.size());
+
+        Property p = properties.get(0);
+        assertEquals(mp, p);
     }
 
     @Test
-    public void readMetrics_NativeCallThrowsNativeExecutionException() throws Exception {
+    public void readMetrics_aMetricSourceBreaksOnCollect() throws Exception {
 
         MockOS mos = new MockOS();
 
-        //
-        // configure MockOS to throw native execution exception on any command
-        //
-
-        mos.breakOnAnyCommand("SYNTHETIC NativeExecutionException message", new RuntimeException("SYNTHETIC RUNTIME"));
-
         DataCollectorImpl dc = new DataCollectorImpl(mos);
 
-        List<Property> properties = dc.readMetrics(null);
+        MockMetricDefinition mmd = new MockMetricDefinition();
+        MockMetricSource mms = new MockMetricSource();
+        mmd.addSource(mos, mms);
 
-        assertTrue(properties.isEmpty());
-    }
+        mms.breakOnCollectMetrics();
 
-    @Test
-    public void readMetrics_NativeCallFailsWithNonZero() throws Exception {
+        try {
+            dc.readMetrics(Collections.singletonList(mmd));
+            fail("should throw exception");
+        }
+        catch(DataCollectionException e) {
 
-        MockOS mos = new MockOS();
-
-        //
-        // configure MockOS to fail on any command
-        //
-
-        mos.failOnAnyCommand("SYNTHETIC stderr CONTENT", "SYNTHETIC stdout CONTENT");
-
-        DataCollectorImpl dc = new DataCollectorImpl(mos);
-
-        List<Property> properties = dc.readMetrics(null);
-
-        assertTrue(properties.isEmpty());
+            String msg = e.getMessage();
+            log.info(msg);
+            assertEquals("SYNTHETIC", msg);
+        }
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

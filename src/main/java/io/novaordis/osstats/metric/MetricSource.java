@@ -16,6 +16,12 @@
 
 package io.novaordis.osstats.metric;
 
+import io.novaordis.events.core.event.Property;
+import io.novaordis.osstats.DataCollectionException;
+import io.novaordis.utilities.os.OS;
+
+import java.util.List;
+
 /**
  * The source for metrics. Can represent a native O/S command, a file, etc.
  *
@@ -31,5 +37,10 @@ public interface MetricSource {
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    /**
+     * @return the complete list of properties. If no properties are collected, returns an empty list, but never null.
+     */
+    List<Property> collectMetrics(OS os) throws DataCollectionException;
 
 }

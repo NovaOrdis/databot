@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.metric;
+package io.novaordis.osstats;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 8/3/16
+ * @since 8/5/16
  */
-public class MockMetricDefinition extends MockMetricDefinitionBase {
+public class DataCollectionException extends Exception {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -28,30 +28,16 @@ public class MockMetricDefinition extends MockMetricDefinitionBase {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private String name;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockMetricDefinition() {
-        this("Mock Metric Definition");
-    }
-
-    public MockMetricDefinition(String name) {
-        this.name = name;
-    }
-
-    // MetricDefinition implementation ---------------------------------------------------------------------------------
-
-    @Override
-    public String getName() {
-        return name;
+    /**
+     * @param message must be human readable, as it will be displayed in logs.
+     */
+    public DataCollectionException(String message) {
+        super(message);
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    public void setName(String s) {
-        this.name = s;
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

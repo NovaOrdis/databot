@@ -36,7 +36,12 @@ public interface DataCollector {
     /**
      * Take a reading and return a timed event containing the most current values for specified metrics. May return null
      * if external circumstances prevented the collector to read data.
+     *
+     * The collector task invoking this method will catch any exception thrown by it and will act accordingly, logging
+     * it but not canceling the timer.
+     *
+     * @exception DataCollectionException must have a human readable message.
      */
-    TimedEvent read(List<MetricDefinition> metrics);
+    TimedEvent read(List<MetricDefinition> metrics) throws DataCollectionException;
 
 }
