@@ -22,6 +22,9 @@ import io.novaordis.utilities.os.NativeExecutionResult;
 import io.novaordis.utilities.os.OS;
 
 /**
+ *
+ * The implementations must correctly implement equals() and hashCode()
+ *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/5/16
  */
@@ -42,10 +45,15 @@ public abstract class OSCommand implements MetricSource {
     // Constructors ----------------------------------------------------------------------------------------------------
 
     /**
-     * @param command the command to execute (without space-separated options) to get the metrics
-     * @param  arguments the arguments as a space-separated String
+     * @param command the command to execute (without space-separated options) to get the metrics. Must not be null.
+     * @param  arguments the arguments as a space-separated String. Can be null and in this case is interpreted as
+     *                   "no arguments"
      */
     public OSCommand(String command, String arguments) {
+
+        if (command == null) {
+            throw new IllegalArgumentException("null command");
+        }
 
         this.command = command;
         this.arguments = arguments;
@@ -54,17 +62,79 @@ public abstract class OSCommand implements MetricSource {
     // Public ----------------------------------------------------------------------------------------------------------
 
     /**
-     * @return the command to execute (without space-separated options) to get the metrics
+     * @return the command to execute (without space-separated options) to get the metrics. Never null.
      */
     public String getCommand() {
         return command;
     }
 
     /**
-     * @return the arguments as a space-separated String.
+     * @return the arguments as a space-separated String. May be null.
      */
     public String getArguments() {
         return arguments;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null) {
+            return false;
+        }
+
+        if (!o.getClass().equals(getClass())) {
+
+            return false;
+        }
+
+        OSCommand that = (OSCommand)o;
+
+        if (!command.equals(that.command)) {
+            return false;
+        }
+
+        String normalizedArg = arguments == null ? "" : arguments;
+        String thatNormalizedArg = that.arguments == null ? "" : that.arguments;
+
+        normalizedArg = normalizedArg.trim();
+        thatNormalizedArg = thatNormalizedArg.trim();
+
+        if (normalizedArg.length() == 0 && thatNormalizedArg.length() == 0) {
+            return true;
+        }
+
+        String[] na = normalizedArg.split(" +");
+        String[] tna = thatNormalizedArg.split(" +");
+
+        if (na.length != tna.length) {
+            return false;
+        }
+
+        for(int i = 0; i < na.length; i ++) {
+            if (!na[i].equals(tna[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+
+        String normalizedArg = arguments == null ? "" : arguments;
+        normalizedArg = normalizedArg.trim();
+        String[] na = normalizedArg.split(" +");
+
+        int hashCode = 7 + 17 * command.hashCode();
+        for(String s: na) {
+            hashCode += 19 * s.hashCode();
+        }
+        return  hashCode;
     }
 
     @Override

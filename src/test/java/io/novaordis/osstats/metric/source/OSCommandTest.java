@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 
 /**
@@ -105,12 +105,97 @@ public abstract class OSCommandTest extends MetricSourceTest {
         assertEquals("SYNTHETIC-OUTPUT", stdout);
     }
 
+    // equals() --------------------------------------------------------------------------------------------------------
+
+    @Test
+    public void equals() throws Exception {
+
+        OSCommand c = getMetricSourceToTest("arg1 arg2");
+        OSCommand c2 = getMetricSourceToTest("arg1 arg2");
+
+        assertEquals(c, c2);
+        assertEquals(c2, c);
+    }
+
+    @Test
+    public void equals2() throws Exception {
+
+        OSCommand c = getMetricSourceToTest(null);
+        OSCommand c2 = getMetricSourceToTest(null);
+
+        assertEquals(c, c2);
+        assertEquals(c2, c);
+    }
+
+    @Test
+    public void equals3() throws Exception {
+
+        OSCommand c = getMetricSourceToTest(null);
+        OSCommand c2 = getMetricSourceToTest(" ");
+
+        assertEquals(c, c2);
+        assertEquals(c2, c);
+    }
+
+    @Test
+    public void equals4() throws Exception {
+
+        OSCommand c = getMetricSourceToTest(" ");
+        OSCommand c2 = getMetricSourceToTest(null);
+
+        assertEquals(c, c2);
+        assertEquals(c2, c);
+    }
+
+    @Test
+    public void equals5() throws Exception {
+
+        OSCommand c = getMetricSourceToTest("");
+        OSCommand c2 = getMetricSourceToTest(" ");
+
+        assertEquals(c, c2);
+        assertEquals(c2, c);
+    }
+
+    @Test
+    public void equals6() throws Exception {
+
+        OSCommand c = getMetricSourceToTest(" a   b  c d     ");
+        OSCommand c2 = getMetricSourceToTest("a b c d");
+
+        assertEquals(c, c2);
+        assertEquals(c2, c);
+    }
+
+    @Test
+    public void notEqual() throws Exception {
+
+        OSCommand c = getMetricSourceToTest("arg1");
+        OSCommand c2 = getMetricSourceToTest("arg2");
+
+        assertNotEquals(c, c2);
+        assertNotEquals(c2, c);
+    }
+
+    @Test
+    public void hashCodeTest() throws Exception {
+
+        OSCommand c = getMetricSourceToTest("arg1");
+        OSCommand c2 = getMetricSourceToTest("arg2");
+
+        assertNotEquals(c.hashCode(), c2.hashCode());
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
 
     @Override
-    protected abstract OSCommand getMetricSourceToTest() throws Exception;
+    protected OSCommand getMetricSourceToTest() throws Exception {
+        return getMetricSourceToTest("");
+    }
+
+    protected abstract OSCommand getMetricSourceToTest(String arguments) throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

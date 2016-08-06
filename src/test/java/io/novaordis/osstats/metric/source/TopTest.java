@@ -412,9 +412,9 @@ public class TopTest extends OSCommandTest {
     // Protected -------------------------------------------------------------------------------------------------------
 
     @Override
-    protected Top getMetricSourceToTest() throws Exception {
+    protected Top getMetricSourceToTest(String arguments) throws Exception {
 
-        return new Top("");
+        return new Top(arguments);
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

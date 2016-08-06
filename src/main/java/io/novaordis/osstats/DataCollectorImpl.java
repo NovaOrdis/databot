@@ -71,13 +71,13 @@ public class DataCollectorImpl implements DataCollector {
                 List<MetricSource> sl = d.getSources(osName);
 
                 if (sl.isEmpty()) {
-                    throw new DataCollectionException(d + " has no declared sources");
+                    throw new DataCollectionException(d + " has no declared sources for " + osName);
                 }
 
                 List<MetricSource> sl2 = d2.getSources(osName);
 
                 if (sl2.isEmpty()) {
-                    throw new DataCollectionException(d2 + " has no declared sources");
+                    throw new DataCollectionException(d2 + " has no declared sources for " + osName);
                 }
 
                 for(MetricSource s: sl) {
