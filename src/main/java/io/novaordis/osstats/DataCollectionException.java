@@ -37,6 +37,11 @@ public class DataCollectionException extends Exception {
         super(message);
     }
 
+    public DataCollectionException(Throwable cause) {
+        super(cause);
+    }
+
+
     // Public ----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------

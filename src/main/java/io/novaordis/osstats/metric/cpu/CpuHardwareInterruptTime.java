@@ -16,6 +16,9 @@
 
 package io.novaordis.osstats.metric.cpu;
 
+import io.novaordis.osstats.metric.source.Top;
+import io.novaordis.utilities.os.OS;
+
 /**
  * See https://kb.novaordis.com/index.php/Vmstat#hi
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -31,6 +34,11 @@ public class CpuHardwareInterruptTime extends CpuMetricDefinitionBase {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    public CpuHardwareInterruptTime() {
+
+        addSource(OS.Linux, new Top("-b -n 1 -p 0"));
+    }
 
     // CpuMetricDefinition implementation ------------------------------------------------------------------------------
 

@@ -17,6 +17,7 @@
 package io.novaordis.osstats.metric;
 
 import io.novaordis.events.core.event.MeasureUnit;
+import io.novaordis.osstats.metric.source.MetricSource;
 import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

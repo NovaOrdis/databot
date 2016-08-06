@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.os;
+package io.novaordis.osstats.metric.source;
 
 import io.novaordis.events.core.event.Property;
 import io.novaordis.events.core.event.PropertyFactory;
+import io.novaordis.osstats.DataCollectionException;
 import io.novaordis.osstats.metric.MetricDefinition;
 import io.novaordis.osstats.metric.cpu.CpuHardwareInterruptTime;
 import io.novaordis.osstats.metric.cpu.CpuIdleTime;
@@ -38,36 +39,72 @@ import io.novaordis.osstats.metric.memory.PhysicalMemoryUsed;
 import io.novaordis.osstats.metric.memory.SwapFree;
 import io.novaordis.osstats.metric.memory.SwapTotal;
 import io.novaordis.osstats.metric.memory.SwapUsed;
+import io.novaordis.utilities.os.OS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/31/16
+ * @since 8/6/16
  */
-public class Top {
+public class Top extends OSCommand {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
+    private static final Logger log = LoggerFactory.getLogger(Top.class);
+
     // Static ----------------------------------------------------------------------------------------------------------
 
-    public static List<Property> parseCommandOutput(String osName, String output)
-            throws InvalidExecutionOutputException {
+    /**
+     * Works both on Linux and Mac.
+     * @param s - expected format " 1.57, 1.59, 1.69"
+     */
+    public static List<Property> parseLoadAverage(String s) throws DataCollectionException {
 
-        if ("Linux".equals(osName)) {
-            return parseLinuxCommandOutput(output);
+        List<Property> result = new ArrayList<>();
+        StringTokenizer st = new StringTokenizer(s, ", ");
+        LoadAverageMetricDefinition[] expected = new LoadAverageMetricDefinition[] {
+                new LoadAverageLastMinute(),
+                new LoadAverageLastFiveMinutes(),
+                new LoadAverageLastTenMinutes()
+        };
+
+        for(LoadAverageMetricDefinition m: expected) {
+            if (st.hasMoreTokens()) {
+                String tok = st.nextToken();
+                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
+            }
         }
-        else if ("MacOS".equals(osName)) {
-            return parseMacCommandOutput(output);
-        }
-        else {
-            throw new IllegalArgumentException("unknown operating system " + osName);
-        }
+        return result;
     }
 
-    public static List<Property> parseLinuxCommandOutput(String output) throws InvalidExecutionOutputException {
+    private static List<Property> parseCpuInfo(String s, Object[][] expectedLabelsAndMetrics)
+            throws DataCollectionException {
+
+        List<Property> result = new ArrayList<>();
+        StringTokenizer st = new StringTokenizer(s, ",");
+
+        while(st.hasMoreTokens()) {
+            String tok = st.nextToken();
+            for (Object[] e : expectedLabelsAndMetrics) {
+                String label = (String) e[0];
+                CpuMetricDefinition m = (CpuMetricDefinition) e[1];
+                int i = tok.indexOf(label);
+                if (i != -1) {
+                    tok = tok.substring(0, i).replace("%", "").trim();
+                    result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
+                }
+            }
+        }
+        return result;
+    }
+
+    public static List<Property> parseLinuxCommandOutput(String output) throws DataCollectionException {
 
         List<Property> result = new ArrayList<>();
 
@@ -101,30 +138,7 @@ public class Top {
         return result;
     }
 
-    /**
-     * Works both on Linux and Mac.
-     * @param s - expected format " 1.57, 1.59, 1.69"
-     */
-    public static List<Property> parseLoadAverage(String s) throws InvalidExecutionOutputException {
-
-        List<Property> result = new ArrayList<>();
-        StringTokenizer st = new StringTokenizer(s, ", ");
-        LoadAverageMetricDefinition[] expected = new LoadAverageMetricDefinition[] {
-                new LoadAverageLastMinute(),
-                new LoadAverageLastFiveMinutes(),
-                new LoadAverageLastTenMinutes()
-        };
-
-        for(LoadAverageMetricDefinition m: expected) {
-            if (st.hasMoreTokens()) {
-                String tok = st.nextToken();
-                result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
-            }
-        }
-        return result;
-    }
-
-    public static List<Property> parseLinuxCpuInfo(String s) throws InvalidExecutionOutputException {
+    public static List<Property> parseLinuxCpuInfo(String s) throws DataCollectionException {
 
         Object[][] expected = new Object[][] {
                 { "us", new CpuUserTime()},
@@ -140,31 +154,10 @@ public class Top {
         return parseCpuInfo(s, expected);
     }
 
-    private static List<Property> parseCpuInfo(String s, Object[][] expectedLabelsAndMetrics)
-            throws InvalidExecutionOutputException {
-
-        List<Property> result = new ArrayList<>();
-        StringTokenizer st = new StringTokenizer(s, ",");
-
-        while(st.hasMoreTokens()) {
-            String tok = st.nextToken();
-            for (Object[] e : expectedLabelsAndMetrics) {
-                String label = (String) e[0];
-                CpuMetricDefinition m = (CpuMetricDefinition) e[1];
-                int i = tok.indexOf(label);
-                if (i != -1) {
-                    tok = tok.substring(0, i).replace("%", "").trim();
-                    result.add(PropertyFactory.createInstance(m.getName(), m.getType(), tok, null, m.getMeasureUnit()));
-                }
-            }
-        }
-        return result;
-    }
-
     /**
      * Parses "1015944 total,   802268 free,    86860 used,   126816 buff/cache" (line usually starts with  KiB Mem :"
      */
-    public static List<Property> parseLinuxMemoryInfo(String s) throws InvalidExecutionOutputException {
+    public static List<Property> parseLinuxMemoryInfo(String s) throws DataCollectionException {
 
         List<Property> result = new ArrayList<>();
 
@@ -202,7 +195,7 @@ public class Top {
     /**
      * Parses "10 total,        10 free,        10 used.   791404 avail Mem" (line usually starts with  KiB Swap :"
      */
-    public static List<Property> parseLinuxSwapInfo(String s) throws InvalidExecutionOutputException {
+    public static List<Property> parseLinuxSwapInfo(String s) throws DataCollectionException {
 
         List<Property> result = new ArrayList<>();
 
@@ -238,7 +231,8 @@ public class Top {
         return result;
     }
 
-    public static List<Property> parseMacCommandOutput(String output) throws InvalidExecutionOutputException {
+
+    public static List<Property> parseMacCommandOutput(String output) throws DataCollectionException {
 
         List<Property> result = new ArrayList<>();
 
@@ -263,7 +257,7 @@ public class Top {
     /**
      * @param s expected format "2.94% user, 10.29% sys, 86.76% idle"
      */
-    public static List<Property> parseMacCpuInfo(String s) throws InvalidExecutionOutputException {
+    public static List<Property> parseMacCpuInfo(String s) throws DataCollectionException {
 
         Object[][] expected = new Object[][] {
                 { "user", new CpuUserTime()},
@@ -276,7 +270,7 @@ public class Top {
     /**
      * Parses "13G used (1470M wired), 2563M unused"
      */
-    public static List<Property> parseMacMemoryInfo(String s) throws InvalidExecutionOutputException {
+    public static List<Property> parseMacMemoryInfo(String s) throws DataCollectionException {
 
         List<Property> result = new ArrayList<>();
         Object[][] expected = new Object[][] {
@@ -301,8 +295,7 @@ public class Top {
                 multiplicationFactor = 1024 * 1024;
             }
             else {
-                throw new InvalidExecutionOutputException(
-                        "not handling yet '" + ms.charAt(ms.length() - 1));
+                throw new DataCollectionException("not handling yet '" + ms.charAt(ms.length() - 1));
             }
             ms = ms.substring(0, ms.length() - 1).trim();
             result.add(PropertyFactory.createInstance(
@@ -311,19 +304,43 @@ public class Top {
         return result;
     }
 
+    // Attributes ------------------------------------------------------------------------------------------------------
 
-// Attributes ------------------------------------------------------------------------------------------------------
 
-// Constructors ----------------------------------------------------------------------------------------------------
+    // Constructors ----------------------------------------------------------------------------------------------------
 
-// Public ----------------------------------------------------------------------------------------------------------
+    public Top(String arguments) {
+        super("top", arguments);
+    }
 
-// Package protected -----------------------------------------------------------------------------------------------
+    // OSCommand implementation ----------------------------------------------------------------------------------------
 
-// Protected -------------------------------------------------------------------------------------------------------
+    @Override
+    public List<Property> collectMetrics(OS os) throws DataCollectionException {
 
-// Private ---------------------------------------------------------------------------------------------------------
+        String stdout = executeCommandAndReturnStdout(os);
 
-// Inner classes ---------------------------------------------------------------------------------------------------
+        if (OS.Linux.equals(os.getName())) {
+            return parseLinuxCommandOutput(stdout);
+        }
+        else if (OS.MacOS.equals(os.getName())) {
+            return parseMacCommandOutput(stdout);
+        }
+        else {
+
+            log.warn(os.toString() + " operating system not currently supported");
+            return Collections.emptyList();
+        }
+    }
+
+    // Public ----------------------------------------------------------------------------------------------------------
+
+    // Package protected -----------------------------------------------------------------------------------------------
+
+    // Protected -------------------------------------------------------------------------------------------------------
+
+    // Private ---------------------------------------------------------------------------------------------------------
+
+    // Inner classes ---------------------------------------------------------------------------------------------------
 
 }

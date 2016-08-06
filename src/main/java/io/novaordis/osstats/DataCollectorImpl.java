@@ -20,7 +20,7 @@ import io.novaordis.events.core.event.GenericTimedEvent;
 import io.novaordis.events.core.event.Property;
 import io.novaordis.events.core.event.TimedEvent;
 import io.novaordis.osstats.metric.MetricDefinition;
-import io.novaordis.osstats.metric.MetricSource;
+import io.novaordis.osstats.metric.source.MetricSource;
 import io.novaordis.utilities.os.OS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.metric;
+package io.novaordis.osstats.metric.source;
 
 import io.novaordis.events.core.event.Property;
 import io.novaordis.osstats.DataCollectionException;

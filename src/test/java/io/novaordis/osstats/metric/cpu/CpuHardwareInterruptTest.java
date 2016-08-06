@@ -17,7 +17,12 @@
 package io.novaordis.osstats.metric.cpu;
 
 import io.novaordis.osstats.metric.MetricDefinition;
+import io.novaordis.osstats.metric.source.MetricSource;
+import io.novaordis.osstats.metric.source.OSCommand;
+import io.novaordis.utilities.os.OS;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -54,12 +59,35 @@ public class CpuHardwareInterruptTest extends CpuMetricDefinitionTest {
         assertEquals("CPU Hardware Interrupt Time", m.getName());
     }
 
+    // sources ---------------------------------------------------------------------------------------------------------
+
+    @Test
+    public void sourcesLinux() throws Exception {
+
+        CpuHardwareInterruptTime m = getMetricDefinitionToTest();
+
+        List<MetricSource> linuxSources = m.getSources(OS.Linux);
+        assertEquals(1, linuxSources.size());
+        OSCommand c = (OSCommand) linuxSources.get(0);
+        assertEquals("top", c.getCommand());
+    }
+
+    @Test
+    public void sourcesMac() throws Exception {
+
+        CpuHardwareInterruptTime m = getMetricDefinitionToTest();
+
+        List<MetricSource> macSources = m.getSources(OS.MacOS);
+        // TODO this will probably change
+        assertEquals(0, macSources.size());
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
 
     @Override
-    protected CpuMetricDefinition getMetricDefinitionToTest() throws Exception {
+    protected CpuHardwareInterruptTime getMetricDefinitionToTest() throws Exception {
 
         return new CpuHardwareInterruptTime();
     }

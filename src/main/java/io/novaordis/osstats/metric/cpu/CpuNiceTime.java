@@ -16,13 +16,15 @@
 
 package io.novaordis.osstats.metric.cpu;
 
+import io.novaordis.osstats.metric.source.Top;
+import io.novaordis.utilities.os.OS;
+
 /**
  * See https://kb.novaordis.com/index.php/Vmstat#ni
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
 public class CpuNiceTime extends CpuMetricDefinitionBase {
-
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -31,6 +33,11 @@ public class CpuNiceTime extends CpuMetricDefinitionBase {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    public CpuNiceTime() {
+
+        addSource(OS.Linux, new Top("-b -n 1 -p 0"));
+    }
 
     // CpuMetricDefinition implementation ------------------------------------------------------------------------------
 

@@ -17,7 +17,12 @@
 package io.novaordis.osstats.metric.memory;
 
 import io.novaordis.osstats.metric.MetricDefinition;
+import io.novaordis.osstats.metric.source.MetricSource;
+import io.novaordis.osstats.metric.source.OSCommand;
+import io.novaordis.utilities.os.OS;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -52,6 +57,30 @@ public class PhysicalMemoryUsedTest extends MemoryMetricDefinitionTest {
 
         PhysicalMemoryUsed m = new PhysicalMemoryUsed();
         assertEquals("Used Physical Memory", m.getName());
+    }
+
+    // sources ---------------------------------------------------------------------------------------------------------
+
+    @Test
+    public void sourcesLinux() throws Exception {
+
+        PhysicalMemoryUsed m = getMetricDefinitionToTest();
+
+        List<MetricSource> linuxSources = m.getSources(OS.Linux);
+        assertEquals(1, linuxSources.size());
+        OSCommand c = (OSCommand) linuxSources.get(0);
+        assertEquals("top", c.getCommand());
+    }
+
+    @Test
+    public void sourcesMac() throws Exception {
+
+        PhysicalMemoryUsed m = getMetricDefinitionToTest();
+
+        List<MetricSource> macSources = m.getSources(OS.MacOS);
+        assertEquals(1, macSources.size());
+        OSCommand c = (OSCommand) macSources.get(0);
+         assertEquals("top", c.getCommand());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

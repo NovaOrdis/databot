@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.os;
+package io.novaordis.osstats.metric.source;
 
 import io.novaordis.events.core.event.FloatProperty;
 import io.novaordis.events.core.event.LongProperty;
@@ -50,9 +50,9 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 8/4/16
+ * @since 8/6/16
  */
-public class TopTest {
+public class TopTest extends OSCommandTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -64,7 +64,35 @@ public class TopTest {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    // Linux -----------------------------------------------------------------------------------------------------------
+    @Test
+    public void parseLoadAverage() throws Exception {
+
+        List<Property> props = Top.parseLoadAverage(" 1.11, 2.22, 3.33");
+        assertEquals(3, props.size());
+
+        LoadAverageLastMinute metric = new LoadAverageLastMinute();
+        FloatProperty p = (FloatProperty)props.get(0);
+        assertNull(p.getMeasureUnit());
+        assertEquals(metric.getName(), p.getName());
+        assertEquals(1.11d, p.getFloat().floatValue(), 0.00001);
+        assertEquals(Float.class, p.getType());
+
+        LoadAverageLastFiveMinutes metric2 = new LoadAverageLastFiveMinutes();
+        FloatProperty p2 = (FloatProperty)props.get(1);
+        assertNull(p2.getMeasureUnit());
+        assertEquals(metric2.getName(), p2.getName());
+        assertEquals(2.22d, p2.getFloat().floatValue(), 0.00001);
+        assertEquals(Float.class, p2.getType());
+
+        LoadAverageLastTenMinutes metric3 = new LoadAverageLastTenMinutes();
+        FloatProperty p3 = (FloatProperty)props.get(2);
+        assertNull(p3.getMeasureUnit());
+        assertEquals(metric3.getName(), p3.getName());
+        assertEquals(3.33d, p3.getFloat().floatValue(), 0.00001);
+        assertEquals(Float.class, p3.getType());
+    }
+
+    // Linux static ----------------------------------------------------------------------------------------------------
 
     @Test
     public void parseLinuxCommandOutput() throws Exception {
@@ -144,34 +172,6 @@ public class TopTest {
         i = 16;
         assertEquals(new SwapUsed().getName(), ps.get(i).getName());
         assertEquals(1024L, ((Long) ps.get(i).getValue()).longValue());
-    }
-
-    @Test
-    public void parseLoadAverage() throws Exception {
-
-        List<Property> props = Top.parseLoadAverage(" 1.11, 2.22, 3.33");
-        assertEquals(3, props.size());
-
-        LoadAverageLastMinute metric = new LoadAverageLastMinute();
-        FloatProperty p = (FloatProperty)props.get(0);
-        assertNull(p.getMeasureUnit());
-        assertEquals(metric.getName(), p.getName());
-        assertEquals(1.11d, p.getFloat().floatValue(), 0.00001);
-        assertEquals(Float.class, p.getType());
-
-        LoadAverageLastFiveMinutes metric2 = new LoadAverageLastFiveMinutes();
-        FloatProperty p2 = (FloatProperty)props.get(1);
-        assertNull(p2.getMeasureUnit());
-        assertEquals(metric2.getName(), p2.getName());
-        assertEquals(2.22d, p2.getFloat().floatValue(), 0.00001);
-        assertEquals(Float.class, p2.getType());
-
-        LoadAverageLastTenMinutes metric3 = new LoadAverageLastTenMinutes();
-        FloatProperty p3 = (FloatProperty)props.get(2);
-        assertNull(p3.getMeasureUnit());
-        assertEquals(metric3.getName(), p3.getName());
-        assertEquals(3.33d, p3.getFloat().floatValue(), 0.00001);
-        assertEquals(Float.class, p3.getType());
     }
 
     @Test
@@ -299,7 +299,7 @@ public class TopTest {
         assertEquals(Long.class, p3.getType());
     }
 
-    // Mac -------------------------------------------------------------------------------------------------------------
+    // Mac static ------------------------------------------------------------------------------------------------------
 
     @Test
     public void parseMacCommandOutput() throws Exception {
@@ -396,9 +396,26 @@ public class TopTest {
         assertEquals(Long.class, p2.getType());
     }
 
+    // accessors -------------------------------------------------------------------------------------------------------
+
+    @Test
+    public void accessors() throws Exception {
+
+        Top top = new Top("something something else");
+
+        assertEquals("top", top.getCommand());
+        assertEquals("something something else", top.getArguments());
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    @Override
+    protected Top getMetricSourceToTest() throws Exception {
+
+        return new Top("");
+    }
 
     // Private ---------------------------------------------------------------------------------------------------------
 

@@ -17,7 +17,12 @@
 package io.novaordis.osstats.metric.cpu;
 
 import io.novaordis.osstats.metric.MetricDefinition;
+import io.novaordis.osstats.metric.source.MetricSource;
+import io.novaordis.osstats.metric.source.OSCommand;
+import io.novaordis.utilities.os.OS;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -54,12 +59,36 @@ public class CpuUserTimeTest extends CpuMetricDefinitionTest {
         assertEquals("CPU User Time", m.getName());
     }
 
+    // sources ---------------------------------------------------------------------------------------------------------
+
+    @Test
+    public void sourcesLinux() throws Exception {
+
+        CpuUserTime m = getMetricDefinitionToTest();
+
+        List<MetricSource> linuxSources = m.getSources(OS.Linux);
+        assertEquals(1, linuxSources.size());
+        OSCommand c = (OSCommand) linuxSources.get(0);
+        assertEquals("top", c.getCommand());
+    }
+
+    @Test
+    public void sourcesMac() throws Exception {
+
+        CpuUserTime m = getMetricDefinitionToTest();
+
+        List<MetricSource> macSources = m.getSources(OS.MacOS);
+        assertEquals(1, macSources.size());
+        OSCommand c = (OSCommand) macSources.get(0);
+         assertEquals("top", c.getCommand());
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
 
     @Override
-    protected CpuMetricDefinition getMetricDefinitionToTest() throws Exception {
+    protected CpuUserTime getMetricDefinitionToTest() throws Exception {
 
         return new CpuUserTime();
     }

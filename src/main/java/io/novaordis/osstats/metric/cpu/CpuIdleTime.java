@@ -16,13 +16,15 @@
 
 package io.novaordis.osstats.metric.cpu;
 
+import io.novaordis.osstats.metric.source.Top;
+import io.novaordis.utilities.os.OS;
+
 /**
  * See https://kb.novaordis.com/index.php/Vmstat#id
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
 public class CpuIdleTime extends CpuMetricDefinitionBase {
-
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -31,6 +33,12 @@ public class CpuIdleTime extends CpuMetricDefinitionBase {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    public CpuIdleTime() {
+
+        addSource(OS.Linux, new Top("-b -n 1 -p 0"));
+        addSource(OS.MacOS, new Top("-l 1 -n 0"));
+    }
 
     // CpuMetricDefinition implementation ------------------------------------------------------------------------------
 

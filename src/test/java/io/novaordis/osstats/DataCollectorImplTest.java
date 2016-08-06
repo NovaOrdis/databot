@@ -18,9 +18,9 @@ package io.novaordis.osstats;
 
 import io.novaordis.events.core.event.Property;
 import io.novaordis.osstats.metric.MetricDefinition;
-import io.novaordis.osstats.metric.MetricSource;
+import io.novaordis.osstats.metric.source.MetricSource;
 import io.novaordis.osstats.metric.MockMetricDefinition;
-import io.novaordis.osstats.metric.MockMetricSource;
+import io.novaordis.osstats.metric.source.MockMetricSource;
 import io.novaordis.osstats.os.MockOS;
 import io.novaordis.utilities.os.OS;
 import org.junit.Test;

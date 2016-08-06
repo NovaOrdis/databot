@@ -16,6 +16,9 @@
 
 package io.novaordis.osstats.metric.loadavg;
 
+import io.novaordis.osstats.metric.source.Top;
+import io.novaordis.utilities.os.OS;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
@@ -29,6 +32,12 @@ public class LoadAverageLastMinute extends LoadAverageMetricDefinitionBase imple
     // Attributes ------------------------------------------------------------------------------------------------------
 
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    public LoadAverageLastMinute() {
+
+        addSource(OS.Linux, new Top("-b -n 1 -p 0"));
+        addSource(OS.MacOS, new Top("-l 1 -n 0"));
+    }
 
     // LoadAverageMetricDefinition implementation ----------------------------------------------------------------------
 

@@ -16,6 +16,9 @@
 
 package io.novaordis.osstats.metric.cpu;
 
+import io.novaordis.osstats.metric.source.Top;
+import io.novaordis.utilities.os.OS;
+
 /**
  * See https://kb.novaordis.com/index.php/Vmstat#sy
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -31,6 +34,12 @@ public class CpuKernelTime extends CpuMetricDefinitionBase {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    public CpuKernelTime() {
+
+        addSource(OS.Linux, new Top("-b -n 1 -p 0"));
+        addSource(OS.MacOS, new Top("-l 1 -n 0"));
+    }
 
     // CpuMetricDefinition implementation ------------------------------------------------------------------------------
 

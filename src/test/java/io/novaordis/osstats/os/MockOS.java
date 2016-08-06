@@ -16,7 +16,6 @@
 
 package io.novaordis.osstats.os;
 
-import io.novaordis.utilities.Files;
 import io.novaordis.utilities.os.NativeExecutionException;
 import io.novaordis.utilities.os.NativeExecutionResult;
 import io.novaordis.utilities.os.OS;
@@ -24,10 +23,8 @@ import io.novaordis.utilities.os.OSConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -45,7 +42,7 @@ public class MockOS implements OS {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean breakOnAnyCommand;
+    private boolean throwNativeExecutionExceptionOnAnyCommand;
     private String nativeExecutionExceptionMessageOnBrokenCommand;
     private Throwable causeOfBrokenCommand;
 
@@ -53,11 +50,18 @@ public class MockOS implements OS {
     private String stderrOnFailure;
     private String stdoutOnFailure;
 
+    // <command-and-argument, [stdout][stderr]>
+    private Map<String, String[]> commandsAndOutputs;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     public MockOS() {
 
-        this.breakOnAnyCommand = false;
+        this.throwNativeExecutionExceptionOnAnyCommand = false;
+        this.failOnAnyCommand = false;
+        this.commandsAndOutputs = new HashMap<>();
+
+        log.debug(this + " constructed");
     }
 
     // OS implementation -----------------------------------------------------------------------------------------------
@@ -68,9 +72,9 @@ public class MockOS implements OS {
     }
 
     @Override
-    public NativeExecutionResult execute(String command) throws NativeExecutionException {
+    public NativeExecutionResult execute(String commandAndArguments) throws NativeExecutionException {
 
-        if (breakOnAnyCommand) {
+        if (throwNativeExecutionExceptionOnAnyCommand) {
 
             throw new NativeExecutionException(nativeExecutionExceptionMessageOnBrokenCommand, causeOfBrokenCommand);
         }
@@ -80,25 +84,19 @@ public class MockOS implements OS {
             return new NativeExecutionResult(1, stdoutOnFailure, stderrOnFailure);
         }
 
-        if ("vmstat".equals(command)) {
+        String[] outputs = commandsAndOutputs.get(commandAndArguments);
 
-            File f = new File(System.getProperty("basedir"), "src/test/resources/data/os/vmstat.out");
-            assertTrue(f.isFile());
-            String content = null;
+        if (outputs != null) {
 
-            try {
-                content = Files.read(f);
-            }
-            catch (Exception ex) {
-
-                log.error("failed to read the content of " + f, ex);
-                fail("failed to read the content of " + f);
-            }
-
-            return new NativeExecutionResult(0, content, null);
+            return new NativeExecutionResult(0, outputs[0], outputs[1]);
         }
         else {
-            throw new RuntimeException("do not know how to handle command " + command);
+
+            //
+            // a random command
+            //
+
+            return new NativeExecutionResult(0, "MOCK-OUTPUT", "MOCK-STDERR");
         }
     }
 
@@ -109,9 +107,14 @@ public class MockOS implements OS {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public void breakOnAnyCommand(String msg, Throwable cause) {
+    public void setCommandOutput(String commandAndArguments, String stdout, String stderr) {
 
-        this.breakOnAnyCommand = true;
+        commandsAndOutputs.put(commandAndArguments, new String[] {stdout, stderr});
+    }
+
+    public void throwNativeExecutionExceptionOnAnyCommand(String msg, Throwable cause) {
+
+        this.throwNativeExecutionExceptionOnAnyCommand = true;
         this.nativeExecutionExceptionMessageOnBrokenCommand = msg;
         this.causeOfBrokenCommand = cause;
     }

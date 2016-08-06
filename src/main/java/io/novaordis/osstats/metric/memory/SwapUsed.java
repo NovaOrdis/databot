@@ -16,6 +16,9 @@
 
 package io.novaordis.osstats.metric.memory;
 
+import io.novaordis.osstats.metric.source.Top;
+import io.novaordis.utilities.os.OS;
+
 /**
  * See https://kb.novaordis.com/index.php/Proc-meminfo#The_Total_Amount_of_Used_Swap
  *
@@ -31,6 +34,11 @@ public class SwapUsed extends MemoryMetricDefinitionBase {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    public SwapUsed() {
+
+        addSource(OS.Linux, new Top("-b -n 1 -p 0"));
+    }
 
     // MemoryMetricDefinition implementation ---------------------------------------------------------------------------
 

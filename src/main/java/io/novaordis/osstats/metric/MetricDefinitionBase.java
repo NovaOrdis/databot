@@ -16,6 +16,8 @@
 
 package io.novaordis.osstats.metric;
 
+import io.novaordis.osstats.metric.source.MetricSource;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

@@ -16,6 +16,9 @@
 
 package io.novaordis.osstats.metric.memory;
 
+import io.novaordis.osstats.metric.source.Top;
+import io.novaordis.utilities.os.OS;
+
 /**
  * See https://kb.novaordis.com/index.php/Proc-meminfo#MemFree
  *
@@ -33,6 +36,12 @@ public class PhysicalMemoryFree extends MemoryMetricDefinitionBase {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    public PhysicalMemoryFree() {
+
+        addSource(OS.Linux, new Top("-b -n 1 -p 0"));
+        addSource(OS.MacOS, new Top("-l 1 -n 0"));
+    }
 
     // MemoryMetricDefinition implementation ---------------------------------------------------------------------------
 

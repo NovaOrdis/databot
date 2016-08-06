@@ -16,6 +16,8 @@
 
 package io.novaordis.osstats.metric;
 
+import io.novaordis.osstats.metric.source.MetricSource;
+import io.novaordis.osstats.metric.source.MockMetricSource;
 import io.novaordis.osstats.os.MockOS;
 import io.novaordis.utilities.UserErrorException;
 import org.junit.Test;
