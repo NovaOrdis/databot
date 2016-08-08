@@ -155,7 +155,9 @@ classpath=$(get_classpath) || fail "failed to build classpath"
 java_bin="java"
 [ "${java_home}" != "" ] && java_bin="${java_home}/bin/java"
 
-command="${java_bin} -Xms${memory} -Xmx${memory} -cp ${classpath} ${debug_args} ${output_settings} ${main_class} ${args}"
+${verbose} && verbose_system_property="-Dverbose=true"
+
+command="${java_bin} -Xms${memory} -Xmx${memory} -cp ${classpath} ${debug_args} ${output_settings} ${verbose_system_property} ${main_class} ${args}"
 
 ${verbose} && echo "${command}" 1>&2;
 

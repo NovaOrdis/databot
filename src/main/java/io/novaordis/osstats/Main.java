@@ -20,6 +20,7 @@ import io.novaordis.events.core.event.Event;
 import io.novaordis.osstats.configuration.Configuration;
 import io.novaordis.osstats.configuration.ConfigurationFactory;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.logging.StderrVerboseLogging;
 import io.novaordis.utilities.os.OS;
 
 import java.util.Timer;
@@ -42,6 +43,8 @@ public class Main {
     public static void main(String[] args) {
 
         try {
+
+            StderrVerboseLogging.init();
 
             Configuration conf = ConfigurationFactory.buildInstance(args);
 
