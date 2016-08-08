@@ -63,12 +63,7 @@ public class DataCollectionTimerTask extends TimerTask {
 
         try {
 
-            log.debug("before the reading");
-
             TimedEvent te = dataCollector.read(metrics);
-
-            log.debug("after the reading");
-
             boolean sent = eventQueue.offer(te);
 
             if (!sent) {

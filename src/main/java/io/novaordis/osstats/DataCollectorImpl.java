@@ -39,6 +39,7 @@ public class DataCollectorImpl implements DataCollector {
     // Constants -------------------------------------------------------------------------------------------------------
 
     private static final Logger log = LoggerFactory.getLogger(DataCollectionTimerTask.class);
+    private static final boolean debug = log.isDebugEnabled();
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -131,9 +132,14 @@ public class DataCollectorImpl implements DataCollector {
     @Override
     public TimedEvent read(List<MetricDefinition> metrics) throws DataCollectionException {
 
+        log.debug("reading metrics ...");
+
         long readingBegins = System.currentTimeMillis();
         List<Property> properties = readMetrics(metrics);
         long readingEnds = System.currentTimeMillis();
+
+        log.debug("reading complete in " + (readingEnds - readingBegins) + " ms");
+
         long t = readingBegins + (readingEnds - readingBegins) / 2;
 
         // It is possible to get an empty property list. This happens when the underlying layer fails to take a
@@ -159,6 +165,8 @@ public class DataCollectorImpl implements DataCollector {
 
         Set<MetricSource> sources = establishSources(metricDefinitions, os.getName());
 
+        if (debug) { log.debug("metric sources: " + sources); }
+
         Set<Property> allProperties = new HashSet<>();
 
         for(MetricSource source: sources) {
@@ -168,6 +176,8 @@ public class DataCollectorImpl implements DataCollector {
         }
 
         List<Property> properties = new ArrayList<>();
+
+        if (debug) { log.debug("metric definitions: " + metricDefinitions); }
 
         metricLoop: for(MetricDefinition m: metricDefinitions) {
 
