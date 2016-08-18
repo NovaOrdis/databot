@@ -151,6 +151,12 @@ public class DataCollectorImpl implements DataCollector {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
+    @Override
+    public String toString() {
+
+        return "DataCollectorImpl[" + os + ":" + Integer.toHexString(System.identityHashCode(this)) + "]";
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     /**

@@ -159,7 +159,9 @@ public class AsynchronousCsvLineWriterTest {
 
         BlockingQueue<Event> queue = new ArrayBlockingQueue<>(10);
         AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(queue, mc);
+
         assertFalse(w.isStarted());
+        assertTrue(w.isHeaderOn());
 
         w.start();
 
@@ -434,15 +436,26 @@ public class AsynchronousCsvLineWriterTest {
     public void write() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
+
         AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(null, mc);
+        assertTrue(w.isHeaderOn());
+
         MockPrintStream mps = new MockPrintStream();
         w.setPrintStream(mps);
 
         MockTimedEvent e = new MockTimedEvent();
         w.write(e);
 
+        String header = mps.getLine();
+        log.info(header);
+        assertFalse(header.isEmpty());
+        assertTrue(header.startsWith("# timestamp"));
+
         String line = mps.getLine();
+        log.info(line);
         assertFalse(line.isEmpty());
+        assertFalse(line.startsWith("#"));
+
         line = mps.getLine();
         assertNull(line);
     }

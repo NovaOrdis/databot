@@ -40,6 +40,7 @@ public class AsynchronousCsvLineWriter implements Runnable {
     // Constants -------------------------------------------------------------------------------------------------------
 
     private static final Logger log = LoggerFactory.getLogger(AsynchronousCsvLineWriter.class);
+    private static final boolean debug = log.isDebugEnabled();
 
     private static final String DEFAULT_THREAD_NAME = "os-stats Data Writer";
 
@@ -86,6 +87,7 @@ public class AsynchronousCsvLineWriter implements Runnable {
         }
 
         csvFormatter = new CsvOutputFormatter();
+        csvFormatter.setHeaderOn();
     }
 
     // Runnable implementation -----------------------------------------------------------------------------------------
@@ -178,10 +180,21 @@ public class AsynchronousCsvLineWriter implements Runnable {
         return eventQueue;
     }
 
+    /**
+     * @return whether the line writer will generate a header on the first event or not.
+     *
+     * @see CsvOutputFormatter#isHeaderOn()
+     */
+    public boolean isHeaderOn() {
+
+        return csvFormatter.isHeaderOn();
+    }
+
     @Override
     public String toString() {
 
-        return "AsynchronousCsvLineWriter:" +
+        return "AsynchronousCsvLineWriter:header " +
+                (isHeaderOn() ? "on" : "off") + ":" +
                 (printStream == null ? "null" :
                         (printStream.equals(System.out) ? "/dev/stdout" : outputFileName));
     }
@@ -190,12 +203,16 @@ public class AsynchronousCsvLineWriter implements Runnable {
 
     void write(TimedEvent e) {
 
+        if (debug) { log.debug("writing " + e); }
+
         try {
 
             if (csvFormatter.process(e)) {
+
                 String content = new String(csvFormatter.getBytes());
+
                 //
-                // the formatter already appends a new line to the content
+                // the formatter already appends a new line to the content, so there's no need we do
                 //
                 printStream.print(content);
             }
