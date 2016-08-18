@@ -34,6 +34,7 @@ public class MockProperty implements Property {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     private String name;
+    private String value;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -42,7 +43,12 @@ public class MockProperty implements Property {
     }
 
     public MockProperty(String name) {
+        this(name, "mock-value");
+    }
+
+    public MockProperty(String name, String value) {
         this.name = name;
+        this.value = value;
     }
 
     // Property implementation -----------------------------------------------------------------------------------------
@@ -55,7 +61,7 @@ public class MockProperty implements Property {
 
     @Override
     public Object getValue() {
-        throw new RuntimeException("getValue() NOT YET IMPLEMENTED");
+        return value;
     }
 
     @Override
@@ -86,7 +92,7 @@ public class MockProperty implements Property {
     @Override
     public String externalizeValue() {
 
-        return "mock-value";
+        return value;
     }
 
     @Override

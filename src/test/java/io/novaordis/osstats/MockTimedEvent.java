@@ -25,8 +25,11 @@ import io.novaordis.events.core.event.Property;
 import io.novaordis.events.core.event.StringProperty;
 import io.novaordis.events.core.event.TimedEvent;
 import io.novaordis.utilities.time.Timestamp;
+import io.novaordis.utilities.time.TimestampImpl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -41,29 +44,29 @@ public class MockTimedEvent implements TimedEvent {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private long time;
-    private Set<Property> properties;
+    private Timestamp timestamp;
+    private List<Property> properties;
 
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
     public MockTimedEvent() {
 
-        time = System.currentTimeMillis();
-        this.properties = new HashSet<>();
-        this.properties.add(new MockProperty());
+        timestamp = new TimestampImpl(System.currentTimeMillis());
+        this.properties = new ArrayList<>();
     }
 
     // TimedEvent implementation ---------------------------------------------------------------------------------------
 
     @Override
     public Long getTime() {
-        return time;
+        return timestamp.getTime();
     }
 
     @Override
     public Timestamp getTimestamp() {
-        throw new RuntimeException("getTimestamp() NOT YET IMPLEMENTED");
+
+        return timestamp;
     }
 
     @Override
@@ -73,12 +76,19 @@ public class MockTimedEvent implements TimedEvent {
 
     @Override
     public Set<Property> getProperties() {
-        return properties;
+        return new HashSet<>(properties);
     }
 
     @Override
     public Property getProperty(String s) {
-        throw new RuntimeException("getProperty() NOT YET IMPLEMENTED");
+
+        for(Property p: properties) {
+            if (p.getName().equals(s)) {
+                return p;
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -113,7 +123,9 @@ public class MockTimedEvent implements TimedEvent {
 
     @Override
     public Property setProperty(Property property) {
-        throw new RuntimeException("setProperty() NOT YET IMPLEMENTED");
+
+        properties.add(property);
+        return null;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

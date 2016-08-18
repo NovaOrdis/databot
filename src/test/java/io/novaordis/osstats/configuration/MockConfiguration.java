@@ -18,6 +18,8 @@ package io.novaordis.osstats.configuration;
 
 import io.novaordis.osstats.metric.MetricDefinition;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,8 +37,14 @@ public class MockConfiguration implements Configuration {
     private boolean foreground;
     private String outputFileName;
     private boolean outputFileOverwrite;
+    private List<MetricDefinition> metrics;
 
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    public MockConfiguration() {
+
+        this.metrics = new ArrayList<>();
+    }
 
     // Configuration implementation ------------------------------------------------------------------------------------
 
@@ -63,7 +71,8 @@ public class MockConfiguration implements Configuration {
 
     @Override
     public List<MetricDefinition> getMetrics() {
-        throw new RuntimeException("getMetrics() NOT YET IMPLEMENTED");
+
+        return metrics;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
@@ -78,6 +87,14 @@ public class MockConfiguration implements Configuration {
 
     public void setOutputFileAppend(boolean b) {
         this.outputFileOverwrite = b;
+    }
+
+    /**
+     * The relative order is preserved.
+     */
+    public void addMetricDefinition(MetricDefinition md) {
+
+        metrics.add(md);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

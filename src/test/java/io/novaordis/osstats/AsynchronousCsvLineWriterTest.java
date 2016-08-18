@@ -20,6 +20,7 @@ import io.novaordis.events.core.event.Event;
 import io.novaordis.events.core.event.GenericTimedEvent;
 import io.novaordis.events.core.event.ShutdownEvent;
 import io.novaordis.osstats.configuration.MockConfiguration;
+import io.novaordis.osstats.metric.MockMetricDefinition;
 import io.novaordis.utilities.Files;
 import org.junit.After;
 import org.junit.Test;
@@ -437,6 +438,9 @@ public class AsynchronousCsvLineWriterTest {
 
         MockConfiguration mc = new MockConfiguration();
 
+        mc.addMetricDefinition(new MockMetricDefinition("z"));
+        mc.addMetricDefinition(new MockMetricDefinition("a"));
+
         AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(null, mc);
         assertTrue(w.isHeaderOn());
 
@@ -444,17 +448,18 @@ public class AsynchronousCsvLineWriterTest {
         w.setPrintStream(mps);
 
         MockTimedEvent e = new MockTimedEvent();
+        e.setProperty(new MockProperty("a", "a-value"));
+        e.setProperty(new MockProperty("z", "z-value"));
+
         w.write(e);
 
         String header = mps.getLine();
         log.info(header);
-        assertFalse(header.isEmpty());
-        assertTrue(header.startsWith("# timestamp"));
+        assertEquals("# timestamp, z, a", header);
 
         String line = mps.getLine();
         log.info(line);
-        assertFalse(line.isEmpty());
-        assertFalse(line.startsWith("#"));
+        assertTrue(line.contains(", z-value, a-value"));
 
         line = mps.getLine();
         assertNull(line);

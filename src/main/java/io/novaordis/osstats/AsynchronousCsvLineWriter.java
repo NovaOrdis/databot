@@ -22,11 +22,14 @@ import io.novaordis.events.core.event.Event;
 import io.novaordis.events.core.event.ShutdownEvent;
 import io.novaordis.events.core.event.TimedEvent;
 import io.novaordis.osstats.configuration.Configuration;
+import io.novaordis.osstats.metric.MetricDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -88,6 +91,27 @@ public class AsynchronousCsvLineWriter implements Runnable {
 
         csvFormatter = new CsvOutputFormatter();
         csvFormatter.setHeaderOn();
+
+        //
+        // we want to preserve the relative order of the metrics as declared in the configuration file, so we
+        // set the output format
+        //
+
+        String outputFormat = "timestamp";
+        List<MetricDefinition> metrics = configuration.getMetrics();
+        if (!metrics.isEmpty()) {
+            outputFormat += ", ";
+            for(Iterator<MetricDefinition> i = metrics.iterator(); i.hasNext(); ) {
+
+                MetricDefinition md = i.next();
+                outputFormat += md.getName();
+                if (i.hasNext()) {
+                    outputFormat += ", ";
+                }
+
+            }
+        }
+        csvFormatter.setOutputFormat(outputFormat);
     }
 
     // Runnable implementation -----------------------------------------------------------------------------------------
