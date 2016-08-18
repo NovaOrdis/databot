@@ -43,8 +43,7 @@ public class SwapFree extends MemoryMetricDefinitionBase {
     // MemoryMetricDefinition implementation ---------------------------------------------------------------------------
 
     @Override
-    public String getName() {
-
+    public String getSimpleLabel() {
         return "Free Swap";
     }
 

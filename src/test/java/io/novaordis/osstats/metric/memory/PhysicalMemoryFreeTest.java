@@ -53,10 +53,10 @@ public class PhysicalMemoryFreeTest extends MemoryMetricDefinitionTest {
     }
 
     @Test
-    public void getName() throws Exception {
+    public void getSimpleLabel() throws Exception {
 
         PhysicalMemoryFree m = new PhysicalMemoryFree();
-        assertEquals("Free Physical Memory", m.getName());
+        assertEquals("Free Physical Memory", m.getSimpleLabel());
     }
 
     // sources ---------------------------------------------------------------------------------------------------------

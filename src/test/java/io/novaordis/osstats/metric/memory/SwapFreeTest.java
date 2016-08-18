@@ -53,10 +53,10 @@ public class SwapFreeTest extends MemoryMetricDefinitionTest {
     }
 
     @Test
-    public void getName() throws Exception {
+    public void getSimpleLabel() throws Exception {
 
         SwapFree m = new SwapFree();
-        assertEquals("Free Swap", m.getName());
+        assertEquals("Free Swap", m.getSimpleLabel());
     }
 
     // sources ---------------------------------------------------------------------------------------------------------

@@ -42,7 +42,7 @@ public class CpuNiceTime extends CpuMetricDefinitionBase {
     // CpuMetricDefinition implementation ------------------------------------------------------------------------------
 
     @Override
-    public String getName() {
+    public String getSimpleLabel() {
         return "CPU Nice Time";
     }
 

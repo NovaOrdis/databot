@@ -53,10 +53,10 @@ public class CpuKernelTimeTest extends CpuMetricDefinitionTest {
     }
 
     @Test
-    public void getName() throws Exception {
+    public void getSimpleLabel() throws Exception {
 
         CpuKernelTime m = new CpuKernelTime();
-        assertEquals("CPU Kernel Time", m.getName());
+        assertEquals("CPU Kernel Time", m.getSimpleLabel());
     }
 
     // sources ---------------------------------------------------------------------------------------------------------

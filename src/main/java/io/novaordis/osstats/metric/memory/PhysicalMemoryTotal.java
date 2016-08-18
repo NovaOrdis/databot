@@ -43,8 +43,7 @@ public class PhysicalMemoryTotal extends MemoryMetricDefinitionBase {
     // MemoryMetricDefinition implementation ---------------------------------------------------------------------------
 
     @Override
-    public String getName() {
-
+    public String getSimpleLabel() {
         return "Total Physical Memory";
     }
 

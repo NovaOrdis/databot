@@ -16,11 +16,6 @@
 
 package io.novaordis.osstats.metric;
 
-import io.novaordis.events.core.event.MeasureUnit;
-import io.novaordis.utilities.os.OS;
-
-import java.util.List;
-
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
@@ -40,6 +35,11 @@ public class MockMetricDefinition2 extends MockMetricDefinitionBase {
     @Override
     public String getName() {
         return "Mock Metric Definition 2";
+    }
+
+    @Override
+    public String getSimpleLabel() {
+        throw new RuntimeException("getSimpleLabel() NOT YET IMPLEMENTED");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

@@ -54,10 +54,10 @@ public class LoadAverageLastTenMinutesTest extends LoadAverageMetricDefinitionTe
     }
 
     @Test
-    public void getName() throws Exception {
+    public void getSimpleLabel() throws Exception {
 
         LoadAverageLastTenMinutes m = new LoadAverageLastTenMinutes();
-        assertEquals("Last Ten Minutes Load Average", m.getName());
+        assertEquals("Last Ten Minutes Load Average", m.getSimpleLabel());
     }
 
     // sources ---------------------------------------------------------------------------------------------------------

@@ -53,10 +53,10 @@ public class CpuIoWaitTimeTest extends CpuMetricDefinitionTest {
     }
 
     @Test
-    public void getName() throws Exception {
+    public void getSimpleLabel() throws Exception {
 
         CpuIoWaitTime m = new CpuIoWaitTime();
-        assertEquals("CPU I/O Wait Time", m.getName());
+        assertEquals("CPU I/O Wait Time", m.getSimpleLabel());
     }
 
     // sources ---------------------------------------------------------------------------------------------------------

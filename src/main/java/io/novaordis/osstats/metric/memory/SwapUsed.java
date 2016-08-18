@@ -43,8 +43,7 @@ public class SwapUsed extends MemoryMetricDefinitionBase {
     // MemoryMetricDefinition implementation ---------------------------------------------------------------------------
 
     @Override
-    public String getName() {
-
+    public String getSimpleLabel() {
         return "Used Swap";
     }
 

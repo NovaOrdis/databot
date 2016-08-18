@@ -47,6 +47,11 @@ public class MockMetricDefinition extends MockMetricDefinitionBase {
         return name;
     }
 
+    @Override
+    public String getSimpleLabel() {
+        throw new RuntimeException("getSimpleLabel() NOT YET IMPLEMENTED");
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
 
     public void setName(String s) {

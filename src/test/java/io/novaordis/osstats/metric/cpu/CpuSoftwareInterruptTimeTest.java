@@ -31,7 +31,7 @@ import static org.junit.Assert.assertNotNull;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
  */
-public class CpuHardwareInterruptTest extends CpuMetricDefinitionTest {
+public class CpuSoftwareInterruptTimeTest extends CpuMetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -48,15 +48,15 @@ public class CpuHardwareInterruptTest extends CpuMetricDefinitionTest {
     @Test
     public void getInstance() throws Exception {
 
-        CpuHardwareInterruptTime m = (CpuHardwareInterruptTime)MetricDefinition.getInstance("CpuHardwareInterruptTime");
+        CpuSoftwareInterruptTime m = (CpuSoftwareInterruptTime)MetricDefinition.getInstance("CpuSoftwareInterruptTime");
         assertNotNull(m);
     }
 
     @Test
-    public void getName() throws Exception {
+    public void getSimpleLabel() throws Exception {
 
-        CpuHardwareInterruptTime m = new CpuHardwareInterruptTime();
-        assertEquals("CPU Hardware Interrupt Time", m.getName());
+        CpuSoftwareInterruptTime m = new CpuSoftwareInterruptTime();
+        assertEquals("CPU Software Interrupt Time", m.getSimpleLabel());
     }
 
     // sources ---------------------------------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ public class CpuHardwareInterruptTest extends CpuMetricDefinitionTest {
     @Test
     public void sourcesLinux() throws Exception {
 
-        CpuHardwareInterruptTime m = getMetricDefinitionToTest();
+        CpuSoftwareInterruptTime m = getMetricDefinitionToTest();
 
         List<MetricSource> linuxSources = m.getSources(OS.Linux);
         assertEquals(1, linuxSources.size());
@@ -75,7 +75,7 @@ public class CpuHardwareInterruptTest extends CpuMetricDefinitionTest {
     @Test
     public void sourcesMac() throws Exception {
 
-        CpuHardwareInterruptTime m = getMetricDefinitionToTest();
+        CpuSoftwareInterruptTime m = getMetricDefinitionToTest();
 
         List<MetricSource> macSources = m.getSources(OS.MacOS);
         // TODO this will probably change
@@ -87,9 +87,9 @@ public class CpuHardwareInterruptTest extends CpuMetricDefinitionTest {
     // Protected -------------------------------------------------------------------------------------------------------
 
     @Override
-    protected CpuHardwareInterruptTime getMetricDefinitionToTest() throws Exception {
+    protected CpuSoftwareInterruptTime getMetricDefinitionToTest() throws Exception {
 
-        return new CpuHardwareInterruptTime();
+        return new CpuSoftwareInterruptTime();
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

@@ -53,10 +53,10 @@ public class SwapUsedTest extends MemoryMetricDefinitionTest {
     }
 
     @Test
-    public void getName() throws Exception {
+    public void getSimpleLabel() throws Exception {
 
         SwapUsed m = new SwapUsed();
-        assertEquals("Used Swap", m.getName());
+        assertEquals("Used Swap", m.getSimpleLabel());
     }
 
     // sources ---------------------------------------------------------------------------------------------------------

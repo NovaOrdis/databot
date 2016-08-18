@@ -85,18 +85,42 @@ public interface MetricDefinition {
     // Public ----------------------------------------------------------------------------------------------------------
 
     /**
-     * The metric name, a human readable string, possibly space separated. For example, the /proc/meminfo PhysicalMemoryTotal's
-     * name is "Total Memory".
+     * The metric name. Must not contain any spaces. It is used by the factory method getInstance() to create the
+     * corresponding class instance, and usually, it is the simple name of the implementing class. Example:
+     * "PhysicalMemoryTotal".
      */
     String getName();
 
     /**
+     * A human readable string, possibly space separated, that is used to represent the metric in user-facing
+     * representations, such as a CSV file headers. The label includes, by default, the parantheses-enclosed measure
+     * unit, if the metric has a measure unit. For example, PhysicalMemoryTotal's label is
+     * "Total Physical Memory (bytes)"
+     *
+     * @see MetricDefinition#getSimpleLabel()
+     * @see MeasureUnit#getLabel()
+     */
+    String getLabel();
+
+    /**
+     * A human readable string, possibly space separated, that is used to represent the metric in user-facing
+     * representations, such as a CSV file headers, but without measure unit. To get a complete representation,
+     * including the measure unit, if available, use getLabel(). For example, PhysicalMemoryTotal's simple label is
+     * "Total Physical Memory".
+     *
+     * @see MetricDefinition#getLabel()
+     */
+    String getSimpleLabel();
+
+    /**
      * May return null if the metric is non-dimensional (for example load average).
+     *
+     * @see MeasureUnit
      */
     MeasureUnit getMeasureUnit();
 
     /**
-     * The human readable text that explains what this metric represents
+     * The human readable text that explains what this metric represents.
      */
     String getDescription();
 

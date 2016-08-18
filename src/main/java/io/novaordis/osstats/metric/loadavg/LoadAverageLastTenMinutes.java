@@ -45,14 +45,14 @@ public class LoadAverageLastTenMinutes
     // LoadAverageMetricDefinition implementation ----------------------------------------------------------------------
 
     @Override
-    public String getDescription() {
-
-        return "CPU and IO utilization during the last ten minutes.";
+    public String getSimpleLabel() {
+        return "Last Ten Minutes Load Average";
     }
 
     @Override
-    public String getName() {
-        return "Last Ten Minutes Load Average";
+    public String getDescription() {
+
+        return "CPU and IO utilization during the last ten minutes.";
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

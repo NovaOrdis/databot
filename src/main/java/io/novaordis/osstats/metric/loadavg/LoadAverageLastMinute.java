@@ -48,7 +48,7 @@ public class LoadAverageLastMinute extends LoadAverageMetricDefinitionBase imple
     }
 
     @Override
-    public String getName() {
+    public String getSimpleLabel() {
         return "Last Minute Load Average";
     }
 

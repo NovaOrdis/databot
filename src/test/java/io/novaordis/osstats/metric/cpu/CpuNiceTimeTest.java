@@ -53,10 +53,10 @@ public class CpuNiceTimeTest extends CpuMetricDefinitionTest {
     }
 
     @Test
-    public void getName() throws Exception {
+    public void getSimpleLabel() throws Exception {
 
         CpuNiceTime m = new CpuNiceTime();
-        assertEquals("CPU Nice Time", m.getName());
+        assertEquals("CPU Nice Time", m.getSimpleLabel());
     }
 
     // sources ---------------------------------------------------------------------------------------------------------

@@ -44,8 +44,7 @@ public class PhysicalMemoryUsed extends MemoryMetricDefinitionBase {
     // MemoryMetricDefinition implementation ---------------------------------------------------------------------------
 
     @Override
-    public String getName() {
-
+    public String getSimpleLabel() {
         return "Used Physical Memory";
     }
 

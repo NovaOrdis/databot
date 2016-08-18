@@ -16,6 +16,7 @@
 
 package io.novaordis.osstats.metric;
 
+import io.novaordis.events.core.event.MeasureUnit;
 import io.novaordis.osstats.metric.source.MetricSource;
 
 import java.util.ArrayList;
@@ -48,6 +49,25 @@ public abstract class MetricDefinitionBase implements MetricDefinition {
     }
 
     // MetricDefinition implementation ---------------------------------------------------------------------------------
+
+    @Override
+    public String getName() {
+
+        return getClass().getSimpleName();
+    }
+
+    @Override
+    public final String getLabel() {
+
+        MeasureUnit mu = getMeasureUnit();
+        String simpleLabel = getSimpleLabel();
+
+        if (mu == null) {
+            return simpleLabel;
+        }
+
+        return simpleLabel + " (" + mu.getLabel() + ")";
+    }
 
     /**
      * The implementation returns a copy of the internal list.

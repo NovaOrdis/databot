@@ -43,7 +43,7 @@ public class CpuIoWaitTime extends CpuMetricDefinitionBase {
     // CpuMetricDefinition implementation ------------------------------------------------------------------------------
 
     @Override
-    public String getName() {
+    public String getSimpleLabel() {
         return "CPU I/O Wait Time";
     }
 

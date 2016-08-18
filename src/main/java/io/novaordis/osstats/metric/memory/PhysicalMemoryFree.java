@@ -46,8 +46,7 @@ public class PhysicalMemoryFree extends MemoryMetricDefinitionBase {
     // MemoryMetricDefinition implementation ---------------------------------------------------------------------------
 
     @Override
-    public String getName() {
-
+    public String getSimpleLabel() {
         return "Free Physical Memory";
     }
 

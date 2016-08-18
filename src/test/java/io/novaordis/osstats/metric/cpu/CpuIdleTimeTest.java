@@ -53,10 +53,10 @@ public class CpuIdleTimeTest extends CpuMetricDefinitionTest {
     }
 
     @Test
-    public void getName() throws Exception {
+    public void getSimpleLabel() throws Exception {
 
         CpuIdleTime m = new CpuIdleTime();
-        assertEquals("CPU Idle Time", m.getName());
+        assertEquals("CPU Idle Time", m.getSimpleLabel());
     }
 
     // sources ---------------------------------------------------------------------------------------------------------

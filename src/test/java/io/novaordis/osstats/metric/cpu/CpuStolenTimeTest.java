@@ -53,10 +53,10 @@ public class CpuStolenTimeTest extends CpuMetricDefinitionTest {
     }
 
     @Test
-    public void getName() throws Exception {
+    public void getSimpleLabel() throws Exception {
 
         CpuStolenTime m = new CpuStolenTime();
-        assertEquals("CPU Stolen Time", m.getName());
+        assertEquals("CPU Stolen Time", m.getSimpleLabel());
     }
 
     // sources ---------------------------------------------------------------------------------------------------------

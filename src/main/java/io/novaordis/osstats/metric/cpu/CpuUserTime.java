@@ -44,7 +44,7 @@ public class CpuUserTime extends CpuMetricDefinitionBase {
     // CpuMetricDefinition implementation ------------------------------------------------------------------------------
 
     @Override
-    public String getName() {
+    public String getSimpleLabel() {
         return "CPU User Time";
     }
 

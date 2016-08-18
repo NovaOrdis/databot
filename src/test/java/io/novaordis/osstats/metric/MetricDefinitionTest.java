@@ -16,6 +16,7 @@
 
 package io.novaordis.osstats.metric;
 
+import io.novaordis.events.core.event.MeasureUnit;
 import io.novaordis.osstats.metric.source.MetricSource;
 import io.novaordis.osstats.metric.source.MockMetricSource;
 import io.novaordis.osstats.os.MockOS;
@@ -69,6 +70,55 @@ public abstract class MetricDefinitionTest {
         String desc = d.getDescription();
         assertNotNull(desc);
         assertFalse(desc.isEmpty());
+    }
+
+    // getLabel() ------------------------------------------------------------------------------------------------------
+
+    @Test
+    public void getLabel() throws Exception {
+
+        MetricDefinition d = getMetricDefinitionToTest();
+
+        String label = d.getLabel();
+
+        assertNotNull(label);
+
+        //
+        // if the metric definition includes a measure unit, the measure unit must be present in the label,
+        // parantheses-enclosed
+        //
+
+        MeasureUnit mu = d.getMeasureUnit();
+
+        if (mu == null) {
+
+            //
+            // no measure unit in label
+            //
+
+            assertFalse(label.contains("("));
+            assertFalse(label.contains(")"));
+
+            assertEquals(label, d.getSimpleLabel());
+        }
+        else {
+
+            String muLabelFragment = " (" + mu.getLabel() + ")";
+            assertTrue(label.endsWith(muLabelFragment));
+            assertTrue(label.contains(d.getSimpleLabel()));
+        }
+    }
+
+    @Test
+    public void getSimpleLabel() throws Exception {
+
+        MetricDefinition d = getMetricDefinitionToTest();
+
+        String label = d.getLabel();
+        String simpleLabel = d.getSimpleLabel();
+
+        assertNotNull(simpleLabel);
+        assertTrue(label.startsWith(simpleLabel));
     }
 
     // metric source tests ---------------------------------------------------------------------------------------------

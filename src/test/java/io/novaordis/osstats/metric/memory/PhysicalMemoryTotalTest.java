@@ -54,10 +54,10 @@ public class PhysicalMemoryTotalTest extends MemoryMetricDefinitionTest {
     }
 
     @Test
-    public void getName() throws Exception {
+    public void getSimpleLabel() throws Exception {
 
         PhysicalMemoryTotal m = new PhysicalMemoryTotal();
-        assertEquals("Total Physical Memory", m.getName());
+        assertEquals("Total Physical Memory", m.getSimpleLabel());
     }
 
     // sources ---------------------------------------------------------------------------------------------------------

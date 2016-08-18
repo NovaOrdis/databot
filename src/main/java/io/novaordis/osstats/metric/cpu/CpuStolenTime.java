@@ -43,7 +43,7 @@ public class CpuStolenTime extends CpuMetricDefinitionBase {
     // CpuMetricDefinition implementation ------------------------------------------------------------------------------
 
     @Override
-    public String getName() {
+    public String getSimpleLabel() {
         return "CPU Stolen Time";
     }
 

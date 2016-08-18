@@ -53,10 +53,10 @@ public class PhysicalMemoryUsedTest extends MemoryMetricDefinitionTest {
     }
 
     @Test
-    public void getName() throws Exception {
+    public void getSimpleLabel() throws Exception {
 
         PhysicalMemoryUsed m = new PhysicalMemoryUsed();
-        assertEquals("Used Physical Memory", m.getName());
+        assertEquals("Used Physical Memory", m.getSimpleLabel());
     }
 
     // sources ---------------------------------------------------------------------------------------------------------

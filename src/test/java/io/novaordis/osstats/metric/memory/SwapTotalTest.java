@@ -53,10 +53,10 @@ public class SwapTotalTest extends MemoryMetricDefinitionTest {
     }
 
     @Test
-    public void getName() throws Exception {
+    public void getSimpleLabel() throws Exception {
 
         SwapTotal m = new SwapTotal();
-        assertEquals("Total Swap", m.getName());
+        assertEquals("Total Swap", m.getSimpleLabel());
     }
 
     // sources ---------------------------------------------------------------------------------------------------------

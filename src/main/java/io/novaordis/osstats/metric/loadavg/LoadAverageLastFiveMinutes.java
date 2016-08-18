@@ -49,7 +49,7 @@ public class LoadAverageLastFiveMinutes
     }
 
     @Override
-    public String getName() {
+    public String getSimpleLabel() {
         return "Last Five Minutes Load Average";
     }
 
