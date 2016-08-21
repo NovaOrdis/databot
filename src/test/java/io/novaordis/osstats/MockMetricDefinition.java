@@ -16,22 +16,11 @@
 
 package io.novaordis.osstats;
 
-import io.novaordis.events.core.event.TimedEvent;
-import io.novaordis.events.metric.MetricDefinition;
-import io.novaordis.osstats.os.MockOS;
-import io.novaordis.utilities.os.OS;
-import org.junit.Test;
-
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.Assert.assertTrue;
-
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/3/16
  */
-public abstract class DataCollectorTest {
+public class MockMetricDefinition extends MockMetricDefinitionBase {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -39,40 +28,39 @@ public abstract class DataCollectorTest {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    private String name;
+
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    public MockMetricDefinition() {
+        this("Mock Metric Definition");
+    }
+
+    public MockMetricDefinition(String name) {
+        this.name = name;
+    }
+
+    // MetricDefinition implementation ---------------------------------------------------------------------------------
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getSimpleLabel() {
+        throw new RuntimeException("getSimpleLabel() NOT YET IMPLEMENTED");
+    }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    @Test
-    public void read() throws Exception {
-
-        MockOS mos = new MockOS();
-
-        DataCollector c = getDataCollectorToTest(mos);
-
-        long t0 = System.currentTimeMillis();
-
-        MockMetricDefinition mmd = new MockMetricDefinition("TEST");
-        MockMetricSource mms = new MockMetricSource();
-        assertTrue(mmd.addSource(mos.getName(), mms));
-
-        mms.mockMetricGeneration(mos, new MockProperty("TEST"));
-
-        List<MetricDefinition> metrics = Collections.singletonList(mmd);
-
-        TimedEvent te = c.read(metrics);
-
-        long t1 = System.currentTimeMillis();
-
-        assertTrue(t0 <= te.getTime());
-        assertTrue(te.getTime() <= t1);
+    public void setName(String s) {
+        this.name = s;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
-
-    protected abstract DataCollector getDataCollectorToTest(OS os) throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

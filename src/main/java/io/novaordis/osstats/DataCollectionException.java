@@ -41,6 +41,9 @@ public class DataCollectionException extends Exception {
         super(cause);
     }
 
+    public DataCollectionException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
     // Public ----------------------------------------------------------------------------------------------------------
 

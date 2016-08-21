@@ -16,22 +16,15 @@
 
 package io.novaordis.osstats;
 
-import io.novaordis.events.core.event.TimedEvent;
+import io.novaordis.events.core.event.MeasureUnit;
 import io.novaordis.events.metric.MetricDefinition;
-import io.novaordis.osstats.os.MockOS;
-import io.novaordis.utilities.os.OS;
-import org.junit.Test;
-
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.Assert.assertTrue;
+import io.novaordis.events.metric.MetricDefinitionBase;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/4/16
  */
-public abstract class DataCollectorTest {
+abstract class MockMetricDefinitionBase extends MetricDefinitionBase implements MetricDefinition {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -41,38 +34,28 @@ public abstract class DataCollectorTest {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // Public ----------------------------------------------------------------------------------------------------------
+    // MetricDefinition implementation ---------------------------------------------------------------------------------
 
-    @Test
-    public void read() throws Exception {
-
-        MockOS mos = new MockOS();
-
-        DataCollector c = getDataCollectorToTest(mos);
-
-        long t0 = System.currentTimeMillis();
-
-        MockMetricDefinition mmd = new MockMetricDefinition("TEST");
-        MockMetricSource mms = new MockMetricSource();
-        assertTrue(mmd.addSource(mos.getName(), mms));
-
-        mms.mockMetricGeneration(mos, new MockProperty("TEST"));
-
-        List<MetricDefinition> metrics = Collections.singletonList(mmd);
-
-        TimedEvent te = c.read(metrics);
-
-        long t1 = System.currentTimeMillis();
-
-        assertTrue(t0 <= te.getTime());
-        assertTrue(te.getTime() <= t1);
+    @Override
+    public MeasureUnit getMeasureUnit() {
+        throw new RuntimeException("getMeasureUnit() NOT YET IMPLEMENTED");
     }
+
+    @Override
+    public String getDescription() {
+        throw new RuntimeException("getDescription() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public Class getType() {
+        throw new RuntimeException("getType() NOT YET IMPLEMENTED");
+    }
+
+    // Public ----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
-
-    protected abstract DataCollector getDataCollectorToTest(OS os) throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

@@ -16,22 +16,22 @@
 
 package io.novaordis.osstats;
 
-import io.novaordis.events.core.event.TimedEvent;
-import io.novaordis.events.metric.MetricDefinition;
-import io.novaordis.osstats.os.MockOS;
+import io.novaordis.events.core.event.Property;
+import io.novaordis.events.metric.MetricCollectionException;
+import io.novaordis.events.metric.source.MetricSource;
 import io.novaordis.utilities.os.OS;
-import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-
-import static org.junit.Assert.assertTrue;
+import java.util.Map;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/5/16
  */
-public abstract class DataCollectorTest {
+public class MockMetricSource implements MetricSource {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -39,40 +39,58 @@ public abstract class DataCollectorTest {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    private Map<OS, List<Property>> results;
+
+    private boolean breakOnCollect;
+
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    public MockMetricSource() {
+
+        results = new HashMap<>();
+    }
+
+    // MetricSource implementation -------------------------------------------------------------------------------------
+
+    @Override
+    public List<Property> collectMetrics(OS os) throws MetricCollectionException {
+
+        if (breakOnCollect) {
+            throw new MetricCollectionException("SYNTHETIC");
+        }
+
+        List<Property> props = results.get(os);
+
+        if (props == null) {
+            return Collections.emptyList();
+        }
+
+        return props;
+    }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    @Test
-    public void read() throws Exception {
+    public void mockMetricGeneration(OS os, Property p) {
 
-        MockOS mos = new MockOS();
+        List<Property> ps = results.get(os);
 
-        DataCollector c = getDataCollectorToTest(mos);
+        if (ps == null) {
 
-        long t0 = System.currentTimeMillis();
+            ps = new ArrayList<>();
+            results.put(os, ps);
+        }
 
-        MockMetricDefinition mmd = new MockMetricDefinition("TEST");
-        MockMetricSource mms = new MockMetricSource();
-        assertTrue(mmd.addSource(mos.getName(), mms));
+        ps.add(p);
+    }
 
-        mms.mockMetricGeneration(mos, new MockProperty("TEST"));
+    public void breakOnCollectMetrics() {
 
-        List<MetricDefinition> metrics = Collections.singletonList(mmd);
-
-        TimedEvent te = c.read(metrics);
-
-        long t1 = System.currentTimeMillis();
-
-        assertTrue(t0 <= te.getTime());
-        assertTrue(te.getTime() <= t1);
+        breakOnCollect = true;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
-
-    protected abstract DataCollector getDataCollectorToTest(OS os) throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

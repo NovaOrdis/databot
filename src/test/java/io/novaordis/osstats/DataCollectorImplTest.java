@@ -17,10 +17,9 @@
 package io.novaordis.osstats;
 
 import io.novaordis.events.core.event.Property;
+import io.novaordis.events.metric.MetricCollectionException;
 import io.novaordis.events.metric.MetricDefinition;
 import io.novaordis.events.metric.source.MetricSource;
-import io.novaordis.events.metric.MockMetricDefinition;
-import io.novaordis.events.metric.source.MockMetricSource;
 import io.novaordis.osstats.os.MockOS;
 import io.novaordis.utilities.os.OS;
 import org.junit.Test;
@@ -34,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -183,7 +183,11 @@ public class DataCollectorImplTest extends DataCollectorTest {
         }
         catch(DataCollectionException e) {
 
-            String msg = e.getMessage();
+            assertNull(e.getMessage());
+
+            MetricCollectionException cause = (MetricCollectionException)e.getCause();
+
+            String msg = cause.getMessage();
             log.info(msg);
             assertEquals("SYNTHETIC", msg);
         }
