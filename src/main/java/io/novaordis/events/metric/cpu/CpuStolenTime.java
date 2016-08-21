@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.configuration;
+package io.novaordis.events.metric.cpu;
 
-import io.novaordis.events.metric.MetricDefinition;
-
-import java.util.ArrayList;
-import java.util.List;
+import io.novaordis.events.metric.source.Top;
+import io.novaordis.utilities.os.OS;
 
 /**
+ * See https://kb.novaordis.com/index.php/Vmstat#st
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/3/16
  */
-public class MockConfiguration implements Configuration {
+public class CpuStolenTime extends CpuMetricDefinitionBase {
+
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,68 +33,26 @@ public class MockConfiguration implements Configuration {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean foreground;
-    private String outputFileName;
-    private boolean outputFileOverwrite;
-    private List<MetricDefinition> metrics;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockConfiguration() {
+    public CpuStolenTime() {
 
-        this.metrics = new ArrayList<>();
+        addSource(OS.Linux, new Top("-b -n 1 -p 0"));
     }
 
-    // Configuration implementation ------------------------------------------------------------------------------------
+    // CpuMetricDefinition implementation ------------------------------------------------------------------------------
 
     @Override
-    public boolean isForeground() {
-
-        return foreground;
-    }
-
-    @Override
-    public int getSamplingIntervalSec() {
-        throw new RuntimeException("getSamplingIntervalSec() NOT YET IMPLEMENTED");
+    public String getSimpleLabel() {
+        return "CPU Stolen Time";
     }
 
     @Override
-    public String getOutputFileName() {
-        return outputFileName;
-    }
-
-    @Override
-    public boolean isOutputFileAppend() {
-        return outputFileOverwrite;
-    }
-
-    @Override
-    public List<MetricDefinition> getMetrics() {
-
-        return metrics;
+    public String getDescription() {
+        return "Percentages of total CPU time stolen from this vm by the hypervisor.";
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    public void setForeground(boolean b) {
-        this.foreground = b;
-    }
-
-    public void setOutputFileName(String s) {
-        this.outputFileName = s;
-    }
-
-    public void setOutputFileAppend(boolean b) {
-        this.outputFileOverwrite = b;
-    }
-
-    /**
-     * The relative order is preserved.
-     */
-    public void addMetricDefinition(MetricDefinition md) {
-
-        metrics.add(md);
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

@@ -14,34 +14,20 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
+package io.novaordis.events.metric.memory;
 
-import io.novaordis.events.core.event.TimedEvent;
 import io.novaordis.events.metric.MetricDefinition;
-
-import java.util.List;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/3/16
  */
-public interface DataCollector {
+public interface MemoryMetricDefinition extends MetricDefinition {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    /**
-     * Take a reading and return a timed event containing the most current values for specified metrics. May return null
-     * if external circumstances prevented the collector to read data.
-     *
-     * The collector task invoking this method will catch any exception thrown by it and will act accordingly, logging
-     * it but not canceling the timer.
-     *
-     * @exception DataCollectionException must have a human readable message.
-     */
-    TimedEvent read(List<MetricDefinition> metrics) throws DataCollectionException;
 
 }

@@ -20,7 +20,7 @@ import io.novaordis.events.core.event.Event;
 import io.novaordis.events.core.event.GenericTimedEvent;
 import io.novaordis.events.core.event.ShutdownEvent;
 import io.novaordis.osstats.configuration.MockConfiguration;
-import io.novaordis.osstats.metric.MockMetricDefinition;
+import io.novaordis.events.metric.MockMetricDefinition;
 import io.novaordis.utilities.Files;
 import org.junit.After;
 import org.junit.Test;

@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.configuration;
+package io.novaordis.events.metric.cpu;
 
-import io.novaordis.events.metric.MetricDefinition;
+import io.novaordis.events.core.event.MeasureUnit;
+import io.novaordis.events.core.event.Percentage;
+import io.novaordis.events.metric.MetricDefinitionTest;
+import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/3/16
  */
-public class MockConfiguration implements Configuration {
+public abstract class CpuMetricDefinitionTest extends MetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,72 +35,36 @@ public class MockConfiguration implements Configuration {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean foreground;
-    private String outputFileName;
-    private boolean outputFileOverwrite;
-    private List<MetricDefinition> metrics;
-
     // Constructors ----------------------------------------------------------------------------------------------------
-
-    public MockConfiguration() {
-
-        this.metrics = new ArrayList<>();
-    }
-
-    // Configuration implementation ------------------------------------------------------------------------------------
-
-    @Override
-    public boolean isForeground() {
-
-        return foreground;
-    }
-
-    @Override
-    public int getSamplingIntervalSec() {
-        throw new RuntimeException("getSamplingIntervalSec() NOT YET IMPLEMENTED");
-    }
-
-    @Override
-    public String getOutputFileName() {
-        return outputFileName;
-    }
-
-    @Override
-    public boolean isOutputFileAppend() {
-        return outputFileOverwrite;
-    }
-
-    @Override
-    public List<MetricDefinition> getMetrics() {
-
-        return metrics;
-    }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public void setForeground(boolean b) {
-        this.foreground = b;
+    @Test
+    public void measureUnitIsPercentage() throws Exception {
+
+        CpuMetricDefinition m = getMetricDefinitionToTest();
+
+        MeasureUnit mu = m.getMeasureUnit();
+
+        assertEquals(Percentage.getInstance(), mu);
     }
 
-    public void setOutputFileName(String s) {
-        this.outputFileName = s;
-    }
+    @Test
+    public void typeIsFloat() throws Exception {
 
-    public void setOutputFileAppend(boolean b) {
-        this.outputFileOverwrite = b;
-    }
+        CpuMetricDefinition m = getMetricDefinitionToTest();
 
-    /**
-     * The relative order is preserved.
-     */
-    public void addMetricDefinition(MetricDefinition md) {
+        Class t = m.getType();
 
-        metrics.add(md);
+        assertEquals(Float.class, t);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    @Override
+    protected abstract CpuMetricDefinition getMetricDefinitionToTest() throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

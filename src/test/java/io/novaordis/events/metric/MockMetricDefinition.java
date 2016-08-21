@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.configuration;
-
-import io.novaordis.events.metric.MetricDefinition;
-
-import java.util.ArrayList;
-import java.util.List;
+package io.novaordis.events.metric;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/3/16
  */
-public class MockConfiguration implements Configuration {
+public class MockMetricDefinition extends MockMetricDefinitionBase {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,67 +28,34 @@ public class MockConfiguration implements Configuration {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean foreground;
-    private String outputFileName;
-    private boolean outputFileOverwrite;
-    private List<MetricDefinition> metrics;
+    private String name;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockConfiguration() {
-
-        this.metrics = new ArrayList<>();
+    public MockMetricDefinition() {
+        this("Mock Metric Definition");
     }
 
-    // Configuration implementation ------------------------------------------------------------------------------------
-
-    @Override
-    public boolean isForeground() {
-
-        return foreground;
+    public MockMetricDefinition(String name) {
+        this.name = name;
     }
 
+    // MetricDefinition implementation ---------------------------------------------------------------------------------
+
     @Override
-    public int getSamplingIntervalSec() {
-        throw new RuntimeException("getSamplingIntervalSec() NOT YET IMPLEMENTED");
+    public String getName() {
+        return name;
     }
 
     @Override
-    public String getOutputFileName() {
-        return outputFileName;
-    }
-
-    @Override
-    public boolean isOutputFileAppend() {
-        return outputFileOverwrite;
-    }
-
-    @Override
-    public List<MetricDefinition> getMetrics() {
-
-        return metrics;
+    public String getSimpleLabel() {
+        throw new RuntimeException("getSimpleLabel() NOT YET IMPLEMENTED");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public void setForeground(boolean b) {
-        this.foreground = b;
-    }
-
-    public void setOutputFileName(String s) {
-        this.outputFileName = s;
-    }
-
-    public void setOutputFileAppend(boolean b) {
-        this.outputFileOverwrite = b;
-    }
-
-    /**
-     * The relative order is preserved.
-     */
-    public void addMetricDefinition(MetricDefinition md) {
-
-        metrics.add(md);
+    public void setName(String s) {
+        this.name = s;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

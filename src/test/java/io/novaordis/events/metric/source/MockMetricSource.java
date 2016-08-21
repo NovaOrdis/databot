@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.configuration;
+package io.novaordis.events.metric.source;
 
-import io.novaordis.events.metric.MetricDefinition;
+import io.novaordis.events.core.event.Property;
+import io.novaordis.osstats.DataCollectionException;
+import io.novaordis.utilities.os.OS;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/5/16
  */
-public class MockConfiguration implements Configuration {
+public class MockMetricSource implements MetricSource {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,67 +38,53 @@ public class MockConfiguration implements Configuration {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean foreground;
-    private String outputFileName;
-    private boolean outputFileOverwrite;
-    private List<MetricDefinition> metrics;
+    private Map<OS, List<Property>> results;
+
+    private boolean breakOnCollect;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockConfiguration() {
+    public MockMetricSource() {
 
-        this.metrics = new ArrayList<>();
+        results = new HashMap<>();
     }
 
-    // Configuration implementation ------------------------------------------------------------------------------------
+    // MetricSource implementation -------------------------------------------------------------------------------------
 
     @Override
-    public boolean isForeground() {
+    public List<Property> collectMetrics(OS os) throws DataCollectionException {
 
-        return foreground;
-    }
+        if (breakOnCollect) {
+            throw new DataCollectionException("SYNTHETIC");
+        }
 
-    @Override
-    public int getSamplingIntervalSec() {
-        throw new RuntimeException("getSamplingIntervalSec() NOT YET IMPLEMENTED");
-    }
+        List<Property> props = results.get(os);
 
-    @Override
-    public String getOutputFileName() {
-        return outputFileName;
-    }
+        if (props == null) {
+            return Collections.emptyList();
+        }
 
-    @Override
-    public boolean isOutputFileAppend() {
-        return outputFileOverwrite;
-    }
-
-    @Override
-    public List<MetricDefinition> getMetrics() {
-
-        return metrics;
+        return props;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public void setForeground(boolean b) {
-        this.foreground = b;
+    public void mockMetricGeneration(OS os, Property p) {
+
+        List<Property> ps = results.get(os);
+
+        if (ps == null) {
+
+            ps = new ArrayList<>();
+            results.put(os, ps);
+        }
+
+        ps.add(p);
     }
 
-    public void setOutputFileName(String s) {
-        this.outputFileName = s;
-    }
+    public void breakOnCollectMetrics() {
 
-    public void setOutputFileAppend(boolean b) {
-        this.outputFileOverwrite = b;
-    }
-
-    /**
-     * The relative order is preserved.
-     */
-    public void addMetricDefinition(MetricDefinition md) {
-
-        metrics.add(md);
+        breakOnCollect = true;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.configuration;
+package io.novaordis.events.metric.loadavg;
 
-import io.novaordis.events.metric.MetricDefinition;
-
-import java.util.ArrayList;
-import java.util.List;
+import io.novaordis.events.metric.source.Top;
+import io.novaordis.utilities.os.OS;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/3/16
  */
-public class MockConfiguration implements Configuration {
+public class LoadAverageLastFiveMinutes
+        extends LoadAverageMetricDefinitionBase implements LoadAverageMetricDefinition {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,68 +32,28 @@ public class MockConfiguration implements Configuration {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean foreground;
-    private String outputFileName;
-    private boolean outputFileOverwrite;
-    private List<MetricDefinition> metrics;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockConfiguration() {
+    public LoadAverageLastFiveMinutes() {
 
-        this.metrics = new ArrayList<>();
+        addSource(OS.Linux, new Top("-b -n 1 -p 0"));
+        addSource(OS.MacOS, new Top("-l 1 -n 0"));
     }
 
-    // Configuration implementation ------------------------------------------------------------------------------------
+    // LoadAverageMetricDefinition implementation ----------------------------------------------------------------------
 
     @Override
-    public boolean isForeground() {
+    public String getDescription() {
 
-        return foreground;
-    }
-
-    @Override
-    public int getSamplingIntervalSec() {
-        throw new RuntimeException("getSamplingIntervalSec() NOT YET IMPLEMENTED");
+        return "CPU and IO utilization during the last five minutes.";
     }
 
     @Override
-    public String getOutputFileName() {
-        return outputFileName;
-    }
-
-    @Override
-    public boolean isOutputFileAppend() {
-        return outputFileOverwrite;
-    }
-
-    @Override
-    public List<MetricDefinition> getMetrics() {
-
-        return metrics;
+    public String getSimpleLabel() {
+        return "Last Five Minutes Load Average";
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    public void setForeground(boolean b) {
-        this.foreground = b;
-    }
-
-    public void setOutputFileName(String s) {
-        this.outputFileName = s;
-    }
-
-    public void setOutputFileAppend(boolean b) {
-        this.outputFileOverwrite = b;
-    }
-
-    /**
-     * The relative order is preserved.
-     */
-    public void addMetricDefinition(MetricDefinition md) {
-
-        metrics.add(md);
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

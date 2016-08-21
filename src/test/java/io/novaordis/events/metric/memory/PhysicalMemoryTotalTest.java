@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
+package io.novaordis.events.metric.memory;
 
-import io.novaordis.events.core.event.TimedEvent;
 import io.novaordis.events.metric.MetricDefinition;
-import io.novaordis.events.metric.MockMetricDefinition;
-import io.novaordis.events.metric.source.MockMetricSource;
-import io.novaordis.osstats.os.MockOS;
+import io.novaordis.events.metric.source.MetricSource;
+import io.novaordis.events.metric.source.OSCommand;
 import io.novaordis.utilities.os.OS;
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/3/16
  */
-public abstract class DataCollectorTest {
+public class PhysicalMemoryTotalTest extends MemoryMetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -45,36 +44,55 @@ public abstract class DataCollectorTest {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
+    // getInstance() ---------------------------------------------------------------------------------------------------
+
     @Test
-    public void read() throws Exception {
+    public void getInstance() throws Exception {
 
-        MockOS mos = new MockOS();
+        PhysicalMemoryTotal m = (PhysicalMemoryTotal) MetricDefinition.getInstance("PhysicalMemoryTotal");
+        assertNotNull(m);
+    }
 
-        DataCollector c = getDataCollectorToTest(mos);
+    @Test
+    public void getSimpleLabel() throws Exception {
 
-        long t0 = System.currentTimeMillis();
+        PhysicalMemoryTotal m = new PhysicalMemoryTotal();
+        assertEquals("Total Physical Memory", m.getSimpleLabel());
+    }
 
-        MockMetricDefinition mmd = new MockMetricDefinition("TEST");
-        MockMetricSource mms = new MockMetricSource();
-        assertTrue(mmd.addSource(mos.getName(), mms));
+    // sources ---------------------------------------------------------------------------------------------------------
 
-        mms.mockMetricGeneration(mos, new MockProperty("TEST"));
+    @Test
+    public void sourcesLinux() throws Exception {
 
-        List<MetricDefinition> metrics = Collections.singletonList(mmd);
+        PhysicalMemoryTotal m = getMetricDefinitionToTest();
 
-        TimedEvent te = c.read(metrics);
+        List<MetricSource> linuxSources = m.getSources(OS.Linux);
+        assertEquals(1, linuxSources.size());
 
-        long t1 = System.currentTimeMillis();
+        OSCommand c = (OSCommand) linuxSources.get(0);
+        assertEquals("top", c.getCommand());
+    }
 
-        assertTrue(t0 <= te.getTime());
-        assertTrue(te.getTime() <= t1);
+    @Test
+    public void sourcesMac() throws Exception {
+
+        PhysicalMemoryTotal m = getMetricDefinitionToTest();
+
+        List<MetricSource> macSources = m.getSources(OS.MacOS);
+
+        // we don't know yet, this will change
+        assertTrue(macSources.isEmpty());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
 
-    protected abstract DataCollector getDataCollectorToTest(OS os) throws Exception;
+    @Override
+    protected PhysicalMemoryTotal getMetricDefinitionToTest() throws Exception {
+        return new PhysicalMemoryTotal();
+    }
 
     // Private ---------------------------------------------------------------------------------------------------------
 

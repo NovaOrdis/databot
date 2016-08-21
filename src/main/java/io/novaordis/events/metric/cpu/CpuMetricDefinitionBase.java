@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.configuration;
+package io.novaordis.events.metric.cpu;
 
-import io.novaordis.events.metric.MetricDefinition;
-
-import java.util.ArrayList;
-import java.util.List;
+import io.novaordis.events.core.event.Percentage;
+import io.novaordis.events.metric.MetricDefinitionBase;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/3/16
  */
-public class MockConfiguration implements Configuration {
+public abstract class CpuMetricDefinitionBase extends MetricDefinitionBase implements CpuMetricDefinition {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,68 +31,22 @@ public class MockConfiguration implements Configuration {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean foreground;
-    private String outputFileName;
-    private boolean outputFileOverwrite;
-    private List<MetricDefinition> metrics;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockConfiguration() {
-
-        this.metrics = new ArrayList<>();
-    }
-
-    // Configuration implementation ------------------------------------------------------------------------------------
+    // CpuMetricDefinition implementation ------------------------------------------------------------------------------
 
     @Override
-    public boolean isForeground() {
+    public Percentage getMeasureUnit() {
 
-        return foreground;
+        return Percentage.getInstance();
     }
 
     @Override
-    public int getSamplingIntervalSec() {
-        throw new RuntimeException("getSamplingIntervalSec() NOT YET IMPLEMENTED");
-    }
-
-    @Override
-    public String getOutputFileName() {
-        return outputFileName;
-    }
-
-    @Override
-    public boolean isOutputFileAppend() {
-        return outputFileOverwrite;
-    }
-
-    @Override
-    public List<MetricDefinition> getMetrics() {
-
-        return metrics;
+    public Class getType() {
+        return Float.class;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    public void setForeground(boolean b) {
-        this.foreground = b;
-    }
-
-    public void setOutputFileName(String s) {
-        this.outputFileName = s;
-    }
-
-    public void setOutputFileAppend(boolean b) {
-        this.outputFileOverwrite = b;
-    }
-
-    /**
-     * The relative order is preserved.
-     */
-    public void addMetricDefinition(MetricDefinition md) {
-
-        metrics.add(md);
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

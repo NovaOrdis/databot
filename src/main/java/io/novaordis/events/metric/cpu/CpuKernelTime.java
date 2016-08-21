@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.configuration;
+package io.novaordis.events.metric.cpu;
 
-import io.novaordis.events.metric.MetricDefinition;
-
-import java.util.ArrayList;
-import java.util.List;
+import io.novaordis.events.metric.source.Top;
+import io.novaordis.utilities.os.OS;
 
 /**
+ * See https://kb.novaordis.com/index.php/Vmstat#sy
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/3/16
  */
-public class MockConfiguration implements Configuration {
+public class CpuKernelTime extends CpuMetricDefinitionBase {
+
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,68 +33,27 @@ public class MockConfiguration implements Configuration {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean foreground;
-    private String outputFileName;
-    private boolean outputFileOverwrite;
-    private List<MetricDefinition> metrics;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockConfiguration() {
+    public CpuKernelTime() {
 
-        this.metrics = new ArrayList<>();
+        addSource(OS.Linux, new Top("-b -n 1 -p 0"));
+        addSource(OS.MacOS, new Top("-l 1 -n 0"));
     }
 
-    // Configuration implementation ------------------------------------------------------------------------------------
+    // CpuMetricDefinition implementation ------------------------------------------------------------------------------
 
     @Override
-    public boolean isForeground() {
-
-        return foreground;
-    }
-
-    @Override
-    public int getSamplingIntervalSec() {
-        throw new RuntimeException("getSamplingIntervalSec() NOT YET IMPLEMENTED");
+    public String getSimpleLabel() {
+        return "CPU Kernel Time";
     }
 
     @Override
-    public String getOutputFileName() {
-        return outputFileName;
-    }
-
-    @Override
-    public boolean isOutputFileAppend() {
-        return outputFileOverwrite;
-    }
-
-    @Override
-    public List<MetricDefinition> getMetrics() {
-
-        return metrics;
+    public String getDescription() {
+        return "Percentage of total CPU time spent running kernel code (system time).";
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    public void setForeground(boolean b) {
-        this.foreground = b;
-    }
-
-    public void setOutputFileName(String s) {
-        this.outputFileName = s;
-    }
-
-    public void setOutputFileAppend(boolean b) {
-        this.outputFileOverwrite = b;
-    }
-
-    /**
-     * The relative order is preserved.
-     */
-    public void addMetricDefinition(MetricDefinition md) {
-
-        metrics.add(md);
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

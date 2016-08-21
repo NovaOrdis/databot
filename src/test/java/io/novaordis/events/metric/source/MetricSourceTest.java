@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.configuration;
+package io.novaordis.events.metric.source;
 
-import io.novaordis.events.metric.MetricDefinition;
-
-import java.util.ArrayList;
-import java.util.List;
+import io.novaordis.osstats.os.MockOS;
+import org.junit.Test;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/4/16
  */
-public class MockConfiguration implements Configuration {
+public abstract class MetricSourceTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,72 +31,25 @@ public class MockConfiguration implements Configuration {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean foreground;
-    private String outputFileName;
-    private boolean outputFileOverwrite;
-    private List<MetricDefinition> metrics;
-
     // Constructors ----------------------------------------------------------------------------------------------------
-
-    public MockConfiguration() {
-
-        this.metrics = new ArrayList<>();
-    }
-
-    // Configuration implementation ------------------------------------------------------------------------------------
-
-    @Override
-    public boolean isForeground() {
-
-        return foreground;
-    }
-
-    @Override
-    public int getSamplingIntervalSec() {
-        throw new RuntimeException("getSamplingIntervalSec() NOT YET IMPLEMENTED");
-    }
-
-    @Override
-    public String getOutputFileName() {
-        return outputFileName;
-    }
-
-    @Override
-    public boolean isOutputFileAppend() {
-        return outputFileOverwrite;
-    }
-
-    @Override
-    public List<MetricDefinition> getMetrics() {
-
-        return metrics;
-    }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public void setForeground(boolean b) {
-        this.foreground = b;
-    }
+    @Test
+    public void collectMetrics() throws Exception {
 
-    public void setOutputFileName(String s) {
-        this.outputFileName = s;
-    }
+        MetricSource s = getMetricSourceToTest();
 
-    public void setOutputFileAppend(boolean b) {
-        this.outputFileOverwrite = b;
-    }
+        MockOS mos = new MockOS();
 
-    /**
-     * The relative order is preserved.
-     */
-    public void addMetricDefinition(MetricDefinition md) {
-
-        metrics.add(md);
+        s.collectMetrics(mos);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    protected abstract MetricSource getMetricSourceToTest() throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

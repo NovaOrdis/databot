@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.configuration;
+package io.novaordis.events.metric.loadavg;
 
-import io.novaordis.events.metric.MetricDefinition;
+import io.novaordis.events.metric.MetricDefinitionTest;
+import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/3/16
  */
-public class MockConfiguration implements Configuration {
+public abstract class LoadAverageMetricDefinitionTest extends MetricDefinitionTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,72 +34,30 @@ public class MockConfiguration implements Configuration {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private boolean foreground;
-    private String outputFileName;
-    private boolean outputFileOverwrite;
-    private List<MetricDefinition> metrics;
-
     // Constructors ----------------------------------------------------------------------------------------------------
-
-    public MockConfiguration() {
-
-        this.metrics = new ArrayList<>();
-    }
-
-    // Configuration implementation ------------------------------------------------------------------------------------
-
-    @Override
-    public boolean isForeground() {
-
-        return foreground;
-    }
-
-    @Override
-    public int getSamplingIntervalSec() {
-        throw new RuntimeException("getSamplingIntervalSec() NOT YET IMPLEMENTED");
-    }
-
-    @Override
-    public String getOutputFileName() {
-        return outputFileName;
-    }
-
-    @Override
-    public boolean isOutputFileAppend() {
-        return outputFileOverwrite;
-    }
-
-    @Override
-    public List<MetricDefinition> getMetrics() {
-
-        return metrics;
-    }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public void setForeground(boolean b) {
-        this.foreground = b;
+    @Test
+    public void measureUnit() throws Exception {
+
+        LoadAverageMetricDefinition m = getMetricDefinitionToTest();
+        assertNull(m.getMeasureUnit());
     }
 
-    public void setOutputFileName(String s) {
-        this.outputFileName = s;
-    }
+    @Test
+    public void type() throws Exception {
 
-    public void setOutputFileAppend(boolean b) {
-        this.outputFileOverwrite = b;
-    }
-
-    /**
-     * The relative order is preserved.
-     */
-    public void addMetricDefinition(MetricDefinition md) {
-
-        metrics.add(md);
+        LoadAverageMetricDefinition m = getMetricDefinitionToTest();
+        assertEquals(Float.class, m.getType());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    @Override
+    protected abstract LoadAverageMetricDefinition getMetricDefinitionToTest() throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

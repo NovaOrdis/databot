@@ -22,7 +22,7 @@ import io.novaordis.events.core.event.Event;
 import io.novaordis.events.core.event.ShutdownEvent;
 import io.novaordis.events.core.event.TimedEvent;
 import io.novaordis.osstats.configuration.Configuration;
-import io.novaordis.osstats.metric.MetricDefinition;
+import io.novaordis.events.metric.MetricDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -16,7 +16,7 @@
 
 package io.novaordis.osstats.configuration;
 
-import io.novaordis.osstats.metric.MetricDefinition;
+import io.novaordis.events.metric.MetricDefinition;
 
 import java.util.List;
 

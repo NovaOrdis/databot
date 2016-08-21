@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats;
+package io.novaordis.events.metric.source;
 
-import io.novaordis.events.core.event.TimedEvent;
-import io.novaordis.events.metric.MetricDefinition;
+import io.novaordis.events.core.event.Property;
+import io.novaordis.osstats.DataCollectionException;
+import io.novaordis.utilities.os.OS;
 
 import java.util.List;
 
 /**
+ * The source for metrics. Can represent a native O/S command, a file, etc.
+ *
+ * The implementations must correctly implement equals() and hashCode()
+ *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 8/4/16
  */
-public interface DataCollector {
+public interface MetricSource {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -34,14 +39,8 @@ public interface DataCollector {
     // Public ----------------------------------------------------------------------------------------------------------
 
     /**
-     * Take a reading and return a timed event containing the most current values for specified metrics. May return null
-     * if external circumstances prevented the collector to read data.
-     *
-     * The collector task invoking this method will catch any exception thrown by it and will act accordingly, logging
-     * it but not canceling the timer.
-     *
-     * @exception DataCollectionException must have a human readable message.
+     * @return the complete list of properties. If no properties are collected, returns an empty list, but never null.
      */
-    TimedEvent read(List<MetricDefinition> metrics) throws DataCollectionException;
+    List<Property> collectMetrics(OS os) throws DataCollectionException;
 
 }
