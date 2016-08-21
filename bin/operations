@@ -268,7 +268,7 @@ function get-project-name() {
 }
 
 #
-# returns the project version as specified in the pom.xml file
+# Returns the project version as specified in the pom.xml file, at stdout
 #
 function get-version() {
 
@@ -287,7 +287,10 @@ function get-version() {
 }
 
 #
-# replaces the version string in pom.xml with the version given as argument
+# Replaces the version string in pom.xml with the version given as argument, if they are different.
+# There are cases when set version is a noop, for example when releasing the current snapshot: the
+# POM file already contains the correct version, and subsequent functions will increment it to the
+# appropriate post-release "current" version.
 #
 function set-version() {
 
@@ -300,8 +303,16 @@ function set-version() {
     [ -z "${pom_file}" ] && pom_file=${project_home}/pom.xml
     [ -f ${pom_file} ] || fail "pom.xml file ${pom_file} not found"
 
+    local current_version
+    current_version=$(get-version) || fail "failed to get the current version from pom.xm"
+
+    if [ "${version}" = "${current_version}" ]; then
+        debug "the provided version ${version} and the current pom.xml version are identical"
+        return 0
+    fi
+
     #
-    # replace the first occurrence of <version>...</version> with our version
+    # if different, replace the first occurrence of <version>...</version> with our version
     #
 
     debug "inserting version ${version}"
@@ -319,8 +330,8 @@ function set-version() {
 # gets the current version as declared in POM and computes the version for the release
 # being processed. 'mode' can be "major", "minor", "patch", "snapshot" or a full version
 # string. If a full version string is provided, the function will verify that is a valid
-# version string and the version it # specifies if newer than the current version.
-# Sends the version string at stdout.
+# version string and the version it specifies if newer than the current version. Sends
+# the version string at stdout.
 #
 function compute-release-version() {
 
@@ -389,7 +400,14 @@ function compute-release-version() {
         fi
         snapshot=""
     elif [ "${mode}" = "snapshot" ]; then
-        if [ -z "${snapshot}" ]; then
+        if [ -n "${snapshot}" ]; then
+            #
+            # the current version is a snapshot, releasing a snapshot means releasing
+            # the current snapshot we were working on and incrementing the snapshot
+            # number.
+            #
+            debug "the current snapshot ${snapshot} is being released"
+        else
             #
             # current release is a dot release, increment to the next patch snapshot 1
             #
@@ -402,11 +420,6 @@ function compute-release-version() {
             else
                 patch=$(expr ${patch} + 1) || exit 1
             fi
-        else
-            #
-            # regular snapshot
-            #
-            snapshot=$(expr ${snapshot} + 1) || exit 1
         fi
     else
         local new_version=${mode}
@@ -830,15 +843,12 @@ function build-release-zip-file() {
     mkdir ${zip_root_dir} && \
         debug "created zip root directory ${zip_root_dir}" || \
         fail "failed to create zip root directory ${zip_root_dir}"
-
     mkdir ${zip_root_dir}/lib && \
         debug "created zip root directory ${zip_root_dir}/lib" || \
         fail "failed to create zip root directory ${zip_root_dir}/lib"
-
     mkdir ${zip_root_dir}/bin && \
         debug "created zip root directory ${zip_root_dir}/bin" || \
         fail "failed to create zip root directory ${zip_root_dir}/bin"
-
     cp ${artifact_path} ${zip_root_dir}/lib && \
         debug "copied $(basename ${artifact_path}) in ${zip_root_dir}/lib" || exit 1;
 
@@ -851,13 +861,10 @@ function build-release-zip-file() {
 
     cp ${project_home}/src/main/bash/* ${zip_root_dir}/bin && \
         debug "copied scripts to ${zip_root_dir}/bin" || exit 1;
-
     configure-run-wrapper ${zip_root_dir}/bin && \
         debug "successfully configured the run wrapper" || exit 1;
-
     chmod a+rx ${zip_root_dir}/bin/* && \
         debug "chmod a+rx ${zip_root_dir}/bin/*" || exit 1;
-
     cp ${project_home}/README.md ${zip_root_dir} && \
         debug "copied ${project_home}/README.md ${zip_root_dir}/" || exit 1;
 
@@ -1137,6 +1144,7 @@ function do-release() {
 
     local release_version
     release_version=$(compute-release-version "${current_version}" "${mode}") || exit 1
+
     debug "release version ${release_version}"
 
     yes "releasing ${release_version}, is this OK?" || { info "release canceled, no files were changed"; return 0; }
@@ -1157,7 +1165,11 @@ function do-release() {
 
     git add . && info "git add ok" || fail "git add . failed"
 
-    git commit -m "release ${release_version}" && info "git commit ok" || fail "git commit failed"
+    #
+    # there may be nothing to commit, so we don't fail on commit failure, we just warn
+    #
+
+    git commit -m "release ${release_version}" && info "git commit ok" || warn "git commit did not succeed, maybe because there was nothing to commit"
 
     local tag=release-${release_version}
     local tagged
@@ -1192,7 +1204,10 @@ function do-release() {
             fail "release binary artifact ${release_binary_artifact} not found, something went wrong with the maven build process"
 
     else
-        mvn ${maven_testing_configuration} clean package || \
+        #
+        # we need to do install and not package because we may need the JAR in the Maven repository as well
+        #
+        mvn ${maven_testing_configuration} clean install || \
             fail "failed to pass tests, must restore the version in pom.xml to ${current_version} manually"
         release_binary_artifact=$(build-release-zip-file) || exit 1
         install-release ${release_binary_artifact}
