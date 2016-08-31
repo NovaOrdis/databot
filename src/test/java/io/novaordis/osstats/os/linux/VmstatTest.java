@@ -102,7 +102,7 @@ public class VmstatTest {
 
         try {
             Vmstat.parseProperty(
-                    "test-header", "unconvertible-value", "test-header", "test-name", Integer.class, 1, null);
+                    "test-header", "unconvertible-value", "test-header", "test-name", Integer.class, 1d, null);
             fail("should throw exception");
         }
         catch(InvalidExecutionOutputException e) {
@@ -127,7 +127,7 @@ public class VmstatTest {
     public void parseProperty_ConversionFromString_MultiplicationFactor() throws Exception {
 
         IntegerProperty ip = (IntegerProperty)Vmstat.parseProperty(
-                "test-header", "7", "test-header", "test-name", Integer.class, 10, null);
+                "test-header", "7", "test-header", "test-name", Integer.class, 10d, null);
 
         assertEquals("test-name", ip.getName());
         assertEquals(70, ip.getInteger().intValue());

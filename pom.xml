@@ -20,7 +20,7 @@
         <slf4j-version>1.7.12</slf4j-version>
         <junit-version>4.12</junit-version>
         <novaordis-utilities-version>4.2.0</novaordis-utilities-version>
-        <events-version>2.4.2</events-version>
+        <events-version>2.4.3-SNAPSHOT-1</events-version>
     </properties>
 
     <build>

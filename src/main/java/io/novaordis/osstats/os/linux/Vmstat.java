@@ -94,11 +94,11 @@ public class Vmstat {
             // resolve multiplication factors
             //
 
-            Integer multiplicationFactor = null;
+            Double multiplicationFactor = null;
             String multiplicationFactorName = (String)CONTENT[i][3];
 
             if (OS_MEMORY_PAGE_SIZE.equals(multiplicationFactorName)) {
-                multiplicationFactor = osConfiguration.getMemoryPageSize();
+                multiplicationFactor = (double)osConfiguration.getMemoryPageSize();
             }
 
             Property p = parseProperty(
@@ -119,12 +119,12 @@ public class Vmstat {
     /**
      * @param value the value to convert to the given type and write into the property (after multiplication with
      *              the multiplication factor, if present)
-     * @param multiplicationFactor the integer to multiply the given value to obtain the value to write into the
+     * @param multiplicationFactor the double to multiply the given value to obtain the value to write into the
      *                             property. May be null, in which case it is ignored.
      */
     public static Property parseProperty(
             String header, String value, String expectedHeader, String name, Class type,
-            Integer multiplicationFactor, MeasureUnit measureUnit) throws InvalidExecutionOutputException {
+            Double multiplicationFactor, MeasureUnit measureUnit) throws InvalidExecutionOutputException {
 
         if (!expectedHeader.equals(header)) {
 
