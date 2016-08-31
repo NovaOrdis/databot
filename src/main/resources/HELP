@@ -13,6 +13,10 @@ To start an instance that runs in foreground, use --foreground command line opti
 mode, the output is switched automatically from the configured file destination to /dev/stdout and
 the output.file configuration, as described below, is ignored.
 
+os-stats  attempts  to use the java installation  indicated by  the OS_STATS_JAVA_HOME environment
+variable,  is set.   If the OS_STATS_JAVA_HOME environment variable is not set,  os-stats uses the
+standard way of locating java (JAVA_HOME, PATH, etc.)
+
 os-stats  can  also  be  used  as a command line  manager  of  the os-stats process running in the
 background. The commands that can be used are:
 
@@ -30,7 +34,8 @@ Command line options:
   --foreground, -fg -  run the command in foreground and  automatically switch the output from the
     configured file destination to /dev/stdout.
 
-Configuration ------------------------------------------------------------------------------------
+
+Configuration:
 
   sampling.interval -  sampling interval, in seconds. If not specified, the default is 10 seconds.
 

@@ -39,6 +39,16 @@ function display-version() {
 }
 
 function get_java_home() {
+
+    #
+    # attempt to use OS_STATS_JAVA_HOME with priority
+    #
+
+    if [ -n "${OS_STATS_JAVA_HOME}" ]; then
+        echo "${OS_STATS_JAVA_HOME}"
+        return 0
+    fi
+
     # local java_home="/usr/java/jdk64-1.7.0_45"
     local java_home=""
     if [ -n "${JAVA_HOME}" ]; then
@@ -150,7 +160,7 @@ done
 pids=$(get-pids) || fail "failed to get pids"
 [ -n "${pids}" ] && fail "an os-stats process is already running (pid ${pids})"
 
-java_home=$(get_java_home) || fail "failed to get JAVA_HOME"
+java_home=$(get_java_home) || fail "failed to get java home"
 classpath=$(get_classpath) || fail "failed to build classpath"
 java_bin="java"
 [ "${java_home}" != "" ] && java_bin="${java_home}/bin/java"
