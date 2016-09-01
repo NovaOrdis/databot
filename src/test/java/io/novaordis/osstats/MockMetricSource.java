@@ -18,6 +18,7 @@ package io.novaordis.osstats;
 
 import io.novaordis.events.core.event.Property;
 import io.novaordis.events.metric.MetricCollectionException;
+import io.novaordis.events.metric.MetricDefinition;
 import io.novaordis.events.metric.source.MetricSource;
 import io.novaordis.utilities.os.OS;
 
@@ -66,6 +67,12 @@ public class MockMetricSource implements MetricSource {
         }
 
         return props;
+    }
+
+    @Override
+    public List<Property> collectMetrics(List<MetricDefinition> metricDefinitions, OS os)
+            throws MetricCollectionException {
+        throw new RuntimeException("collectMetrics() NOT YET IMPLEMENTED");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
