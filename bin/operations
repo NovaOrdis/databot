@@ -110,7 +110,7 @@ function main() {
         ((i++))
     done
 
-    [ "${command}" = "" -o ${arguments[0]} = "--help" ] && { usage; exit 0; }
+    [ "${command}" = "" -o "${arguments[0]}" = "--help" ] && { usage; exit 0; }
 
     #
     # set project home

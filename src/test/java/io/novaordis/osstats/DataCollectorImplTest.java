@@ -135,6 +135,26 @@ public class DataCollectorImplTest extends DataCollectorTest {
         }
     }
 
+    @Test
+    public void establishSources_OneMetricThatHasNoSource() throws Exception {
+
+        MockOS mos = new MockOS();
+
+        MockMetricDefinition d = new MockMetricDefinition();
+
+        List<MetricDefinition> metrics = new ArrayList<>(Collections.singletonList(d));
+
+        try {
+            DataCollectorImpl.establishSources(metrics, mos.getName());
+            fail("should throw exception");
+        }
+        catch(DataCollectionException e) {
+            String msg = e.getMessage();
+            log.info(msg);
+            assertTrue(msg.contains("has no declared sources"));
+        }
+    }
+
     // readMetrics() ---------------------------------------------------------------------------------------------------
 
     @Test

@@ -111,7 +111,15 @@ public class DataCollectorImpl implements DataCollector {
             //
             // add the preferred source
             //
-            sources.add(d.getSources(osName).get(0));
+            List<MetricSource> srcs = d.getSources(osName);
+            if (srcs.isEmpty()) {
+                //
+                // d has no source, fail
+                //
+                throw new DataCollectionException(d + " has no declared sources for " + osName);
+            }
+
+            sources.add(srcs.get(0));
         }
 
         return sources;

@@ -34,7 +34,6 @@ Command line options:
   --foreground, -fg -  run the command in foreground and  automatically switch the output from the
     configured file destination to /dev/stdout.
 
-
 Configuration:
 
   sampling.interval -  sampling interval, in seconds. If not specified, the default is 10 seconds.
@@ -55,4 +54,5 @@ Configuration:
 
       os-stats --help metrics (not yet implemented, TODO).
 
+    Until then, go to https://kb.novaordis.com/index.php/Os-stats_Metric_Reference
 
