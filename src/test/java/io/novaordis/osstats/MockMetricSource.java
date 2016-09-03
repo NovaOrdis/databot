@@ -40,7 +40,7 @@ public class MockMetricSource implements MetricSource {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private Map<OS, List<Property>> results;
+    private Map<OS, Map<MetricDefinition, Property>> results;
 
     private boolean breakOnCollect;
 
@@ -54,41 +54,73 @@ public class MockMetricSource implements MetricSource {
     // MetricSource implementation -------------------------------------------------------------------------------------
 
     @Override
-    public List<Property> collectMetrics(OS os) throws MetricCollectionException {
+    public List<Property> collectAllMetrics(OS os) throws MetricCollectionException {
 
         if (breakOnCollect) {
             throw new MetricCollectionException("SYNTHETIC");
         }
 
-        List<Property> props = results.get(os);
+        Map<MetricDefinition, Property> props = results.get(os);
 
         if (props == null) {
             return Collections.emptyList();
         }
 
-        return props;
+        return new ArrayList<>(props.values());
     }
 
     @Override
     public List<Property> collectMetrics(List<MetricDefinition> metricDefinitions, OS os)
             throws MetricCollectionException {
-        throw new RuntimeException("collectMetrics() NOT YET IMPLEMENTED");
+
+        List<Property> result = new ArrayList<>();
+
+        Map<MetricDefinition, Property> props = results.get(os);
+
+        if (props != null) {
+
+            for(MetricDefinition d: metricDefinitions) {
+
+                Property p = props.get(d);
+
+                if (p != null) {
+
+                    result.add(p);
+                }
+            }
+        }
+
+        return result;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
     public void mockMetricGeneration(OS os, Property p) {
 
-        List<Property> ps = results.get(os);
+        Map<MetricDefinition, Property> properties = results.get(os);
 
-        if (ps == null) {
+        if (properties == null) {
 
-            ps = new ArrayList<>();
-            results.put(os, ps);
+            properties = new HashMap<>();
+            results.put(os, properties);
         }
 
-        ps.add(p);
+        properties.put(new MockMetricDefinition("mock"), p);
     }
+
+    public void mockMetricGeneration(OS os, MetricDefinition d, Property p) {
+
+        Map<MetricDefinition, Property> properties = results.get(os);
+
+        if (properties == null) {
+
+            properties = new HashMap<>();
+            results.put(os, properties);
+        }
+
+        properties.put(d, p);
+    }
+
 
     public void breakOnCollectMetrics() {
 

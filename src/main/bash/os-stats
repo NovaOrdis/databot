@@ -63,6 +63,101 @@ function get_java_home() {
     echo ${java_home}
 }
 
+jboss_cli_dependencies="\
+jboss-as-cli \
+jboss-dmr \
+jboss-logging \
+staxmapper \
+jboss-as-protocol \
+picketbox \
+jboss-as-controller-client \
+jboss-threads \
+jboss-remoting \
+aesh \
+xnio-api \
+xnio-nio \
+slf4j-api \
+slf4j-jboss-logmanager"
+
+#
+# Build the classpath fragment required by the CLI wrapper to work using JARs deployed within the specified JBoss
+# installation. If it successful, return the classpath fragment at stdout and returns 0. If not, it sends an error
+# message at stderr and returns 1.
+#
+function get-jboss-cli-classpath() {
+
+    local jboss_home=$1
+    [ -z "${jboss_home}" ] && { echo "[error]: 'jboss_home' not provided" 1>&2; return 1; }
+    [ -d ${jboss_home} ] || { echo "[error]: jboss_home ${jboss_home} does not exist" 1>&2; return 1; }
+
+    local classpath
+
+    local jboss_modules_jar=${jboss_home}/jboss-modules.jar
+    [ -f ${jboss_modules_jar} ] || { echo "[error]: ${jboss_modules_jar} not found" 1>&2; return 1; }
+    classpath=${jboss_modules_jar}
+
+    local jboss_cli_client_jar=${jboss_home}/bin/client/jboss-cli-client.jar
+    [ -f ${jboss_cli_client_jar} ] || { echo "[error]: ${jboss_cli_client_jar} not found" 1>&2; return 1; }
+    classpath=${classpath}:${jboss_cli_client_jar}
+
+    for i in ${jboss_cli_dependencies}; do
+        local classpath_element
+        classpath_element=$(locate-newest-jar ${jboss_home} ${i}) || return 1
+        classpath=${classpath}:${classpath_element}
+    done
+
+    echo "${classpath}"
+    return 0
+}
+
+#
+# writes the newest JAR path that matches the base name at stdout (by comparing overlays), or returns 1 if no such JAR
+# is found. We don't compare the JAR file names themselves, because we encountered cases when different overlays
+# contain the same JARs, and the older overlays contain corrupted JARs.
+#
+function locate-newest-jar() {
+
+    local jboss_home=$1
+    [ -z "${jboss_home}" ] && { echo "[error]: 'jboss_home' not provided" 1>&2; return 1; }
+    [ -d ${jboss_home} ] || { echo "[error]: jboss_home ${jboss_home} does not exist" 1>&2; return 1; }
+
+    local jar_base_name=$2
+    [ -z "${jar_base_name}" ] && { echo "[error]: 'jar_base_name' not provided" 1>&2; return 1; }
+
+    local module_dir=${jboss_home}/modules
+    [ -d ${module_dir} ] || { echo "[error]: the module directory ${module_dir} does not exist" 1>&2; return 1; }
+
+    local newest_jar_path
+    local newest_overlay
+    local newest_jar_basename
+    for i in $(find ${module_dir} -name ${jar_base_name}-[0-9]*); do
+        local current_basename
+        current_basename=$(basename ${i})
+        if [[ ${i} =~ .overlays ]]; then
+            current_overlay=${i#*.overlays/}
+            current_overlay=${current_overlay%%/*}
+        fi
+        if [[ "${current_overlay}" > "${newest_overlay}" ]]; then
+            newest_jar_basename=${current_basename}
+            newest_jar_path=${i}
+            newest_overlay=${current_overlay}
+            continue
+        fi
+        if [ "${current_overlay}" = "${newest_overlay}" ]; then
+            if [[ "${current_basename}" > "${newest_jar_basename}" ]]; then
+                newest_jar_basename=${current_basename}
+                newest_jar_path=${i}
+                continue
+            fi
+        fi
+    done
+
+    [ -z "${newest_jar_path}" ] && \
+        { echo "[error]: no JAR with a name starting with '${jar_base_name}' found in ${module_dir}" 1>&2; return 1; }
+
+    echo ${newest_jar_path}
+}
+
 function get_classpath() {
     debug "${FUNCNAME[0]}: home_dir=${home_dir}"
     local first=true
@@ -161,7 +256,11 @@ pids=$(get-pids) || fail "failed to get pids"
 [ -n "${pids}" ] && fail "an os-stats process is already running (pid ${pids})"
 
 java_home=$(get_java_home) || fail "failed to get java home"
+
 classpath=$(get_classpath) || fail "failed to build classpath"
+jboss_cli_classpath=$(get-jboss-cli-classpath /Users/ovidiu/runtime/jboss-eap-6.4.6) || fail "failed to build jboss CLI classpath"
+classpath=${classpath}:${jboss_cli_classpath}
+
 java_bin="java"
 [ "${java_home}" != "" ] && java_bin="${java_home}/bin/java"
 

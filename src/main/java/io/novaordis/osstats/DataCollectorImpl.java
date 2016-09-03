@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -189,11 +190,17 @@ public class DataCollectorImpl implements DataCollector {
             List<Property> props;
 
             try {
-                props = source.collectMetrics(os);
+
+                //
+                // optimization: collect all possible metrics in one go. It may return an empty list for some sources
+                //
+                props = source.collectAllMetrics(os);
             }
             catch(MetricCollectionException e) {
-                throw new DataCollectionException(null, e);
+
+                throw new DataCollectionException(e);
             }
+
             allProperties.addAll(props);
         }
 
@@ -213,11 +220,34 @@ public class DataCollectorImpl implements DataCollector {
             }
 
             //
-            // this is not supposed to happen, we must find at least one property that corresponds to the given
-            // metric, if that is not the case, it means the metric was configured with the incorrect sources
+            // this happens when the "bulk" metric collection for a source returned an empty list. Attempt collecting
+            // the specific metric with its preferred source
             //
 
-            throw new IllegalStateException("NOT YET IMPLEMENTED");
+            MetricSource preferredSource = m.getSources(os.getName()).get(0);
+
+            try {
+
+                List<Property> props = preferredSource.collectMetrics(Collections.singletonList(m), os);
+
+                //
+                // because we're only passing one metric definition, we expect one property
+                //
+
+                if (props.size() != 1) {
+
+                    throw new DataCollectionException(
+                            "we received " + props.size() + " properties for one metric " + m);
+                }
+
+                Property p = props.get(0);
+                properties.add(p);
+            }
+            catch(MetricCollectionException e) {
+
+                throw new DataCollectionException(e);
+            }
+
         }
 
         return properties;

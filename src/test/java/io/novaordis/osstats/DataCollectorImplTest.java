@@ -213,6 +213,43 @@ public class DataCollectorImplTest extends DataCollectorTest {
         }
     }
 
+    @Test
+    public void readMetrics_bulkCollectionReturnsNoMetrics() throws Exception {
+
+        MockOS mos = new MockOS();
+
+        DataCollectorImpl dc = new DataCollectorImpl(mos);
+
+        MockMetricDefinition mmd = new MockMetricDefinition();
+        MockMetricSource mms = new MockMetricSource();
+        mmd.addSource(mos.getName(), mms);
+        MockProperty mockProperty = new MockProperty("test");
+
+        mms.mockMetricGeneration(mos, mmd, mockProperty);
+
+        //
+        // make sure that bulk collection returns an empty list
+        //
+
+        List<MetricSource> sources = mmd.getSources(mos.getName());
+        assertEquals(1, sources.size());
+        MetricSource source = sources.get(0);
+        List<Property> bulkCollection = source.collectAllMetrics(mos);
+
+        //
+        // TODO review this
+        //
+        assertTrue(bulkCollection.isEmpty());
+
+        List<Property> targetedCollection = dc.readMetrics(Collections.singletonList(mmd));
+
+        assertEquals(1, targetedCollection.size());;
+
+        Property p = targetedCollection.get(0);
+
+        assertEquals(mockProperty, p);
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------

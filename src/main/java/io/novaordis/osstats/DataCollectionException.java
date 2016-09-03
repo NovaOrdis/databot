@@ -38,7 +38,7 @@ public class DataCollectionException extends Exception {
     }
 
     public DataCollectionException(Throwable cause) {
-        super(cause);
+        super(null, cause);
     }
 
     public DataCollectionException(String msg, Throwable cause) {
