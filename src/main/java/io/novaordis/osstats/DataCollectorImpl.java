@@ -237,7 +237,7 @@ public class DataCollectorImpl implements DataCollector {
                 if (props.size() != 1) {
 
                     throw new DataCollectionException(
-                            "we received " + props.size() + " properties for one metric " + m);
+                            m + " produced " + (props.size() == 0 ? "no" : props.size()) + " values");
                 }
 
                 Property p = props.get(0);
