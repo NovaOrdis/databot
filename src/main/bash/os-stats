@@ -76,8 +76,7 @@ jboss-remoting \
 aesh \
 xnio-api \
 xnio-nio \
-slf4j-api \
-slf4j-jboss-logmanager"
+slf4j-api"
 
 #
 # Build the classpath fragment required by the CLI wrapper to work using JARs deployed within the specified JBoss
