@@ -170,7 +170,7 @@ public class DataCollectorImpl implements DataCollector {
     // Package protected -----------------------------------------------------------------------------------------------
 
     /**
-     * Reads the specified metrics from the underlying O/S.
+     * Reads the specified metrics from the underlying metric sources.
      *
      * @return a list of properties. Order matters, and the event will preserve the order as it is processed downstream.
      * A reading or parsing failure will be logged as warning and an empty property list will be returned.
@@ -220,7 +220,7 @@ public class DataCollectorImpl implements DataCollector {
             }
 
             //
-            // this happens when the "bulk" metric collection for a source returned an empty list. Attempt collecting
+            // this happens when the "bulk" metric collection for a source returns an empty list. Attempt collecting
             // the specific metric with its preferred source
             //
 
@@ -228,7 +228,7 @@ public class DataCollectorImpl implements DataCollector {
 
             try {
 
-                List<Property> props = preferredSource.collectMetrics(Collections.singletonList(m), os);
+                List<Property> props = preferredSource.collectMetrics(Collections.singletonList(m));
 
                 //
                 // because we're only passing one metric definition, we expect one property

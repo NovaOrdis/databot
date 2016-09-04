@@ -56,7 +56,7 @@ public abstract class DataCollectorTest {
         MockMetricSource mms = new MockMetricSource();
         assertTrue(mmd.addSource(mos.getName(), mms));
 
-        mms.mockMetricGeneration(mos, new MockProperty("TEST"));
+        mms.addBulkReading(mos, new MockProperty("TEST"));
 
         List<MetricDefinition> metrics = Collections.singletonList(mmd);
 

@@ -174,7 +174,7 @@ public class DataCollectorImplTest extends DataCollectorTest {
         MockProperty mp = new MockProperty();
         mp.setName("TEST");
 
-        mms.mockMetricGeneration(mos, mp);
+        mms.addBulkReading(mos, mp);
 
         List<Property> properties = dc.readMetrics(Collections.singletonList(mmd));
 
@@ -216,37 +216,34 @@ public class DataCollectorImplTest extends DataCollectorTest {
     @Test
     public void readMetrics_bulkCollectionReturnsNoMetrics() throws Exception {
 
-        MockOS mos = new MockOS();
+        MockOS mockOs = new MockOS();
 
-        DataCollectorImpl dc = new DataCollectorImpl(mos);
+        DataCollectorImpl dc = getDataCollectorToTest(mockOs);
 
-        MockMetricDefinition mmd = new MockMetricDefinition();
-        MockMetricSource mms = new MockMetricSource();
-        mmd.addSource(mos.getName(), mms);
+
+        MockMetricDefinition md = new MockMetricDefinition();
+        MockMetricSource ms = new MockMetricSource();
+        md.addSource(mockOs.getName(), ms);
+
         MockProperty mockProperty = new MockProperty("test");
 
-        mms.mockMetricGeneration(mos, mmd, mockProperty);
+        ms.addReadingForMetric(md, mockProperty);
 
         //
-        // make sure that bulk collection returns an empty list
+        // make sure that bulk collection does not return anything
         //
 
-        List<MetricSource> sources = mmd.getSources(mos.getName());
+        List<MetricSource> sources = md.getSources(mockOs.getName());
         assertEquals(1, sources.size());
         MetricSource source = sources.get(0);
-        List<Property> bulkCollection = source.collectAllMetrics(mos);
 
-        //
-        // TODO review this
-        //
+        List<Property> bulkCollection = source.collectAllMetrics(mockOs);
         assertTrue(bulkCollection.isEmpty());
 
-        List<Property> targetedCollection = dc.readMetrics(Collections.singletonList(mmd));
+        List<Property> targetedCollection = dc.readMetrics(Collections.singletonList(md));
 
-        assertEquals(1, targetedCollection.size());;
-
+        assertEquals(1, targetedCollection.size());
         Property p = targetedCollection.get(0);
-
         assertEquals(mockProperty, p);
     }
 

@@ -40,7 +40,8 @@ public class MockMetricSource implements MetricSource {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private Map<OS, Map<MetricDefinition, Property>> results;
+    private Map<OS, Map<MetricDefinition, Property>> bulkReadingsForOs;
+    private Map<MetricDefinition, Property> readingsForMetrics;
 
     private boolean breakOnCollect;
 
@@ -48,7 +49,8 @@ public class MockMetricSource implements MetricSource {
 
     public MockMetricSource() {
 
-        results = new HashMap<>();
+        bulkReadingsForOs = new HashMap<>();
+        readingsForMetrics = new HashMap<>();
     }
 
     // MetricSource implementation -------------------------------------------------------------------------------------
@@ -60,7 +62,7 @@ public class MockMetricSource implements MetricSource {
             throw new MetricCollectionException("SYNTHETIC");
         }
 
-        Map<MetricDefinition, Property> props = results.get(os);
+        Map<MetricDefinition, Property> props = bulkReadingsForOs.get(os);
 
         if (props == null) {
             return Collections.emptyList();
@@ -70,23 +72,16 @@ public class MockMetricSource implements MetricSource {
     }
 
     @Override
-    public List<Property> collectMetrics(List<MetricDefinition> metricDefinitions, OS os)
-            throws MetricCollectionException {
+    public List<Property> collectMetrics(List<MetricDefinition> metricDefinitions) throws MetricCollectionException {
 
         List<Property> result = new ArrayList<>();
 
-        Map<MetricDefinition, Property> props = results.get(os);
+        for(MetricDefinition d: metricDefinitions) {
 
-        if (props != null) {
+            Property p = readingsForMetrics.get(d);
 
-            for(MetricDefinition d: metricDefinitions) {
-
-                Property p = props.get(d);
-
-                if (p != null) {
-
-                    result.add(p);
-                }
+            if (p != null) {
+                result.add(p);
             }
         }
 
@@ -95,36 +90,33 @@ public class MockMetricSource implements MetricSource {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public void mockMetricGeneration(OS os, Property p) {
+    public void addBulkReading(OS os, Property p) {
 
-        Map<MetricDefinition, Property> properties = results.get(os);
+        Map<MetricDefinition, Property> properties = bulkReadingsForOs.get(os);
 
         if (properties == null) {
 
             properties = new HashMap<>();
-            results.put(os, properties);
+            bulkReadingsForOs.put(os, properties);
         }
 
         properties.put(new MockMetricDefinition("mock"), p);
     }
 
-    public void mockMetricGeneration(OS os, MetricDefinition d, Property p) {
+    public void addReadingForMetric(MetricDefinition d, Property p) {
 
-        Map<MetricDefinition, Property> properties = results.get(os);
-
-        if (properties == null) {
-
-            properties = new HashMap<>();
-            results.put(os, properties);
-        }
-
-        properties.put(d, p);
+        readingsForMetrics.put(d, p);
     }
-
 
     public void breakOnCollectMetrics() {
 
         breakOnCollect = true;
+    }
+
+    @Override
+    public String toString() {
+
+        return "Mock Metric Source";
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
