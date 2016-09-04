@@ -10,7 +10,7 @@
     <artifactId>os-stats</artifactId>
     <packaging>jar</packaging>
 
-    <version>1.0.1-SNAPSHOT-6</version>
+    <version>1.0.1-SNAPSHOT-7</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,7 +20,7 @@
         <slf4j-version>1.7.12</slf4j-version>
         <junit-version>4.12</junit-version>
         <novaordis-utilities-version>4.2.0</novaordis-utilities-version>
-        <events-version>2.4.3-SNAPSHOT-20</events-version>
+        <events-version>2.4.3-SNAPSHOT-21</events-version>
     </properties>
 
     <build>
