@@ -15,13 +15,13 @@ function fail {
 }
 
 function display-help() {
-    local help_file=${reldir}/../lib/HELP
+    local help_file=$(dirname $0)/../lib/HELP
     [ ! -f ${help_file} ] && fail "HELP file ${help_file} not available, possible because of faulty installation"
     cat ${help_file}
 }
 
 function display-version() {
-    local version_file=${reldir}/../lib/VERSION
+    local version_file=$(dirname $0)/../lib/VERSION
     [ ! -f ${version_file} ] && fail "VERSION file ${version_file} not available, possible because of faulty installation"
     cat ${version_file}
 }
@@ -35,6 +35,7 @@ function get-os-stats-configuration-file() {
     [ -d ${OS_STATS_CONFIG_DIR} ] || fail "'OS_STATS_CONFIG_DIR' environment variable points to an invalid directory ${OS_STATS_CONFIG_DIR}"
     local config_file=${OS_STATS_CONFIG_DIR}/${os_stats_config_file_name}
     [ -f ${config_file} ] || fail "os-stats configuration file ${config_file} does not exist"
+    debug "os-stats configuration file: ${config_file}"
     echo ${config_file}
 }
 
@@ -48,10 +49,14 @@ function get-configuration-property() {
     [ -z "${property_name}" ] && fail "property name not provided"
     local config_file
     config_file=$(get-os-stats-configuration-file) || fail "failed to locate the configuration file"
-    grep "^${property_name}=.*" ${config_file} | sed -e 's/^.*=//'
+    local value
+    value=$(grep "^${property_name}=.*" ${config_file} | sed -e 's/^.*=//') || \
+        fail "failed to extract property '${property_name}' from ${config_file}"
+    debug "extracted ${property_name}=${value} from ${config_file}"
+    echo ${value}
 }
 
-function get_java_home() {
+function get-java-home() {
 
     #
     # attempt to use OS_STATS_JAVA_HOME with priority
@@ -169,8 +174,9 @@ function locate-newest-jar() {
     echo ${newest_jar_path}
 }
 
-function get_classpath() {
-    debug "${FUNCNAME[0]}: home_dir=${home_dir}"
+function get-classpath() {
+    local home_dir=$1
+    [ -z "${home_dir}" ] && fail "no 'home_dir' specified"
     local first=true
     for i in ${home_dir}/lib/*.jar; do
         ${first} && first=false || echo -n ":"

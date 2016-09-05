@@ -71,16 +71,17 @@ function main() {
     [ -n "${pids}" ] && fail "an os-stats process is already running (pid ${pids})"
 
     local java_home
-    java_home=$(get_java_home) || fail "failed to get java home"
+    java_home=$(get-java-home) || fail "failed to get java home"
 
     local classpath
-    classpath=$(get_classpath) || fail "failed to build classpath"
+    classpath=$(get-classpath $(dirname $0)/..) || fail "failed to build os-stats classpath"
 
     #
     # if jboss metrics are encountered in the configuration file, append the CLI classpath to the regular classpath
     #
     if configuration-file-contains-jboss-metric; then
-        classpath=$(append-jboss-classpath-fragment ${classpath}) || exit 1
+        classpath=$(append-jboss-classpath-fragment ${classpath}) || \
+        fail "os-stats configuration file $(get-os-stats-configuration-file) contains jboss CLI metrics, but the required classpath cannot be built (see above)"
     fi
 
     local java_bin="java"
