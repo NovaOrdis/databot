@@ -29,30 +29,42 @@ background. The commands that can be used are:
 
   stop - stop the background os-stats process, if running.
 
+
 Command line options:
 
   --foreground, -fg -  run the command in foreground and  automatically switch the output from the
     configured file destination to /dev/stdout.
 
+  -v - verbose, turns on DEBUG logging at stdout.
+
+  --debug  -  start the JVM in debug mode,  so it can be accessed by a debugger.  It also turns on
+    DEBUG logging.
+
+
 Configuration:
 
-  sampling.interval -  sampling interval, in seconds. If not specified, the default is 10 seconds.
+sampling.interval - the sampling interval, in seconds. If not specified, the default is 10 seconds.
 
-  output.file - the name of the output file. If not specified, the default value is
-    /tmp/os-stats.csv.  Note that if --foreground option is used, the output will forcibly send to
-    /dev/stdout, regardless of the value of 'output.file' configuration parameter.
+output.file - the name of the output file. If not specified, the default value is
+    /tmp/os-stats.csv. Note that if --foreground (or -fg) option is used, the output will forcibly
+    send to /dev/stdout, regardless of the value of 'output.file' configuration parameter.
 
-  output.file.append  -  true/false. Indicates whether to append to an already existing file or to
-    overwrite the file. The default value is "true" (append).
+output.file.append - true/false. Indicates whether to append to an already existing output file or
+    to overwrite the existing file. The default value is "true" (append);  this configuration will
+    allow accumulation of  historical data.  Every time os-stats is restarted in "append" mode,  a
+    new header line will be inserted in the file.
 
-  metrics  -  the comma-separated list of the definitions for the metrics to be collected from the
-    system. Example:
+metrics - comma-separated list of the definitions for the metrics to be collected from the system.
+    Example:
 
-    metrics=PhysicalMemoryTotal,PhysicalMemoryUsed,SwapTotal,SwapUsed,CpuKernelTime,CpuUserTime
+    metrics=PhysicalMemoryUsed,CpuUserTime,jboss:/subsystem=web/connector=http/bytesReceived
 
-    For a complete list of supported metrics, run:
+    For  a complete list  of supported metrics,  syntax details  and extensive documentation,  see
+    https://kb.novaordis.com/index.php/Os-stats_Metric_Reference
 
-      os-stats --help metrics (not yet implemented, TODO).
-
-    Until then, go to https://kb.novaordis.com/index.php/Os-stats_Metric_Reference
+jboss.home  -  the path to a locally accessible JBoss instance.  If it needs to monitor  JBoss CLI
+    metrics,  os-stats must be configured to detect and use the libraries from a JBoss instance it
+    has access to (it does not ship with the required JARs, as those may be different depending on
+    the version of the target JBoss instance.  In order to enable os-stats  to build the classpath
+    fragment, jboss_home must be specified in the configuration file.
 

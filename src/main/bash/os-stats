@@ -6,271 +6,99 @@
 # For more details see https://kb.novaordis.com/index.php/novaordis-release-tools
 #
 
-reldir=$(dirname $0)
-home_dir=${reldir}/..
+[ -f $(dirname $0)/os-stats.shlib ] && \
+    . $(dirname $0)/os-stats.shlib || \
+    { echo "[error]: required library file $(dirname $0)/os-stats.shlib not found, was os-stats installed correctly?" 1>&2; exit 1; }
+
 main_class=${main_class}
 memory=1024m
 verbose=false
+os_stats_config_file_name="os-stats.conf"
 
-function debug() {
-    ${verbose} && echo "$@" 1>&2;
-    return 0
-}
+function main() {
 
-function debug-arguments {
-    ${verbose} && echo "${FUNCNAME[1]}($@)" 1>&2;
-    return 0
-}
+    local debug_args=""
+    local output_settings=""
+    local foreground=false
+    local do_kill=false
 
-function fail {
-    echo "[error]: $@" 1>&2 && exit 1
-}
-
-function display-help() {
-    local help_file=${reldir}/../lib/HELP
-    [ ! -f ${help_file} ] && fail "HELP file ${help_file} not available, possible because of faulty installation"
-    cat ${help_file}
-}
-
-function display-version() {
-    local version_file=${reldir}/../lib/VERSION
-    [ ! -f ${version_file} ] && fail "VERSION file ${version_file} not available, possible because of faulty installation"
-    cat ${version_file}
-}
-
-function get_java_home() {
-
-    #
-    # attempt to use OS_STATS_JAVA_HOME with priority
-    #
-
-    if [ -n "${OS_STATS_JAVA_HOME}" ]; then
-        echo "${OS_STATS_JAVA_HOME}"
-        return 0
-    fi
-
-    # local java_home="/usr/java/jdk64-1.7.0_45"
-    local java_home=""
-    if [ -n "${JAVA_HOME}" ]; then
-        debug "using JAVA_HOME from environment ${JAVA_HOME}"
-        java_home=${JAVA_HOME}
-    else
-        local name;
-        name=$(uname -n)
-        name=${name##*.}
-        [ "${name}" = "local" ] && java_home="/Library/Java/JavaVirtualMachines/jdk1.7.0_60.jdk/Contents/Home"
-    fi
-    echo ${java_home}
-}
-
-jboss_cli_dependencies="\
-jboss-as-cli \
-jboss-dmr \
-jboss-logging \
-staxmapper \
-jboss-as-protocol \
-picketbox \
-jboss-as-controller-client \
-jboss-threads \
-jboss-remoting \
-aesh \
-xnio-api \
-xnio-nio \
-slf4j-api"
-
-#
-# Build the classpath fragment required by the CLI wrapper to work using JARs deployed within the specified JBoss
-# installation. If it successful, return the classpath fragment at stdout and returns 0. If not, it sends an error
-# message at stderr and returns 1.
-#
-function get-jboss-cli-classpath() {
-
-    local jboss_home=$1
-    [ -z "${jboss_home}" ] && { echo "[error]: 'jboss_home' not provided" 1>&2; return 1; }
-    [ -d ${jboss_home} ] || { echo "[error]: jboss_home ${jboss_home} does not exist" 1>&2; return 1; }
-
-    local classpath
-
-    local jboss_modules_jar=${jboss_home}/jboss-modules.jar
-    [ -f ${jboss_modules_jar} ] || { echo "[error]: ${jboss_modules_jar} not found" 1>&2; return 1; }
-    classpath=${jboss_modules_jar}
-
-    local jboss_cli_client_jar=${jboss_home}/bin/client/jboss-cli-client.jar
-    [ -f ${jboss_cli_client_jar} ] || { echo "[error]: ${jboss_cli_client_jar} not found" 1>&2; return 1; }
-    classpath=${classpath}:${jboss_cli_client_jar}
-
-    for i in ${jboss_cli_dependencies}; do
-        local classpath_element
-        classpath_element=$(locate-newest-jar ${jboss_home} ${i}) || return 1
-        classpath=${classpath}:${classpath_element}
-    done
-
-    echo "${classpath}"
-    return 0
-}
-
-#
-# writes the newest JAR path that matches the base name at stdout (by comparing overlays), or returns 1 if no such JAR
-# is found. We don't compare the JAR file names themselves, because we encountered cases when different overlays
-# contain the same JARs, and the older overlays contain corrupted JARs.
-#
-function locate-newest-jar() {
-
-    local jboss_home=$1
-    [ -z "${jboss_home}" ] && { echo "[error]: 'jboss_home' not provided" 1>&2; return 1; }
-    [ -d ${jboss_home} ] || { echo "[error]: jboss_home ${jboss_home} does not exist" 1>&2; return 1; }
-
-    local jar_base_name=$2
-    [ -z "${jar_base_name}" ] && { echo "[error]: 'jar_base_name' not provided" 1>&2; return 1; }
-
-    local module_dir=${jboss_home}/modules
-    [ -d ${module_dir} ] || { echo "[error]: the module directory ${module_dir} does not exist" 1>&2; return 1; }
-
-    local newest_jar_path
-    local newest_overlay
-    local newest_jar_basename
-    for i in $(find ${module_dir} -name ${jar_base_name}-[0-9]*); do
-        local current_basename
-        current_basename=$(basename ${i})
-        if [[ ${i} =~ .overlays ]]; then
-            current_overlay=${i#*.overlays/}
-            current_overlay=${current_overlay%%/*}
-        fi
-        if [[ "${current_overlay}" > "${newest_overlay}" ]]; then
-            newest_jar_basename=${current_basename}
-            newest_jar_path=${i}
-            newest_overlay=${current_overlay}
-            continue
-        fi
-        if [ "${current_overlay}" = "${newest_overlay}" ]; then
-            if [[ "${current_basename}" > "${newest_jar_basename}" ]]; then
-                newest_jar_basename=${current_basename}
-                newest_jar_path=${i}
-                continue
+    while [ "$1" != "" ]; do
+        if [ "$1" = "help" -o "$1" = "--help" ]; then
+            display-help;
+            exit 0
+        elif [ "$1" = "version" -o "$1" = "--version" ]; then
+            display-version;
+            exit 0
+        elif [ "$1" = "--debug" ]; then
+            debug_args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5011"
+            verbose=true
+        elif [ "$1" = "--verbose" -o "$1" = "-v" ]; then
+            verbose=true
+        elif [ "$1" = "--foreground" -o "$1" = "-fg" ]; then
+            foreground=true
+            #
+            # also pass it as a java process argument, to let it know to ignore output.file
+            #
+            args="${args} $1"
+        elif [ "$1" = "stop" ]; then
+            stop && exit 0 || fail "failed to stop background os-stats"
+        elif [ "$1" = "status" ]; then
+            status && exit 0
+        else
+            #
+            # if the argument contains spaces, it means double quotes were used, we need to pass those down so the java
+            # command parsing line logic can detect quoted strings; more than that, if the double quoted string contains
+            # escaped quotes, we want to pass them as such
+            #
+            if [ "$1" = "${1/ //}" ]; then
+                # no spaces, pass as is
+                args="${args} $1"
+            else
+                # quoted string that contains spaces, escape inner quotes, in case they exist
+                escaped_inner_quotes=${1//\"/\\\"}
+                args="${args} \"${escaped_inner_quotes}\""
             fi
         fi
+        shift;
     done
 
-    [ -z "${newest_jar_path}" ] && \
-        { echo "[error]: no JAR with a name starting with '${jar_base_name}' found in ${module_dir}" 1>&2; return 1; }
-
-    echo ${newest_jar_path}
-}
-
-function get_classpath() {
-    debug "${FUNCNAME[0]}: home_dir=${home_dir}"
-    local first=true
-    for i in ${home_dir}/lib/*.jar; do
-        ${first} && first=false || echo -n ":"
-        echo -n ${i}
-    done
-}
-
-# may return empty string or more than one PID (in a space separated list)
-function get-pids() {
-    local pids=$(ps -ef | grep java | grep ${main_class} | awk '{print $2}')
-    echo ${pids}
-}
-
-function stop() {
-
+    #
+    # check if background processes are running on the system. If they do, report and exist, we only
+    # want a single process on the VM
+    #
     local pids
     pids=$(get-pids) || fail "failed to get pids"
+    [ -n "${pids}" ] && fail "an os-stats process is already running (pid ${pids})"
 
-    [ -z "${pids}" ] && { echo "no os-stats background processes running on $(uname -n)"; exit 0; }
+    local java_home
+    java_home=$(get_java_home) || fail "failed to get java home"
 
-    local force=false
-    local signal=""
-    local signal_name="SIGTERM"
-    if ${force}; then
-        signal="-9"
-        signal_name="SIGKILL"
+    local classpath
+    classpath=$(get_classpath) || fail "failed to build classpath"
+
+    #
+    # if jboss metrics are encountered in the configuration file, append the CLI classpath to the regular classpath
+    #
+    if configuration-file-contains-jboss-metric; then
+        classpath=$(append-jboss-classpath-fragment ${classpath}) || exit 1
     fi
 
-    for pid in ${pids}; do
-        kill ${signal} ${pid} && \
-            echo "sent ${signal_name} into os-stats process (${pid})" || \
-            echo "fail to send ${signal_name} into os-stats process with pid ${pid}"
-    done
-}
+    local java_bin="java"
+    [ "${java_home}" != "" ] && java_bin="${java_home}/bin/java"
 
-function status() {
+    ${verbose} && verbose_system_property="-Dverbose=true"
 
-    local pids
-    pids=$(get-pids) || fail "failed to get pids"
-    [ -z "${pids}" ] && { echo "no os-stats background processes running on $(uname -n)"; exit 0; }
-    echo "os-status with pid ${pids} running"
-}
+    command="${java_bin} -Xms${memory} -Xmx${memory} -cp ${classpath} ${debug_args} ${output_settings} ${verbose_system_property} ${main_class} ${args}"
 
-debug_args=""
-output_settings=""
-foreground=false
-do_kill=false
+    ${verbose} && echo "${command}" 1>&2;
 
-while [ "$1" != "" ]; do
-    if [ "$1" = "help" -o "$1" = "--help" ]; then
-        display-help;
-        exit 0
-    elif [ "$1" = "version" -o "$1" = "--version" ]; then
-        display-version;
-        exit 0
-    elif [ "$1" = "--debug" ]; then
-        debug_args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5011"
-        verbose=true
-    elif [ "$1" = "--verbose" -o "$1" = "-v" ]; then
-        verbose=true
-    elif [ "$1" = "--foreground" -o "$1" = "-fg" ]; then
-        foreground=true
-        #
-        # also pass it as a java process argument, to let it know to ignore output.file
-        #
-        args="${args} $1"
-    elif [ "$1" = "stop" ]; then
-        stop && exit 0 || fail "failed to stop background os-stats"
-    elif [ "$1" = "status" ]; then
-        status && exit 0
+    if ${foreground}; then
+        ${command}
     else
-        #
-        # if the argument contains spaces, it means double quotes were used, we need to pass those down so the java
-        # command parsing line logic can detect quoted strings; more than that, if the double quoted string contains
-        # escaped quotes, we want to pass them as such
-        #
-        if [ "$1" = "${1/ //}" ]; then
-            # no spaces, pass as is
-            args="${args} $1"
-        else
-            # quoted string that contains spaces, escape inner quotes, in case they exist
-            escaped_inner_quotes=${1//\"/\\\"}
-            args="${args} \"${escaped_inner_quotes}\""
-        fi
+        ${command} &
     fi
-    shift;
-done
+}
 
-#
-# check if background processes are running on the system. If they do, report and exist, we only
-# want a single process on the VM
-#
-pids=$(get-pids) || fail "failed to get pids"
-[ -n "${pids}" ] && fail "an os-stats process is already running (pid ${pids})"
+main $@
 
-java_home=$(get_java_home) || fail "failed to get java home"
 
-classpath=$(get_classpath) || fail "failed to build classpath"
-jboss_cli_classpath=$(get-jboss-cli-classpath /Users/ovidiu/runtime/jboss-eap-6.4.6) || fail "failed to build jboss CLI classpath"
-classpath=${classpath}:${jboss_cli_classpath}
-
-java_bin="java"
-[ "${java_home}" != "" ] && java_bin="${java_home}/bin/java"
-
-${verbose} && verbose_system_property="-Dverbose=true"
-
-command="${java_bin} -Xms${memory} -Xmx${memory} -cp ${classpath} ${debug_args} ${output_settings} ${verbose_system_property} ${main_class} ${args}"
-
-${verbose} && echo "${command}" 1>&2;
-
-if ${foreground}; then
-    ${command}
-else
-    ${command} &
-fi
