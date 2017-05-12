@@ -23,6 +23,7 @@ import io.novaordis.utilities.os.OSConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,14 +82,14 @@ public class MockOS implements OS {
 
         if (failOnAnyCommand) {
 
-            return new NativeExecutionResult(1, stdoutOnFailure, stderrOnFailure);
+            return new NativeExecutionResult(1, stdoutOnFailure, stderrOnFailure, true, true);
         }
 
         String[] outputs = commandsAndOutputs.get(commandAndArguments);
 
         if (outputs != null) {
 
-            return new NativeExecutionResult(0, outputs[0], outputs[1]);
+            return new NativeExecutionResult(0, outputs[0], outputs[1], true, true);
         }
         else {
 
@@ -96,8 +97,13 @@ public class MockOS implements OS {
             // a random command
             //
 
-            return new NativeExecutionResult(0, "MOCK-OUTPUT", "MOCK-STDERR");
+            return new NativeExecutionResult(0, "MOCK-OUTPUT", "MOCK-STDERR", true, true);
         }
+    }
+
+    @Override
+    public NativeExecutionResult execute(File directory, String command) throws NativeExecutionException {
+        throw new RuntimeException("execute() NOT YET IMPLEMENTED");
     }
 
     @Override

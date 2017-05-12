@@ -27,6 +27,8 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="os-stats" target="1.8" />
+      <module name="os-stats-release" target="1.8" />
+      <module name="os-stats-root" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

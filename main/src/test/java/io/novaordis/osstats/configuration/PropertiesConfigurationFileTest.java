@@ -77,7 +77,7 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
         catch(UserErrorException e) {
             String msg = e.getMessage();
             log.info(msg);
-            assertEquals("invalid sampling interval value: \"blah\"" , msg);
+            assertTrue(msg.startsWith("invalid sampling interval value: \"blah\""));
         }
     }
 
