@@ -20,7 +20,6 @@ import io.novaordis.osstats.env.EnvironmentVariableProvider;
 import io.novaordis.osstats.env.EnvironmentVariableProviderImpl;
 import io.novaordis.utilities.UserErrorException;
 
-import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,8 +42,6 @@ public class ConfigurationFactory {
 
     public static final String CONFIGURATION_FILE_SHORT_OPTION = "-c";
     public static final String CONFIGURATION_FILE_LONG_OPTION = "--configuration";
-    public static final String OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME = "OS_STATS_CONFIG_DIR";
-    public static final String DEFAULT_CONFIGURATION_FILE_NAME = "os-stats.conf";
 
     public static final String FOREGROUND_SHORT_OPTION = "-fg";
     public static final String FOREGROUND_LONG_OPTION = "--foreground";
@@ -74,10 +71,6 @@ public class ConfigurationFactory {
 
             if (CONFIGURATION_FILE_SHORT_OPTION.equals(crt) ||
                     crt.startsWith(CONFIGURATION_FILE_LONG_OPTION)) {
-
-                //
-                // non-default configuration file
-                //
 
                 if (CONFIGURATION_FILE_SHORT_OPTION.equals(crt)) {
 
@@ -132,7 +125,7 @@ public class ConfigurationFactory {
 
         if (configurationFileName == null) {
 
-            configurationFileName = getDefaultConfigurationFileName();
+            throw new UserErrorException("no configuration file specified, use -c|--configuration");
         }
 
         //noinspection UnnecessaryLocalVariable
@@ -186,22 +179,6 @@ public class ConfigurationFactory {
             }
             throw new UserErrorException("we don't know yet to handle " + s + " configuration files");
         }
-    }
-
-    /**
-     * Relies on the presence of 'bin.dir' system property (BIN_DIR_SYSTEM_PROPERTY_NAME). If the method is called, and
-     * the system property is not present, it is handled as user error.
-     */
-    static String getDefaultConfigurationFileName() throws UserErrorException {
-
-        String s = environmentVariableProvider.get(OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME);
-
-        if (s == null) {
-            throw new UserErrorException(
-                    OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME + " environment variable not defined");
-        }
-
-        return new File(s, DEFAULT_CONFIGURATION_FILE_NAME).getPath();
     }
 
     // Protected -------------------------------------------------------------------------------------------------------

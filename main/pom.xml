@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.novaordis.os-stats</groupId>
         <artifactId>os-stats-root</artifactId>
-        <version>1.1-SNAPSHOT-1</version>
+        <version>1.1.-SNAPSHOT-2</version>
     </parent>
 
     <artifactId>os-stats</artifactId>

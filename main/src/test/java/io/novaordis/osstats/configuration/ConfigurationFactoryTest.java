@@ -16,8 +16,6 @@
 
 package io.novaordis.osstats.configuration;
 
-import io.novaordis.osstats.env.EnvironmentVariableProvider;
-import io.novaordis.osstats.env.MockEnvironmentVariableProvider;
 import io.novaordis.utilities.UserErrorException;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -51,27 +49,16 @@ public class ConfigurationFactoryTest {
     // buildInstance() command line arguments --------------------------------------------------------------------------
 
     @Test
-    public void buildInstance_DefaultConfiguration() throws Exception {
-
-        File d = new File(System.getProperty("basedir"), "src/test/resources/data/configuration");
-        assertTrue(d.isDirectory());
-
-        EnvironmentVariableProvider orig = ConfigurationFactory.getEnvironmentVariableProvider();
-        MockEnvironmentVariableProvider mevp = new MockEnvironmentVariableProvider();
-        mevp.set(ConfigurationFactory.OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME, d.getAbsolutePath());
+    public void buildInstance_NoConfigurationFileSpecified() throws Exception {
 
         try {
 
-            ConfigurationFactory.setEnvironmentVariableProvider(mevp);
-
-            Configuration c = ConfigurationFactory.buildInstance(new String[0]);
-
-            assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingIntervalSec());
-            assertFalse(c.isForeground());
+            ConfigurationFactory.buildInstance(new String[0]);
         }
-        finally {
+        catch(UserErrorException e) {
 
-            ConfigurationFactory.setEnvironmentVariableProvider(orig);
+            String msg = e.getMessage();
+            assertTrue(msg.contains("no configuration file specified"));
         }
     }
 
@@ -138,41 +125,25 @@ public class ConfigurationFactoryTest {
     @Test
     public void buildInstance_Foreground_ShortOption() throws Exception {
 
-        File d = new File(System.getProperty("basedir"), "src/test/resources/data/configuration");
-        EnvironmentVariableProvider orig = ConfigurationFactory.getEnvironmentVariableProvider();
-        MockEnvironmentVariableProvider mevp = new MockEnvironmentVariableProvider();
-        mevp.set(ConfigurationFactory.OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME, d.getAbsolutePath());
+        File resourceDir = new File(System.getProperty("basedir"), "src/test/resources/data/configuration");
+        assertTrue(resourceDir.isDirectory());
+        File configFile = new File(resourceDir, "reference-props.conf");
+        assertTrue(configFile.isFile());
 
-        try {
+        Configuration c = ConfigurationFactory.buildInstance(new String[]{"-c", configFile.getPath(), "-fg"});
 
-            ConfigurationFactory.setEnvironmentVariableProvider(mevp);
-
-            Configuration c = ConfigurationFactory.buildInstance(new String[]{"-fg"});
-            assertTrue(c.isForeground());
-        }
-        finally {
-            ConfigurationFactory.setEnvironmentVariableProvider(orig);
-        }
+        assertTrue(c.isForeground());
     }
 
     @Test
     public void buildInstance_Foreground_LongOption() throws Exception {
 
-        File d = new File(System.getProperty("basedir"), "src/test/resources/data/configuration");
-        EnvironmentVariableProvider orig = ConfigurationFactory.getEnvironmentVariableProvider();
-        MockEnvironmentVariableProvider mevp = new MockEnvironmentVariableProvider();
-        mevp.set(ConfigurationFactory.OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME, d.getAbsolutePath());
+        File resourceDir = new File(System.getProperty("basedir"), "src/test/resources/data/configuration");
+        assertTrue(resourceDir.isDirectory());
+        File configFile = new File(resourceDir, "reference-props.conf");
+        assertTrue(configFile.isFile());
 
-        try {
-
-            ConfigurationFactory.setEnvironmentVariableProvider(mevp);
-
-            Configuration c = ConfigurationFactory.buildInstance(new String[]{"--foreground"});
-            assertTrue(c.isForeground());
-        }
-        finally {
-            ConfigurationFactory.setEnvironmentVariableProvider(orig);
-        }
+        Configuration c = ConfigurationFactory.buildInstance(new String[]{"-c", configFile.getPath(), "--foreground"});
     }
 
     @Test
@@ -216,51 +187,6 @@ public class ConfigurationFactoryTest {
             String msg = e.getMessage();
             log.info(msg);
             assertEquals("we don't know yet to handle recognize configuration files", msg);
-        }
-    }
-
-    // getDefaultConfigurationFileName() -------------------------------------------------------------------------------
-
-    @Test
-    public void getDefaultConfigurationFileName_NoOsStatsConfigDirEnvironmentVariableDefined() throws Exception {
-
-        EnvironmentVariableProvider orig = ConfigurationFactory.getEnvironmentVariableProvider();
-        MockEnvironmentVariableProvider mevp = new MockEnvironmentVariableProvider();
-
-        try {
-
-            ConfigurationFactory.setEnvironmentVariableProvider(mevp);
-            ConfigurationFactory.getDefaultConfigurationFileName();
-            fail("should throw Exception");
-        }
-        catch(UserErrorException e) {
-
-            String msg = e.getMessage();
-            log.info(msg);
-            assertEquals(
-                    ConfigurationFactory.OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME +
-                            " environment variable not defined", msg);
-        }
-        finally {
-            ConfigurationFactory.setEnvironmentVariableProvider(orig);
-        }
-    }
-
-    @Test
-    public void getDefaultConfigurationFileName() throws Exception {
-
-        EnvironmentVariableProvider orig = ConfigurationFactory.getEnvironmentVariableProvider();
-        MockEnvironmentVariableProvider mevp = new MockEnvironmentVariableProvider();
-        mevp.set(ConfigurationFactory.OS_STATS_CONFIG_DIR_ENVIRONMENT_VARIABLE_NAME, "something/something-else");
-
-
-        try {
-            ConfigurationFactory.setEnvironmentVariableProvider(mevp);
-            String fileName = ConfigurationFactory.getDefaultConfigurationFileName();
-            assertEquals("something/something-else/" + ConfigurationFactory.DEFAULT_CONFIGURATION_FILE_NAME, fileName);
-        }
-        finally {
-            ConfigurationFactory.setEnvironmentVariableProvider(orig);
         }
     }
 

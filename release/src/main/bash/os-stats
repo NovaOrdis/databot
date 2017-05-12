@@ -8,10 +8,10 @@
 
 [ -f $(dirname $0)/os-stats.shlib ] && \
     . $(dirname $0)/os-stats.shlib || \
-    { echo "[error]: required library file $(dirname $0)/os-stats.shlib not found, was os-stats installed correctly?" 1>&2; exit 1; }
+    { echo "[error]: required library file $(dirname $0)/os-stats.shlib not found, os-stats was most likely incorrectly installed" 1>&2; exit 1; }
 
 main_class=io.novaordis.osstats.Main
-memory=1024m
+memory=256m
 verbose=false
 os_stats_config_file_name="os-stats.conf"
 
@@ -23,28 +23,44 @@ function main() {
     local do_kill=false
 
     while [ "$1" != "" ]; do
+
         if [ "$1" = "help" -o "$1" = "--help" ]; then
+
             display-help;
             exit 0
+
         elif [ "$1" = "version" -o "$1" = "--version" ]; then
+
             display-version;
             exit 0
+
         elif [ "$1" = "-d" -o "$1" = "--debug" ]; then
+
             debug_args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5011"
             verbose=true
+
         elif [ "$1" = "--verbose" -o "$1" = "-v" ]; then
+
             verbose=true
+
         elif [ "$1" = "--foreground" -o "$1" = "-fg" ]; then
+
             foreground=true
             #
             # also pass it as a java process argument, to let it know to ignore output.file
             #
             args="${args} $1"
+
         elif [ "$1" = "stop" ]; then
+
             stop && exit 0 || fail "failed to stop background os-stats"
+
         elif [ "$1" = "status" ]; then
+
             status && exit 0
+
         else
+
             #
             # if the argument contains spaces, it means double quotes were used, we need to pass those down so the java
             # command parsing line logic can detect quoted strings; more than that, if the double quoted string contains
@@ -63,8 +79,8 @@ function main() {
     done
 
     #
-    # check if background processes are running on the system. If they do, report and exist, we only
-    # want a single process on the VM
+    # check if background processes are running on the system. If they do, report and exist, we only want a single
+    # process on the VM
     #
     local pids
     pids=$(get-pids) || fail "failed to get pids"
@@ -76,12 +92,15 @@ function main() {
     local classpath
     classpath=$(get-classpath $(dirname $0)/..) || fail "failed to build os-stats classpath"
 
+    local configuration_file
+    configuration_file=$(get-configuration-file) || fail "failed to find configuration file"
+
     #
     # if jboss metrics are encountered in the configuration file, append the CLI classpath to the regular classpath
     #
-    if configuration-file-contains-jboss-metric; then
+    if configuration-file-contains-jboss-metric ${configuration_file}; then
         classpath=$(append-jboss-classpath-fragment ${classpath}) || \
-        fail "os-stats configuration file $(get-os-stats-configuration-file) contains jboss CLI metrics, but the required classpath cannot be built (see above)"
+        fail "os-stats configuration file ${configuration_file} contains jboss CLI metrics, but the required classpath cannot be built (see above)"
     fi
 
     local java_bin="java"
@@ -89,7 +108,7 @@ function main() {
 
     ${verbose} && verbose_system_property="-Dverbose=true"
 
-    command="${java_bin} -Xms${memory} -Xmx${memory} -cp ${classpath} ${debug_args} ${output_settings} ${verbose_system_property} ${main_class} ${args}"
+    command="${java_bin} -Xms${memory} -Xmx${memory} -cp ${classpath} ${debug_args} ${output_settings} ${verbose_system_property} ${main_class} -c ${configuration_file} ${args}"
 
     ${verbose} && echo "${command}" 1>&2;
 
