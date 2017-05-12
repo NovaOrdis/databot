@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.configuration;
+package io.novaordis.osstats.configuration.props;
 
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.osstats.configuration.Configuration;
 import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

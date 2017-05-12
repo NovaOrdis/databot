@@ -16,9 +16,13 @@
 
 package io.novaordis.osstats.configuration;
 
+import io.novaordis.osstats.configuration.props.PropertiesConfigurationFile;
+import io.novaordis.osstats.configuration.yaml.YamlConfigurationFile;
 import io.novaordis.osstats.env.EnvironmentVariableProvider;
 import io.novaordis.osstats.env.EnvironmentVariableProviderImpl;
 import io.novaordis.utilities.UserErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -39,6 +43,8 @@ import java.util.List;
 public class ConfigurationFactory {
 
     // Constants -------------------------------------------------------------------------------------------------------
+
+    private static final Logger log = LoggerFactory.getLogger(ConfigurationFactory.class);
 
     public static final String CONFIGURATION_FILE_SHORT_OPTION = "-c";
     public static final String CONFIGURATION_FILE_LONG_OPTION = "--configuration";
@@ -158,6 +164,8 @@ public class ConfigurationFactory {
 
     static Configuration buildInstance(String fileName, boolean foreground) throws Exception {
 
+        log.debug("configuration file name: " + fileName);
+
         //
         // heuristics to choose the right subclass implementation
         //
@@ -165,10 +173,14 @@ public class ConfigurationFactory {
         if (fileName.endsWith(".conf")) {
 
             //
-            // properties-based configuration file
+            // property-based configuration file
             //
 
             return new PropertiesConfigurationFile(fileName, foreground);
+        }
+        else if (fileName.endsWith(".yaml") || fileName.endsWith(".yml")) {
+
+            return new YamlConfigurationFile(fileName, foreground);
         }
         else {
 

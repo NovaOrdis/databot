@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package io.novaordis.osstats.configuration;
+package io.novaordis.osstats.configuration.props;
 
+import io.novaordis.osstats.configuration.Configuration;
+import io.novaordis.osstats.configuration.ConfigurationFactoryTest;
+import io.novaordis.osstats.configuration.ConfigurationTest;
 import io.novaordis.utilities.UserErrorException;
 import org.junit.Test;
 import org.slf4j.Logger;
