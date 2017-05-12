@@ -16,8 +16,8 @@
 
 package io.novaordis.osstats;
 
-import io.novaordis.events.core.event.TimedEvent;
-import io.novaordis.events.metric.MetricDefinition;
+import io.novaordis.events.api.event.TimedEvent;
+import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.osstats.os.MockOS;
 import io.novaordis.utilities.os.OS;
 import org.junit.Test;

@@ -16,10 +16,10 @@
 
 package io.novaordis.osstats.configuration;
 
-import io.novaordis.events.metric.MetricDefinition;
-import io.novaordis.events.metric.cpu.CpuUserTime;
-import io.novaordis.events.metric.loadavg.LoadAverageLastMinute;
-import io.novaordis.events.metric.memory.PhysicalMemoryTotal;
+import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.cpu.CpuUserTime;
+import io.novaordis.events.api.metric.loadavg.LoadAverageLastMinute;
+import io.novaordis.events.api.metric.memory.PhysicalMemoryTotal;
 import org.junit.Test;
 
 import java.util.List;

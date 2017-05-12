@@ -16,8 +16,9 @@
 
 package io.novaordis.osstats;
 
-import io.novaordis.events.core.event.TimedEvent;
-import io.novaordis.events.metric.MetricDefinition;
+
+import io.novaordis.events.api.event.TimedEvent;
+import io.novaordis.events.api.metric.MetricDefinition;
 
 import java.util.List;
 

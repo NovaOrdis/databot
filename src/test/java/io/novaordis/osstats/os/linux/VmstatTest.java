@@ -16,10 +16,10 @@
 
 package io.novaordis.osstats.os.linux;
 
-import io.novaordis.events.core.event.IntegerProperty;
-import io.novaordis.events.core.event.LongProperty;
-import io.novaordis.events.core.event.MemoryMeasureUnit;
-import io.novaordis.events.core.event.Property;
+import io.novaordis.events.api.event.IntegerProperty;
+import io.novaordis.events.api.event.LongProperty;
+import io.novaordis.events.api.event.Property;
+import io.novaordis.events.api.measure.MemoryMeasureUnit;
 import io.novaordis.osstats.os.InvalidExecutionOutputException;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.os.OS;

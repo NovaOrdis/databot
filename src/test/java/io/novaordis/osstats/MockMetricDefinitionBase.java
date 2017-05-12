@@ -16,9 +16,9 @@
 
 package io.novaordis.osstats;
 
-import io.novaordis.events.core.event.MeasureUnit;
-import io.novaordis.events.metric.MetricDefinition;
-import io.novaordis.events.metric.MetricDefinitionBase;
+import io.novaordis.events.api.measure.MeasureUnit;
+import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.MetricDefinitionBase;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>

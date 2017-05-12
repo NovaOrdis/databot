@@ -16,9 +16,9 @@
 
 package io.novaordis.osstats;
 
-import io.novaordis.events.core.event.Event;
-import io.novaordis.events.core.event.GenericTimedEvent;
-import io.novaordis.events.core.event.ShutdownEvent;
+import io.novaordis.events.api.event.Event;
+import io.novaordis.events.api.event.GenericTimedEvent;
+import io.novaordis.events.api.event.ShutdownEvent;
 import io.novaordis.osstats.configuration.MockConfiguration;
 import io.novaordis.utilities.Files;
 import org.junit.After;

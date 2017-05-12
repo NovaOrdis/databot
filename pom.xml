@@ -20,7 +20,8 @@
         <slf4j-version>1.7.12</slf4j-version>
         <junit-version>4.12</junit-version>
         <novaordis-utilities-version>4.2.0</novaordis-utilities-version>
-        <events-version>2.4.3-SNAPSHOT-23</events-version>
+        <events-api-version>1.1.5-SNAPSHOT-1</events-api-version>
+        <events-core-version>1.0.0-SNAPSHOT-1</events-core-version>
     </properties>
 
     <build>
@@ -92,9 +93,14 @@
                 <version>${novaordis-utilities-version}</version>
             </dependency>
             <dependency>
+                <groupId>io.novaordis.events.api</groupId>
+                <artifactId>events-api</artifactId>
+                <version>${events-api-version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.novaordis.events</groupId>
-                <artifactId>events</artifactId>
-                <version>${events-version}</version>
+                <artifactId>events-core</artifactId>
+                <version>${events-core-version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -121,8 +127,12 @@
             <artifactId>novaordis-utilities</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.novaordis.events.api</groupId>
+            <artifactId>events-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.novaordis.events</groupId>
-            <artifactId>events</artifactId>
+            <artifactId>events-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

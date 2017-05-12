@@ -16,12 +16,12 @@
 
 package io.novaordis.osstats;
 
-import io.novaordis.events.core.event.GenericTimedEvent;
-import io.novaordis.events.core.event.Property;
-import io.novaordis.events.core.event.TimedEvent;
-import io.novaordis.events.metric.MetricCollectionException;
-import io.novaordis.events.metric.MetricDefinition;
-import io.novaordis.events.metric.source.MetricSource;
+import io.novaordis.events.api.event.GenericTimedEvent;
+import io.novaordis.events.api.event.Property;
+import io.novaordis.events.api.event.TimedEvent;
+import io.novaordis.events.api.metric.MetricCollectionException;
+import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.source.MetricSource;
 import io.novaordis.utilities.os.OS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -16,14 +16,14 @@
 
 package io.novaordis.osstats;
 
-import io.novaordis.events.core.event.BooleanProperty;
-import io.novaordis.events.core.event.IntegerProperty;
-import io.novaordis.events.core.event.ListProperty;
-import io.novaordis.events.core.event.LongProperty;
-import io.novaordis.events.core.event.MapProperty;
-import io.novaordis.events.core.event.Property;
-import io.novaordis.events.core.event.StringProperty;
-import io.novaordis.events.core.event.TimedEvent;
+import io.novaordis.events.api.event.BooleanProperty;
+import io.novaordis.events.api.event.IntegerProperty;
+import io.novaordis.events.api.event.ListProperty;
+import io.novaordis.events.api.event.LongProperty;
+import io.novaordis.events.api.event.MapProperty;
+import io.novaordis.events.api.event.Property;
+import io.novaordis.events.api.event.StringProperty;
+import io.novaordis.events.api.event.TimedEvent;
 import io.novaordis.utilities.time.Timestamp;
 import io.novaordis.utilities.time.TimestampImpl;
 
@@ -126,6 +126,16 @@ public class MockTimedEvent implements TimedEvent {
 
         properties.add(property);
         return null;
+    }
+
+    @Override
+    public Long getLineNumber() {
+        throw new RuntimeException("getLineNumber() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public void setLineNumber(Long lineNumber) {
+        throw new RuntimeException("setLineNumber() NOT YET IMPLEMENTED");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

@@ -16,8 +16,8 @@
 
 package io.novaordis.osstats;
 
-import io.novaordis.events.core.event.MeasureUnit;
-import io.novaordis.events.core.event.Property;
+import io.novaordis.events.api.event.Property;
+import io.novaordis.events.api.measure.MeasureUnit;
 
 import java.text.Format;
 

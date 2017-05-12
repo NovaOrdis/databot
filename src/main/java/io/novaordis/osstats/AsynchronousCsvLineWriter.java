@@ -16,13 +16,13 @@
 
 package io.novaordis.osstats;
 
+import io.novaordis.events.api.event.Event;
+import io.novaordis.events.api.event.ShutdownEvent;
+import io.novaordis.events.api.event.TimedEvent;
+import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.core.ClosedException;
 import io.novaordis.events.core.CsvOutputFormatter;
-import io.novaordis.events.core.event.Event;
-import io.novaordis.events.core.event.ShutdownEvent;
-import io.novaordis.events.core.event.TimedEvent;
 import io.novaordis.osstats.configuration.Configuration;
-import io.novaordis.events.metric.MetricDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

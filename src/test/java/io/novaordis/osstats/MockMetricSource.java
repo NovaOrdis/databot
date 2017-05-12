@@ -16,10 +16,10 @@
 
 package io.novaordis.osstats;
 
-import io.novaordis.events.core.event.Property;
-import io.novaordis.events.metric.MetricCollectionException;
-import io.novaordis.events.metric.MetricDefinition;
-import io.novaordis.events.metric.source.MetricSource;
+import io.novaordis.events.api.event.Property;
+import io.novaordis.events.api.metric.MetricCollectionException;
+import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.source.MetricSource;
 import io.novaordis.utilities.os.OS;
 
 import java.util.ArrayList;
