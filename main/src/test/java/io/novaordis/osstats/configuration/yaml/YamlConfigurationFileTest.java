@@ -16,12 +16,20 @@
 
 package io.novaordis.osstats.configuration.yaml;
 
+import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.osstats.configuration.Configuration;
 import io.novaordis.osstats.configuration.ConfigurationTest;
+import io.novaordis.utilities.UserErrorException;
+import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -39,9 +47,124 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    // constructor -----------------------------------------------------------------------------------------------------
+    // Tests -----------------------------------------------------------------------------------------------------------
 
-    // readConfiguration() ---------------------------------------------------------------------------------------------
+    // load() ----------------------------------------------------------------------------------------------------------
+
+    @Test
+    public void load_InvalidSamplingInterval() throws Exception {
+
+        YamlConfigurationFile c = new YamlConfigurationFile(true, null);
+
+        String s = "sampling.interval: blah";
+        InputStream is = new ByteArrayInputStream(s.getBytes());
+
+        try {
+
+            c.load(is);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.startsWith("invalid sampling interval value: \"blah\""));
+        }
+    }
+
+    @Test
+    public void load_InvalidOutputFileAppend() throws Exception {
+
+        YamlConfigurationFile c = new YamlConfigurationFile(true, null);
+
+        String s =
+                "output:\n" +
+                "  file: something\n" +
+                "  append: blah\n";
+
+        InputStream is = new ByteArrayInputStream(s.getBytes());
+
+        try {
+
+            c.load(is);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertEquals("invalid '" + YamlConfigurationFile.OUTPUT_APPEND_KEY + "' boolean value: \"blah\"", msg);
+        }
+    }
+
+    @Test
+    public void load_MetricsNotAList() throws Exception {
+
+        YamlConfigurationFile c = new YamlConfigurationFile(true, null);
+
+        String s = "metrics: something\n";
+
+        InputStream is = new ByteArrayInputStream(s.getBytes());
+
+        try {
+
+            c.load(is);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertEquals("'" + YamlConfigurationFile.METRICS_KEY + "' not a list", msg);
+        }
+    }
+
+    @Test
+    public void load_Metrics() throws Exception {
+
+        YamlConfigurationFile c = new YamlConfigurationFile(true, null);
+
+        String s = "metrics:\n" +
+                "  - PhysicalMemoryTotal\n" +
+                "  - CpuUserTime\n" +
+                "  - LoadAverageLastMinute\n";
+
+        InputStream is = new ByteArrayInputStream(s.getBytes());
+
+        c.load(is);
+
+        List<MetricDefinition> mds = c.getMetricDefinitions();
+        assertEquals(3, mds.size());
+
+        MetricDefinition md = mds.get(0);
+        assertEquals("PhysicalMemoryTotal", md.getName());
+        MetricDefinition md2 = mds.get(1);
+        assertEquals("CpuUserTime", md2.getName());
+        MetricDefinition md3 = mds.get(2);
+        assertEquals("LoadAverageLastMinute", md3.getName());
+    }
+
+    // toMetricDefinition() --------------------------------------------------------------------------------------------
+
+    @Test
+    public void toMetricDefinition_Null() throws Exception {
+
+
+        try {
+
+            YamlConfigurationFile.toMetricDefinition(null);
+            fail("should have thrown exception");
+        }
+        catch(IllegalArgumentException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.equals("null metric definition"));
+        }
+    }
+
+    @Test
+    public void toMetricDefinition() throws Exception {
+
+        MetricDefinition md = YamlConfigurationFile.toMetricDefinition("PhysicalMemoryTotal");
+        assertEquals("PhysicalMemoryTotal", md.getName());
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

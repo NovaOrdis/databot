@@ -4,5 +4,11 @@
 
 sampling.interval: 20
 
-output.file: /tmp/test.csv
-output.file.append: false
+output:
+  file: /tmp/test.csv
+  append: false
+
+metrics:
+  - PhysicalMemoryTotal
+  - CpuUserTime
+  - LoadAverageLastMinute

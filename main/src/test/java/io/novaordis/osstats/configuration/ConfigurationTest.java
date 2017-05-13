@@ -31,6 +31,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -74,6 +75,7 @@ public abstract class ConfigurationTest {
         try {
 
             getConfigurationToTest(true, "there/is/no/such/file");
+            fail("should have thrown exception");
         }
         catch(UserErrorException e) {
 

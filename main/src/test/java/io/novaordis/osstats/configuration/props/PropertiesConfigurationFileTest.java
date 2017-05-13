@@ -31,6 +31,7 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -69,6 +70,7 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
         try {
 
             p.load(bais);
+            fail("should have thrown exception");
         }
         catch(UserErrorException e) {
 
@@ -93,6 +95,7 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
         try {
 
             p.load(bais);
+            fail("should have thrown exception");
         }
         catch(UserErrorException e) {
             String msg = e.getMessage();
@@ -117,6 +120,7 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
         try {
 
             p.load(bais);
+            fail("should have thrown exception");
         }
         catch(UserErrorException e) {
             String msg = e.getMessage();
