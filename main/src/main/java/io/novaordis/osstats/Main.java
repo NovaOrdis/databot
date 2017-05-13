@@ -58,7 +58,7 @@ public class Main {
             OS os = OS.getInstance();
             DataCollector dataCollector = new DataCollectorImpl(os);
             Timer timer = new Timer();
-            DataCollectionTimerTask t = new DataCollectionTimerTask(eventBuffer, dataCollector, conf.getMetrics());
+            DataCollectionTimerTask t = new DataCollectionTimerTask(eventBuffer, dataCollector, conf.getMetricDefinitions());
             timer.scheduleAtFixedRate(t, 0, conf.getSamplingIntervalSec() * 1000L);
 
             exitLatch.await();

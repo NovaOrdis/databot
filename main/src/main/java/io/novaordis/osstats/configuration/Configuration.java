@@ -62,6 +62,6 @@ public interface Configuration {
     /**
      * @return the list of metric definitions to collect and log.
      */
-    List<MetricDefinition> getMetrics();
+    List<MetricDefinition> getMetricDefinitions();
 
 }

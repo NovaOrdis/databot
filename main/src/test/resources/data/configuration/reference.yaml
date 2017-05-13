@@ -1,0 +1,8 @@
+#
+# reference configuration - do not change, tests will fail
+#
+
+sampling.interval: 20
+
+output.file: /tmp/test.csv
+output.file.append: false

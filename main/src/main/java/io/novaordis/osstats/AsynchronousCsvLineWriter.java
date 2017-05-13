@@ -98,7 +98,7 @@ public class AsynchronousCsvLineWriter implements Runnable {
         //
 
         String outputFormat = "timestamp";
-        List<MetricDefinition> metrics = configuration.getMetrics();
+        List<MetricDefinition> metrics = configuration.getMetricDefinitions();
         if (!metrics.isEmpty()) {
             outputFormat += ", ";
             for(Iterator<MetricDefinition> i = metrics.iterator(); i.hasNext(); ) {

@@ -69,7 +69,7 @@ public class MockConfiguration implements Configuration {
     }
 
     @Override
-    public List<MetricDefinition> getMetrics() {
+    public List<MetricDefinition> getMetricDefinitions() {
 
         return metrics;
     }

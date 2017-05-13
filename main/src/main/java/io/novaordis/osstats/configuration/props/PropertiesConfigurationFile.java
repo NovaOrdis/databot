@@ -17,16 +17,13 @@
 package io.novaordis.osstats.configuration.props;
 
 import io.novaordis.events.api.metric.MetricDefinition;
-import io.novaordis.osstats.configuration.Configuration;
+import io.novaordis.osstats.configuration.ConfigurationBase;
 import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -36,7 +33,7 @@ import java.util.StringTokenizer;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/27/16
  */
-public class PropertiesConfigurationFile implements Configuration {
+public class PropertiesConfigurationFile extends ConfigurationBase {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -51,100 +48,35 @@ public class PropertiesConfigurationFile implements Configuration {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private int samplingInterval;
-    private String outputFileName;
-    private boolean outputFileAppend;
-    private boolean foreground;
-    private List<MetricDefinition> metrics;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public PropertiesConfigurationFile(String fileName, boolean foreground) throws UserErrorException {
+    public PropertiesConfigurationFile(boolean foreground, String fileName) throws UserErrorException {
 
-        this();
-
-        File f = new File(fileName);
-        if (!f.isFile() || !f.canRead()) {
-            throw new UserErrorException("configuration file " + fileName + " does not exist or cannot be read");
-        }
-
-        InputStream is = null;
-        Properties props = new Properties();
-
-        try {
-
-            is = new FileInputStream(f);
-            props.load(is);
-        }
-        catch(Exception e) {
-            throw new UserErrorException("failure while reading configuration file " + f);
-        }
-        finally {
-
-            if (is != null) {
-                try {
-                    is.close();
-                }
-                catch(Exception e) {
-                    log.warn("failed to close input stream for " + f);
-                }
-            }
-        }
-
-        this.foreground = foreground;
-
-        readConfiguration(props);
-    }
-
-    /**
-     * Testing only.
-     */
-    PropertiesConfigurationFile() {
-
-        this.samplingInterval = DEFAULT_SAMPLING_INTERVAL_SEC;
-        this.outputFileName = DEFAULT_OUTPUT_FILE_NAME;
-        this.outputFileAppend = true;
-        this.foreground = false;
-        this.metrics = new ArrayList<>();
-    }
-
-    // Configuration implementation ------------------------------------------------------------------------------------
-
-    @Override
-    public boolean isForeground() {
-
-        return foreground;
-    }
-
-    @Override
-    public int getSamplingIntervalSec() {
-
-        return samplingInterval;
-    }
-
-    @Override
-    public String getOutputFileName() {
-
-        return outputFileName;
-    }
-
-    @Override
-    public boolean isOutputFileAppend() {
-
-        return outputFileAppend;
-    }
-
-    @Override
-    public List<MetricDefinition> getMetrics() {
-
-        return metrics;
+        super(foreground, fileName);
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------
 
-    protected void readConfiguration(Properties properties) throws UserErrorException {
+    // Protected -------------------------------------------------------------------------------------------------------
+
+    @Override
+    protected void load(InputStream is) throws UserErrorException {
+
+        log.debug("loading configuration");
+
+        Properties properties = new Properties();
+
+        try {
+
+            properties.load(is);
+        }
+        catch(IOException e) {
+
+            throw new UserErrorException("failed to read input file", e);
+        }
+
 
         String s = properties.getProperty(SAMPLING_INTERVAL_PROPERTY_NAME);
 
@@ -155,7 +87,8 @@ public class PropertiesConfigurationFile implements Configuration {
             //
 
             try {
-                samplingInterval = Integer.parseInt(s);
+
+                setSamplingIntervalSec(Integer.parseInt(s));
             }
             catch(Exception e) {
                 throw new UserErrorException("invalid sampling interval value: \"" + s + "\"", e);
@@ -166,7 +99,7 @@ public class PropertiesConfigurationFile implements Configuration {
 
         if (s != null) {
 
-            outputFileName = s;
+            setOutputFileName(s);
         }
 
         s = properties.getProperty(OUTPUT_FILE_APPEND_PROPERTY_NAME);
@@ -177,12 +110,15 @@ public class PropertiesConfigurationFile implements Configuration {
             ls = ls.trim().toLowerCase();
 
             if ("true".equals(ls) || "yes".equals(ls)) {
-                this.outputFileAppend = true;
+
+                setOutputFileAppend(true);
             }
             else if ("false".equals(ls) || "no".equals(ls)) {
-                this.outputFileAppend = false;
+
+                setOutputFileAppend(false);
             }
             else {
+
                 throw new UserErrorException(
                         "invalid '" + OUTPUT_FILE_APPEND_PROPERTY_NAME + "' boolean value: \"" + s + "\"");
             }
@@ -193,15 +129,15 @@ public class PropertiesConfigurationFile implements Configuration {
         if (s != null) {
 
             StringTokenizer st = new StringTokenizer(s, ", ");
+
             while(st.hasMoreTokens()) {
+
                 String tok = st.nextToken();
                 MetricDefinition md = MetricDefinition.getInstance(tok);
-                metrics.add(md);
+                addMetricDefinition(md);
             }
         }
     }
-
-    // Protected -------------------------------------------------------------------------------------------------------
 
     // Private ---------------------------------------------------------------------------------------------------------
 

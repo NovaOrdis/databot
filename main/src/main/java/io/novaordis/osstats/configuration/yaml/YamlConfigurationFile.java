@@ -16,13 +16,12 @@
 
 package io.novaordis.osstats.configuration.yaml;
 
-import io.novaordis.events.api.metric.MetricDefinition;
-import io.novaordis.osstats.configuration.Configuration;
+import io.novaordis.osstats.configuration.ConfigurationBase;
 import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.io.InputStream;
 
 /**
  * A configuration instance backed by a property file.
@@ -30,7 +29,7 @@ import java.util.List;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/27/16
  */
-public class YamlConfigurationFile implements Configuration {
+public class YamlConfigurationFile extends ConfigurationBase {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -42,84 +41,19 @@ public class YamlConfigurationFile implements Configuration {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public YamlConfigurationFile(String fileName, boolean foreground) throws UserErrorException {
+    public YamlConfigurationFile(boolean foreground, String fileName) throws UserErrorException {
 
-//        File f = new File(fileName);
-//        if (!f.isFile() || !f.canRead()) {
-//            throw new UserErrorException("configuration file " + fileName + " does not exist or cannot be read");
-//        }
-//
-//        InputStream is = null;
-//        Properties props = new Properties();
-//
-//        try {
-//
-//            is = new FileInputStream(f);
-//            props.load(is);
-//        }
-//        catch(Exception e) {
-//            throw new UserErrorException("failure while reading configuration file " + f);
-//        }
-//        finally {
-//
-//            if (is != null) {
-//                try {
-//                    is.close();
-//                }
-//                catch(Exception e) {
-//                    log.warn("failed to close input stream for " + f);
-//                }
-//            }
-//        }
-//
-//        this.foreground = foreground;
-//
-//        readConfiguration(props);
-    }
-
-    /**
-     * Testing only
-     */
-    YamlConfigurationFile() {
+        super(foreground, fileName);
     }
 
     // Configuration implementation ------------------------------------------------------------------------------------
-
-    @Override
-    public boolean isForeground() {
-
-        throw new RuntimeException("NYE");
-    }
-
-    @Override
-    public int getSamplingIntervalSec() {
-
-        throw new RuntimeException("NYE");
-    }
-
-    @Override
-    public String getOutputFileName() {
-
-        throw new RuntimeException("NYE");
-    }
-
-    @Override
-    public boolean isOutputFileAppend() {
-
-        throw new RuntimeException("NYE");
-    }
-
-    @Override
-    public List<MetricDefinition> getMetrics() {
-
-        throw new RuntimeException("NYE");
-    }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------
 
-//    protected void readConfiguration(Properties properties) throws UserErrorException {
+    @Override
+    protected void load(InputStream is) throws UserErrorException {
 //
 //        String s = properties.getProperty(SAMPLING_INTERVAL_PROPERTY_NAME);
 //
@@ -174,7 +108,7 @@ public class YamlConfigurationFile implements Configuration {
 //                metrics.add(md);
 //            }
 //        }
-//    }
+    }
 
     // Protected -------------------------------------------------------------------------------------------------------
 

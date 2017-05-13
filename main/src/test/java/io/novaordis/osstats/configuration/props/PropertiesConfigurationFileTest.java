@@ -24,6 +24,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.Properties;
 
@@ -50,34 +52,26 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
 
     // constructor -----------------------------------------------------------------------------------------------------
 
-    @Test
-    public void constructor_configurationFileDoesNotExist() throws Exception {
-
-        try {
-            new PropertiesConfigurationFile("there/is/no/such/file", false);
-        }
-        catch(UserErrorException e) {
-            String msg = e.getMessage();
-            log.info(msg);
-            assertEquals("configuration file there/is/no/such/file does not exist or cannot be read" , msg);
-        }
-    }
-
-    // readConfiguration() ---------------------------------------------------------------------------------------------
+    // load() ----------------------------------------------------------------------------------------------------------
 
     @Test
-    public void readConfiguration_InvalidSamplingInterval() throws Exception {
+    public void load_InvalidSamplingInterval() throws Exception {
 
-        PropertiesConfigurationFile p = new PropertiesConfigurationFile();
+        PropertiesConfigurationFile p = new PropertiesConfigurationFile(true, null);
 
         Properties props = new Properties();
         props.setProperty(PropertiesConfigurationFile.SAMPLING_INTERVAL_PROPERTY_NAME, "blah");
 
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        props.store(baos, "comments");
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
         try {
 
-            p.readConfiguration(props);
+            p.load(bais);
         }
         catch(UserErrorException e) {
+
             String msg = e.getMessage();
             log.info(msg);
             assertTrue(msg.startsWith("invalid sampling interval value: \"blah\""));
@@ -85,16 +79,20 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
     }
 
     @Test
-    public void readConfiguration_InvalidOutputFileAppend() throws Exception {
+    public void load_InvalidOutputFileAppend() throws Exception {
 
-        PropertiesConfigurationFile p = new PropertiesConfigurationFile();
+        PropertiesConfigurationFile p = new PropertiesConfigurationFile(true, null);
 
         Properties props = new Properties();
         props.setProperty(PropertiesConfigurationFile.OUTPUT_FILE_APPEND_PROPERTY_NAME, "blah");
 
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        props.store(baos, "comments");
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
         try {
 
-            p.readConfiguration(props);
+            p.load(bais);
         }
         catch(UserErrorException e) {
             String msg = e.getMessage();
@@ -105,16 +103,20 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
     }
 
     @Test
-    public void readConfiguration_Metrics() throws Exception {
+    public void load_Metrics() throws Exception {
 
-        PropertiesConfigurationFile p = new PropertiesConfigurationFile();
+        PropertiesConfigurationFile p = new PropertiesConfigurationFile(true, null);
 
         Properties props = new Properties();
         props.setProperty(PropertiesConfigurationFile.OUTPUT_FILE_APPEND_PROPERTY_NAME, "blah");
 
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        props.store(baos, "comments");
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
         try {
 
-            p.readConfiguration(props);
+            p.load(bais);
         }
         catch(UserErrorException e) {
             String msg = e.getMessage();
@@ -129,18 +131,17 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
     // Protected -------------------------------------------------------------------------------------------------------
 
     @Override
-    protected Configuration getConfigurationToTest(boolean useReferenceFile) throws Exception {
+    protected Configuration getConfigurationToTest(boolean foreground, String fileName) throws Exception {
 
-        if (useReferenceFile) {
+        return new PropertiesConfigurationFile(foreground, fileName);
+    }
 
-            File configFile = new File(
-                    System.getProperty("basedir"), "src/test/resources/data/configuration/reference-props.conf");
-            assertTrue(configFile.isFile());
-            return new PropertiesConfigurationFile(configFile.getAbsolutePath(), false);
-        }
-        else {
-            return new PropertiesConfigurationFile();
-        }
+    @Override
+    protected String getReferenceFileName() {
+
+        File f = new File(System.getProperty("basedir"), "src/test/resources/data/configuration/reference-props.conf");
+        assertTrue(f.isFile());
+        return f.getPath();
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

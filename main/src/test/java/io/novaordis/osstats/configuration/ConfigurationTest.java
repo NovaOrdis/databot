@@ -20,8 +20,10 @@ import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.cpu.CpuUserTime;
 import io.novaordis.events.api.metric.loadavg.LoadAverageLastMinute;
 import io.novaordis.events.api.metric.memory.PhysicalMemoryTotal;
+import io.novaordis.utilities.UserErrorException;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -46,19 +48,39 @@ public abstract class ConfigurationTest {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    /**
-     * The default configuration represents built-in values, values that are available when no external configuration
-     * file is specified, or when no specific values are present in the configuration file.
-     */
+    // Tests -----------------------------------------------------------------------------------------------------------
+
+    // isForeground() --------------------------------------------------------------------------------------------------
+
     @Test
-    public void defaultConfiguration() throws Exception {
+    public void isForeground_True() throws Exception {
 
-        Configuration c = getConfigurationToTest(false);
+        Configuration c = getConfigurationToTest(true, null);
+        assertTrue(c.isForeground());
+    }
 
-        assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingIntervalSec());
-        assertEquals(Configuration.DEFAULT_OUTPUT_FILE_NAME, c.getOutputFileName());
-        assertEquals(Configuration.DEFAULT_OUTPUT_FILE_APPEND, c.isOutputFileAppend());
-        assertTrue(c.getMetrics().isEmpty());
+    @Test
+    public void isForeground_False() throws Exception {
+
+        Configuration c = getConfigurationToTest(false, null);
+        assertFalse(c.isForeground());
+    }
+
+    // constructor -----------------------------------------------------------------------------------------------
+
+    @Test
+    public void constructor_configurationFileDoesNotExist() throws Exception {
+
+        try {
+
+            getConfigurationToTest(true, "there/is/no/such/file");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("there/is/no/such/file"));
+            assertTrue(msg.contains("does not exist or cannot be read"));
+        }
     }
 
     /**
@@ -67,7 +89,11 @@ public abstract class ConfigurationTest {
     @Test
     public void referenceConfiguration() throws Exception {
 
-        Configuration c = getConfigurationToTest(true);
+        String referenceFile = getReferenceFileName();
+
+        assertTrue(new File(referenceFile).isFile());
+
+        Configuration c = getConfigurationToTest(true, referenceFile);
 
         assertEquals(20, c.getSamplingIntervalSec());
         assertNotEquals(20, Configuration.DEFAULT_SAMPLING_INTERVAL_SEC);
@@ -76,7 +102,7 @@ public abstract class ConfigurationTest {
         assertEquals("/tmp/test.csv", c.getOutputFileName());
         assertNotEquals("/tmp/test.csv", Configuration.DEFAULT_OUTPUT_FILE_NAME);
 
-        List<MetricDefinition> metrics = c.getMetrics();
+        List<MetricDefinition> metrics = c.getMetricDefinitions();
 
         assertEquals(3, metrics.size());
 
@@ -90,15 +116,31 @@ public abstract class ConfigurationTest {
         assertNotNull(lm);
     }
 
+    /**
+     * The default configuration represents built-in values, values that are available when no external configuration
+     * file is specified, or when no specific values are present in the configuration file.
+     */
+    @Test
+    public void defaultConfiguration() throws Exception {
+
+        Configuration c = getConfigurationToTest(false, null);
+
+        assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingIntervalSec());
+        assertEquals(Configuration.DEFAULT_OUTPUT_FILE_NAME, c.getOutputFileName());
+        assertEquals(Configuration.DEFAULT_OUTPUT_FILE_APPEND, c.isOutputFileAppend());
+        assertTrue(c.getMetricDefinitions().isEmpty());
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
 
     /**
-     * @param useReferenceFile if true, use the corresponding reference file from under src/test/resources/data, if
-     *                         false, don't use any file, but expect built-in values.
+     * @param fileName null acceptable, will produce a configuration file that exposes defaults.
      */
-    protected abstract Configuration getConfigurationToTest(boolean useReferenceFile) throws Exception;
+    protected abstract Configuration getConfigurationToTest(boolean foreground, String fileName) throws Exception;
+
+    protected abstract String getReferenceFileName();
 
     // Private ---------------------------------------------------------------------------------------------------------
 

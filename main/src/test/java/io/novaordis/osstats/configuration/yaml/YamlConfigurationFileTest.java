@@ -17,12 +17,7 @@
 package io.novaordis.osstats.configuration.yaml;
 
 import io.novaordis.osstats.configuration.Configuration;
-import io.novaordis.osstats.configuration.ConfigurationFactoryTest;
 import io.novaordis.osstats.configuration.ConfigurationTest;
-import io.novaordis.osstats.configuration.props.PropertiesConfigurationFile;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
@@ -35,8 +30,6 @@ import static org.junit.Assert.assertTrue;
 public class YamlConfigurationFileTest extends ConfigurationTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
-
-    private static final Logger log = LoggerFactory.getLogger(ConfigurationFactoryTest.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -55,19 +48,17 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     // Protected -------------------------------------------------------------------------------------------------------
 
     @Override
-    protected Configuration getConfigurationToTest(boolean useReferenceFile) throws Exception {
+    protected Configuration getConfigurationToTest(boolean foreground, String fileName) throws Exception {
 
-        if (useReferenceFile) {
+        return new YamlConfigurationFile(foreground, fileName);
+    }
 
-            File configFile = new File(
-                    System.getProperty("basedir"), "src/test/resources/data/configuration/reference-yaml.yaml");
-            assertTrue(configFile.isFile());
-            return new PropertiesConfigurationFile(configFile.getAbsolutePath(), false);
-        }
-        else {
+    @Override
+    protected String getReferenceFileName() {
 
-            return new YamlConfigurationFile();
-        }
+        File f = new File(System.getProperty("basedir"), "src/test/resources/data/configuration/reference.yaml");
+        assertTrue(f.isFile());
+        return f.getPath();
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

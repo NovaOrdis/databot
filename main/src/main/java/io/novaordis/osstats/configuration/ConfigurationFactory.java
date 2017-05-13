@@ -18,8 +18,6 @@ package io.novaordis.osstats.configuration;
 
 import io.novaordis.osstats.configuration.props.PropertiesConfigurationFile;
 import io.novaordis.osstats.configuration.yaml.YamlConfigurationFile;
-import io.novaordis.osstats.env.EnvironmentVariableProvider;
-import io.novaordis.osstats.env.EnvironmentVariableProviderImpl;
 import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,8 +51,6 @@ public class ConfigurationFactory {
     public static final String FOREGROUND_LONG_OPTION = "--foreground";
 
     // Static Attributes -----------------------------------------------------------------------------------------------
-
-    private static EnvironmentVariableProvider environmentVariableProvider = new EnvironmentVariableProviderImpl();
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -141,16 +137,6 @@ public class ConfigurationFactory {
 
     // Package protected static ----------------------------------------------------------------------------------------
 
-    static void setEnvironmentVariableProvider(EnvironmentVariableProvider p) {
-
-        environmentVariableProvider = p;
-    }
-
-    static EnvironmentVariableProvider getEnvironmentVariableProvider() {
-
-        return environmentVariableProvider;
-    }
-
     // Attributes ------------------------------------------------------------------------------------------------------
 
     // Constructors ----------------------------------------------------------------------------------------------------
@@ -176,11 +162,11 @@ public class ConfigurationFactory {
             // property-based configuration file
             //
 
-            return new PropertiesConfigurationFile(fileName, foreground);
+            return new PropertiesConfigurationFile(foreground, fileName);
         }
         else if (fileName.endsWith(".yaml") || fileName.endsWith(".yml")) {
 
-            return new YamlConfigurationFile(fileName, foreground);
+            return new YamlConfigurationFile(foreground, fileName);
         }
         else {
 
