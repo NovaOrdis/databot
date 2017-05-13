@@ -52,6 +52,26 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     // load() ----------------------------------------------------------------------------------------------------------
 
     @Test
+    public void load_EmtpyConfigurationFile() throws Exception {
+
+        YamlConfigurationFile c = new YamlConfigurationFile(true, null);
+
+        String s = "";
+        InputStream is = new ByteArrayInputStream(s.getBytes());
+
+        try {
+
+            c.load(is);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.equals("empty configuration file"));
+        }
+    }
+
+    @Test
     public void load_InvalidSamplingInterval() throws Exception {
 
         YamlConfigurationFile c = new YamlConfigurationFile(true, null);

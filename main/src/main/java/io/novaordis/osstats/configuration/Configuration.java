@@ -29,7 +29,7 @@ public interface Configuration {
     // Constants -------------------------------------------------------------------------------------------------------
 
     int DEFAULT_SAMPLING_INTERVAL_SEC = 10;
-    String DEFAULT_OUTPUT_FILE_NAME = "/tmp/os-stats.csv";
+    String DEFAULT_OUTPUT_FILE_NAME = "./os-stats.csv";
     boolean DEFAULT_OUTPUT_FILE_APPEND = true;
 
     // Static ----------------------------------------------------------------------------------------------------------

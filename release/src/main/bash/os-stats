@@ -93,7 +93,7 @@ function main() {
     classpath=$(get-classpath $(dirname $0)/..) || fail "failed to build os-stats classpath"
 
     local configuration_file
-    configuration_file=$(get-configuration-file) || fail "failed to find configuration file"
+    configuration_file=$(get-configuration-file) || exit 1
 
     #
     # if jboss metrics are encountered in the configuration file, append the CLI classpath to the regular classpath

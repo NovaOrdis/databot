@@ -73,6 +73,15 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
         Map m = (Map)yaml.load(is);
 
+        //
+        // we get null on empty files
+        //
+
+        if (m == null) {
+
+            throw new UserErrorException("empty configuration file");
+        }
+
         Object o = m.get(SAMPLING_INTERVAL_KEY);
 
         if (o != null) {

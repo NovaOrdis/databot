@@ -37,6 +37,7 @@ public abstract class ConfigurationBase implements Configuration {
     // Constants -------------------------------------------------------------------------------------------------------
 
     private static final Logger log = LoggerFactory.getLogger(ConfigurationBase.class);
+    private static final boolean debug = log.isDebugEnabled();
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -77,6 +78,15 @@ public abstract class ConfigurationBase implements Configuration {
 
                 throw new UserErrorException("configuration file " + filename + " does not exist or cannot be read");
             }
+            catch (UserErrorException e) {
+
+                //
+                // add the file name to the error message
+                //
+
+                throw new UserErrorException(e.getMessage() + ": " + filename);
+
+            }
             finally {
 
                 if (fis != null) {
@@ -91,6 +101,11 @@ public abstract class ConfigurationBase implements Configuration {
                     }
                 }
             }
+        }
+
+        if (debug) {
+
+            dumpConfiguration();
         }
     }
 
@@ -155,6 +170,25 @@ public abstract class ConfigurationBase implements Configuration {
     }
 
     // Private ---------------------------------------------------------------------------------------------------------
+
+    private void dumpConfiguration() {
+
+        String s =
+                "\n\nconfiguration:\n\n" +
+                        " sampling interval:     " + getSamplingIntervalSec() + " seconds\n" +
+                        " output file:           " + getOutputFileName() + "\n" +
+                        " append to output file: " + isOutputFileAppend() + "\n" +
+                        " metrics:\n";
+
+        List<MetricDefinition> mds = getMetricDefinitions();
+
+        for(MetricDefinition md: mds) {
+
+            s += "    - " + md.getName() + "\n";
+        }
+
+        log.debug(s);
+    }
 
     // Inner classes ---------------------------------------------------------------------------------------------------
 
