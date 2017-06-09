@@ -4,15 +4,15 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>os-stats Release Module</name>
+    <name>databot Release Module</name>
 
     <parent>
-        <groupId>io.novaordis.os-stats</groupId>
-        <artifactId>os-stats-root</artifactId>
-        <version>1.1.0-SNAPSHOT-7</version>
+        <groupId>io.novaordis.databot</groupId>
+        <artifactId>databot-root</artifactId>
+        <version>1.0.0-SNAPSHOT-1</version>
     </parent>
 
-    <artifactId>os-stats-release</artifactId>
+    <artifactId>databot-release</artifactId>
     <packaging>pom</packaging>
 
     <build>
@@ -25,7 +25,7 @@
                           finalName impacts only the locally built artifact, not the name of the artifact that gets
                           deployed in the repository.
                     -->
-                    <finalName>os-stats-${project.version}</finalName>
+                    <finalName>databot-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptors>
                         <descriptor>src/assembly/release.xml</descriptor>
@@ -46,8 +46,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.novaordis.os-stats</groupId>
-            <artifactId>os-stats</artifactId>
+            <groupId>io.novaordis.databot</groupId>
+            <artifactId>databot</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

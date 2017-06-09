@@ -4,11 +4,11 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>os-stats</name>
+    <name>databot</name>
 
-    <groupId>io.novaordis.os-stats</groupId>
-    <artifactId>os-stats-root</artifactId>
-    <version>1.1.0-SNAPSHOT-7</version>
+    <groupId>io.novaordis.databot</groupId>
+    <artifactId>databot-root</artifactId>
+    <version>1.0.0-SNAPSHOT-1</version>
     <packaging>pom</packaging>
 
     <properties>

@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/main/os-stats.iml" filepath="$PROJECT_DIR$/main/os-stats.iml" />
-      <module fileurl="file://$PROJECT_DIR$/release/os-stats-release.iml" filepath="$PROJECT_DIR$/release/os-stats-release.iml" />
-      <module fileurl="file://$PROJECT_DIR$/os-stats-root.iml" filepath="$PROJECT_DIR$/os-stats-root.iml" />
+      <module fileurl="file://$PROJECT_DIR$/main/databot.iml" filepath="$PROJECT_DIR$/main/databot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/release/databot-release.iml" filepath="$PROJECT_DIR$/release/databot-release.iml" />
+      <module fileurl="file://$PROJECT_DIR$/databot-root.iml" filepath="$PROJECT_DIR$/databot-root.iml" />
     </modules>
   </component>
 </project>

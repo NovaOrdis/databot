@@ -2,7 +2,7 @@
 # release configuration
 #
 qualification:
-  os.command.to.get.installed.version: os-stats version
+  os.command.to.get.installed.version: databot version
 
 build:
 

@@ -1,0 +1,274 @@
+#!/bin/bash
+
+function debug() {
+
+    ${verbose} && echo "$@" 1>&2;
+    return 0
+}
+
+function debug-arguments {
+
+    ${verbose} && echo "${FUNCNAME[1]}($@)" 1>&2;
+    return 0
+}
+
+function fail {
+
+    echo "[error]: $@" 1>&2 && exit 1
+}
+
+function display-help() {
+
+    local help_file=$(dirname $0)/../lib/HELP
+    [ ! -f ${help_file} ] && fail "HELP file ${help_file} not available, possible because of faulty installation"
+    cat ${help_file}
+}
+
+function display-version() {
+
+    local version_file=$(dirname $0)/../lib/VERSION
+    [ ! -f ${version_file} ] && fail "VERSION file ${version_file} not available, possible because of faulty installation"
+    cat ${version_file}
+}
+
+#
+# Returns the databot configuration file path at stdout, if the file exists, or fail if not found
+#
+function get-configuration-file() {
+
+    local databot_conf_file
+    local msg
+
+    if [ -n "${DATABOT_CONF}" ]; then
+
+        databot_conf_file=${DATABOT_CONF}
+        msg="DATABOT_CONF"
+    else
+
+        databot_conf_file=~/./databot.yaml
+        msg="default"
+    fi
+
+    [ -f "${databot_conf_file}" ] || fail "${msg} configuration file ${databot_conf_file} not found"
+
+    debug "databot configuration file: ${databot_conf_file}"
+    echo ${databot_conf_file}
+}
+
+#
+# returns the value of the given configuration property, or the empty string if the configuration property not
+# found in the configuration file. The method fails if the configuration file cannot be correctly detected.
+#
+function get-configuration-property() {
+
+    local property_name=$1
+    [ -z "${property_name}" ] && fail "property name not provided"
+    local config_file
+    config_file=$(get-configuration-file) || exit 1
+    local value
+    value=$(grep "^${property_name}=.*" ${config_file} | sed -e 's/^.*=//') || \
+        fail "failed to extract property '${property_name}' from ${config_file}"
+    debug "extracted ${property_name}=${value} from ${config_file}"
+    echo ${value}
+}
+
+#
+# if echoes an empty string, it means neither DATABOT_JAVA_HOME or JAVA_HOME were set, so we rely on the java
+# executable found in PATH
+#
+function get-java-home() {
+
+    #
+    # attempt to use DATABOT_JAVA_HOME with priority
+    #
+
+    if [ -n "${DATABOT_JAVA_HOME}" ]; then
+        echo "${DATABOT_JAVA_HOME}"
+        return 0
+    fi
+
+    local java_home
+
+    if [ -n "${JAVA_HOME}" ]; then
+        debug "using JAVA_HOME from environment ${JAVA_HOME}"
+        java_home=${JAVA_HOME}
+
+    fi
+    echo ${java_home}
+}
+
+jboss_cli_dependencies="\
+jboss-dmr \
+jboss-logging \
+staxmapper \
+jboss-as-protocol \
+picketbox \
+jboss-as-controller-client \
+jboss-threads \
+jboss-remoting \
+aesh \
+xnio-api \
+xnio-nio \
+slf4j-api"
+
+#
+# Build the classpath fragment required by the CLI wrapper to work using JARs deployed within the specified JBoss
+# installation. If it successful, return the classpath fragment at stdout and returns 0. If not, it sends an error
+# message at stderr and returns 1.
+#
+function get-jboss-cli-classpath() {
+
+    local jboss_home=$1
+    [ -z "${jboss_home}" ] && { echo "[error]: 'jboss_home' not provided" 1>&2; return 1; }
+    [ -d ${jboss_home} ] || { echo "[error]: jboss_home ${jboss_home} does not exist" 1>&2; return 1; }
+
+    local classpath
+
+    local jboss_modules_jar=${jboss_home}/jboss-modules.jar
+    [ -f ${jboss_modules_jar} ] || { echo "[error]: ${jboss_modules_jar} not found" 1>&2; return 1; }
+    classpath=${jboss_modules_jar}
+
+    local jboss_cli_client_jar=${jboss_home}/bin/client/jboss-cli-client.jar
+    [ -f ${jboss_cli_client_jar} ] || { echo "[error]: ${jboss_cli_client_jar} not found" 1>&2; return 1; }
+    classpath=${classpath}:${jboss_cli_client_jar}
+
+    for i in ${jboss_cli_dependencies}; do
+        local classpath_element
+        classpath_element=$(locate-newest-jar ${jboss_home} ${i}) || return 1
+        classpath=${classpath}:${classpath_element}
+    done
+
+    echo "${classpath}"
+    return 0
+}
+
+#
+# writes the newest JAR path that matches the base name at stdout (by comparing overlays), or returns 1 if no such JAR
+# is found. We don't compare the JAR file names themselves, because we encountered cases when different overlays
+# contain the same JARs, and the older overlays contain corrupted JARs.
+#
+function locate-newest-jar() {
+
+    local jboss_home=$1
+    [ -z "${jboss_home}" ] && { echo "[error]: 'jboss_home' not provided" 1>&2; return 1; }
+    [ -d ${jboss_home} ] || { echo "[error]: jboss_home ${jboss_home} does not exist" 1>&2; return 1; }
+
+    local jar_base_name=$2
+    [ -z "${jar_base_name}" ] && { echo "[error]: 'jar_base_name' not provided" 1>&2; return 1; }
+
+    local module_dir=${jboss_home}/modules
+    [ -d ${module_dir} ] || { echo "[error]: the module directory ${module_dir} does not exist" 1>&2; return 1; }
+
+    local newest_jar_path
+    local newest_overlay
+    local newest_jar_basename
+    for i in $(find ${module_dir} -name ${jar_base_name}-[0-9]*); do
+        local current_basename
+        current_basename=$(basename ${i})
+        if [[ ${i} =~ .overlays ]]; then
+            current_overlay=${i#*.overlays/}
+            current_overlay=${current_overlay%%/*}
+        fi
+        if [[ "${current_overlay}" > "${newest_overlay}" ]]; then
+            newest_jar_basename=${current_basename}
+            newest_jar_path=${i}
+            newest_overlay=${current_overlay}
+            continue
+        fi
+        if [ "${current_overlay}" = "${newest_overlay}" ]; then
+            if [[ "${current_basename}" > "${newest_jar_basename}" ]]; then
+                newest_jar_basename=${current_basename}
+                newest_jar_path=${i}
+                continue
+            fi
+        fi
+    done
+
+    [ -z "${newest_jar_path}" ] && \
+        { echo "[error]: no JAR with a name starting with '${jar_base_name}' found in ${module_dir}" 1>&2; return 1; }
+
+    echo ${newest_jar_path}
+}
+
+function get-classpath() {
+    local home_dir=$1
+    [ -z "${home_dir}" ] && fail "no 'home_dir' specified"
+    local first=true
+    for i in ${home_dir}/lib/*.jar; do
+        ${first} && first=false || echo -n ":"
+        echo -n ${i}
+    done
+}
+
+#
+# return 0 if the configuration file contain jboss: metrics or 1 if not
+#
+function configuration-file-contains-jboss-metric() {
+
+    local config_file=$1
+
+    [ -z "${config_file}" ] && fail "'config_file' not provided"
+    grep -q "^metrics=.*jboss:.*" ${config_file}
+}
+
+#
+# appends the classpath fragment required by JBoss CLI at the end of the given classpath. Attempt to get 'jboss_home' from the configuration file and build
+# the required classpath
+#
+function append-jboss-classpath-fragment() {
+
+    local classpath=$1
+    [ -z "${classpath}" ] && fail "no 'classpath' provided"
+
+    #
+    # get jboss.home from configuration
+    #
+    local jboss_home
+    jboss_home=$(get-configuration-property jboss.home) || exit 1
+
+    [ -z "${jboss_home}" ] && \
+        fail "no 'jboss.home' configuration element found in $(get-configuration-file)"
+    [ -d "${jboss_home}" ] || \
+        fail "the 'jboss.home' configuration element found in $(get-configuration-file) is not a valid directory: ${jboss_home}"
+
+    local jboss_cli_classpath
+    jboss_cli_classpath=$(get-jboss-cli-classpath ${jboss_home}) || \
+        fail "failed to build jboss CLI classpath from jboss home ${jboss_home}"
+    echo "${classpath}:${jboss_cli_classpath}"
+}
+
+# may return empty string or more than one PID (in a space separated list)
+function get-pids() {
+    local pids=$(ps -ef | grep java | grep ${main_class} | awk '{print $2}')
+    echo ${pids}
+}
+
+function stop() {
+
+    local pids
+    pids=$(get-pids) || fail "failed to get pids"
+
+    [ -z "${pids}" ] && { echo "no databot background processes running on $(uname -n)"; exit 0; }
+
+    local force=false
+    local signal=""
+    local signal_name="SIGTERM"
+    if ${force}; then
+        signal="-9"
+        signal_name="SIGKILL"
+    fi
+
+    for pid in ${pids}; do
+        kill ${signal} ${pid} && \
+            echo "sent ${signal_name} into databot process (${pid})" || \
+            echo "fail to send ${signal_name} into databot process with pid ${pid}"
+    done
+}
+
+function status() {
+
+    local pids
+    pids=$(get-pids) || fail "failed to get pids"
+    [ -z "${pids}" ] && { echo "no databot background processes running on $(uname -n)"; exit 0; }
+    echo "databot with pid ${pids} running"
+}

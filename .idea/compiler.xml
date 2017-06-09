@@ -17,18 +17,18 @@
       <profile default="true" name="Default" enabled="false">
         <processorPath useClasspath="true" />
       </profile>
-      <profile default="false" name="Annotation profile for os-stats" enabled="true">
+      <profile default="false" name="Annotation profile for databot" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="os-stats" />
+        <module name="databot" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="os-stats" target="1.8" />
-      <module name="os-stats-release" target="1.8" />
-      <module name="os-stats-root" target="1.8" />
+      <module name="databot" target="1.8" />
+      <module name="databot-release" target="1.8" />
+      <module name="databot-root" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
