@@ -18,6 +18,8 @@ package io.novaordis.databot.configuration.props;
 
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.databot.configuration.ConfigurationBase;
+import io.novaordis.events.api.metric.MetricDefinitionException;
+import io.novaordis.events.api.metric.MetricDefinitionParser;
 import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,8 +135,17 @@ public class PropertiesConfigurationFile extends ConfigurationBase {
             while(st.hasMoreTokens()) {
 
                 String tok = st.nextToken();
-                MetricDefinition md = MetricDefinition.getInstance(tok);
-                addMetricDefinition(md);
+
+                try {
+
+                    MetricDefinition md = MetricDefinitionParser.parse(null, tok);
+
+                    addMetricDefinition(md);
+                }
+                catch(MetricDefinitionException e) {
+
+                    throw new UserErrorException(e);
+                }
             }
         }
     }

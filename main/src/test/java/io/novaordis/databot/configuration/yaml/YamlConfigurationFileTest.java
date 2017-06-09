@@ -154,11 +154,11 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
         assertEquals(3, mds.size());
 
         MetricDefinition md = mds.get(0);
-        assertEquals("PhysicalMemoryTotal", md.getName());
+        assertEquals("PhysicalMemoryTotal", md.getId());
         MetricDefinition md2 = mds.get(1);
-        assertEquals("CpuUserTime", md2.getName());
+        assertEquals("CpuUserTime", md2.getId());
         MetricDefinition md3 = mds.get(2);
-        assertEquals("LoadAverageLastMinute", md3.getName());
+        assertEquals("LoadAverageLastMinute", md3.getId());
     }
 
     // toMetricDefinition() --------------------------------------------------------------------------------------------
@@ -183,7 +183,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     public void toMetricDefinition() throws Exception {
 
         MetricDefinition md = YamlConfigurationFile.toMetricDefinition("PhysicalMemoryTotal");
-        assertEquals("PhysicalMemoryTotal", md.getName());
+        assertEquals("PhysicalMemoryTotal", md.getId());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

@@ -49,64 +49,64 @@ public class DataCollectionTimerTaskTest {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    @Test
-    public void theTimerTaskDoesNotThrowUncheckedExceptions() throws Exception {
-
-        MockDataCollector mdc = new MockDataCollector();
-        mdc.setBroken(true);
-        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
-
-        DataCollectionTimerTask t = new DataCollectionTimerTask(null, mdc, metrics);
-
-        // this MUST NOT throw any exception
-        t.run();
-
-        log.info("we're good");
-    }
-
-    @Test
-    public void lifecycle() throws Exception {
-
-        MockDataCollector mdc = new MockDataCollector();
-        BlockingQueue<Event> queue = new ArrayBlockingQueue<>(1);
-        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
-
-        DataCollectionTimerTask t = new DataCollectionTimerTask(queue, mdc, metrics);
-
-        t.run();
-
-        // pick the mock event from the queue
-
-        MockTimedEvent mte = (MockTimedEvent)queue.take();
-
-        assertNotNull(mte);
-    }
-
-    @Test
-    public void failureToOfferTheEventToTheQueue() throws Exception {
-
-        MockDataCollector mdc = new MockDataCollector();
-
-        // one element queue, the second will block
-        BlockingQueue<Event> queue = new ArrayBlockingQueue<>(1);
-        assertTrue(queue.isEmpty());
-
-        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
-
-        DataCollectionTimerTask t = new DataCollectionTimerTask(queue, mdc, metrics);
-
-        t.run();
-
-        assertEquals(1, queue.size());
-
-        //
-        // the queue is full now, run() one more time so the queue won't accept the event
-        //
-
-        t.run();
-
-        log.info("we're good");
-    }
+//    @Test
+//    public void theTimerTaskDoesNotThrowUncheckedExceptions() throws Exception {
+//
+//        MockDataCollector mdc = new MockDataCollector();
+//        mdc.setBroken(true);
+//        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
+//
+//        DataCollectionTimerTask t = new DataCollectionTimerTask(null, mdc, metrics);
+//
+//        // this MUST NOT throw any exception
+//        t.run();
+//
+//        log.info("we're good");
+//    }
+//
+//    @Test
+//    public void lifecycle() throws Exception {
+//
+//        MockDataCollector mdc = new MockDataCollector();
+//        BlockingQueue<Event> queue = new ArrayBlockingQueue<>(1);
+//        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
+//
+//        DataCollectionTimerTask t = new DataCollectionTimerTask(queue, mdc, metrics);
+//
+//        t.run();
+//
+//        // pick the mock event from the queue
+//
+//        MockTimedEvent mte = (MockTimedEvent)queue.take();
+//
+//        assertNotNull(mte);
+//    }
+//
+//    @Test
+//    public void failureToOfferTheEventToTheQueue() throws Exception {
+//
+//        MockDataCollector mdc = new MockDataCollector();
+//
+//        // one element queue, the second will block
+//        BlockingQueue<Event> queue = new ArrayBlockingQueue<>(1);
+//        assertTrue(queue.isEmpty());
+//
+//        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
+//
+//        DataCollectionTimerTask t = new DataCollectionTimerTask(queue, mdc, metrics);
+//
+//        t.run();
+//
+//        assertEquals(1, queue.size());
+//
+//        //
+//        // the queue is full now, run() one more time so the queue won't accept the event
+//        //
+//
+//        t.run();
+//
+//        log.info("we're good");
+//    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

@@ -19,6 +19,7 @@ package io.novaordis.databot;
 import io.novaordis.events.api.measure.MeasureUnit;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricDefinitionBase;
+import io.novaordis.events.api.metric.MetricSource;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -34,10 +35,17 @@ abstract class MockMetricDefinitionBase extends MetricDefinitionBase implements 
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
+    /**
+     * @param source must always have a non-null source.
+     */
+    protected MockMetricDefinitionBase(MetricSource source) {
+        super(source);
+    }
+
     // MetricDefinition implementation ---------------------------------------------------------------------------------
 
     @Override
-    public MeasureUnit getMeasureUnit() {
+    public MeasureUnit getBaseUnit() {
         throw new RuntimeException("getMeasureUnit() NOT YET IMPLEMENTED");
     }
 

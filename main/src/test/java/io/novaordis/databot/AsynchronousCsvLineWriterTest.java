@@ -437,31 +437,32 @@ public class AsynchronousCsvLineWriterTest {
 
         MockConfiguration mc = new MockConfiguration();
 
-        mc.addMetricDefinition(new MockMetricDefinition("z"));
-        mc.addMetricDefinition(new MockMetricDefinition("a"));
-
-        AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(null, mc);
-        assertTrue(w.isHeaderOn());
-
-        MockPrintStream mps = new MockPrintStream();
-        w.setPrintStream(mps);
-
-        MockTimedEvent e = new MockTimedEvent();
-        e.setProperty(new MockProperty("a", "a-value"));
-        e.setProperty(new MockProperty("z", "z-value"));
-
-        w.write(e);
-
-        String header = mps.getLine();
-        log.info(header);
-        assertEquals("# timestamp, z, a", header);
-
-        String line = mps.getLine();
-        log.info(line);
-        assertTrue(line.contains(", z-value, a-value"));
-
-        line = mps.getLine();
-        assertNull(line);
+        throw new RuntimeException("RETURN HERE");
+//        mc.addMetricDefinition(new MockMetricDefinition("z"));
+//        mc.addMetricDefinition(new MockMetricDefinition("a"));
+//
+//        AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(null, mc);
+//        assertTrue(w.isHeaderOn());
+//
+//        MockPrintStream mps = new MockPrintStream();
+//        w.setPrintStream(mps);
+//
+//        MockTimedEvent e = new MockTimedEvent();
+//        e.setProperty(new MockProperty("a", "a-value"));
+//        e.setProperty(new MockProperty("z", "z-value"));
+//
+//        w.write(e);
+//
+//        String header = mps.getLine();
+//        log.info(header);
+//        assertEquals("# timestamp, z, a", header);
+//
+//        String line = mps.getLine();
+//        log.info(line);
+//        assertTrue(line.contains(", z-value, a-value"));
+//
+//        line = mps.getLine();
+//        assertNull(line);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

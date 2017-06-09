@@ -104,7 +104,7 @@ public class AsynchronousCsvLineWriter implements Runnable {
             for(Iterator<MetricDefinition> i = metrics.iterator(); i.hasNext(); ) {
 
                 MetricDefinition md = i.next();
-                outputFormat += md.getName();
+                outputFormat += md.getId();
                 if (i.hasNext()) {
                     outputFormat += ", ";
                 }

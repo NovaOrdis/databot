@@ -55,6 +55,16 @@ public class MockMetricSource implements MetricSource {
     // MetricSource implementation -------------------------------------------------------------------------------------
 
     @Override
+    public String getAddress() {
+        throw new RuntimeException("getAddress() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public boolean hasAddress(String address) {
+        throw new RuntimeException("hasAddress() NOT YET IMPLEMENTED");
+    }
+
+    @Override
     public List<Property> collectMetrics(List<MetricDefinition> metricDefinitions) throws MetricException {
 
         List<Property> result = new ArrayList<>();
@@ -75,15 +85,17 @@ public class MockMetricSource implements MetricSource {
 
     public void addBulkReading(OS os, Property p) {
 
-        Map<MetricDefinition, Property> properties = bulkReadingsForOs.get(os);
+        throw new RuntimeException("NYE");
 
-        if (properties == null) {
-
-            properties = new HashMap<>();
-            bulkReadingsForOs.put(os, properties);
-        }
-
-        properties.put(new MockMetricDefinition("mock"), p);
+//        Map<MetricDefinition, Property> properties = bulkReadingsForOs.get(os);
+//
+//        if (properties == null) {
+//
+//            properties = new HashMap<>();
+//            bulkReadingsForOs.put(os, properties);
+//        }
+//
+//        properties.put(new MockMetricDefinition("mock"), p);
     }
 
     public void addReadingForMetric(MetricDefinition d, Property p) {

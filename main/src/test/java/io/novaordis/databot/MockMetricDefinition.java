@@ -16,6 +16,8 @@
 
 package io.novaordis.databot;
 
+import io.novaordis.events.api.metric.MetricSource;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/3/16
@@ -28,23 +30,26 @@ public class MockMetricDefinition extends MockMetricDefinitionBase {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private String name;
+    private String id;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockMetricDefinition() {
-        this("Mock Metric Definition");
-    }
+//    public MockMetricDefinition() {
+//        this("Mock Metric Definition");
+//    }
 
-    public MockMetricDefinition(String name) {
-        this.name = name;
+    /**
+     * @param source must always have a non-null source.
+     */
+    protected MockMetricDefinition(MetricSource source) {
+        super(source);
     }
 
     // MetricDefinition implementation ---------------------------------------------------------------------------------
 
     @Override
-    public String getName() {
-        return name;
+    public String getId() {
+        return id;
     }
 
     @Override
@@ -54,8 +59,8 @@ public class MockMetricDefinition extends MockMetricDefinitionBase {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public void setName(String s) {
-        this.name = s;
+    public void setId(String s) {
+        this.id = s;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

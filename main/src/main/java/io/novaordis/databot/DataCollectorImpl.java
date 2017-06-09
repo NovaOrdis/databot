@@ -48,15 +48,12 @@ public class DataCollectorImpl implements DataCollector {
     // Package protected static ----------------------------------------------------------------------------------------
 
     /**
-     * The method looks at the definitions of the metrics we need and determines the minimal amount of native
-     * command executions and file system reads necessary in order to gather all the metrics.
-     *
-     * @param osName one of OS.Linux, OS.MacOS, OS.Windows
+     * The method looks at the definitions of all the metrics given as argument and determines the sources we need
+     * to query to gather all the metrics.
      *
      * @exception DataCollectionException if at least one metric has no source defined.
      */
-    static Set<MetricSource> establishSources(List<MetricDefinition> metrics, String osName)
-            throws DataCollectionException {
+    static Set<MetricSource> establishSources(List<MetricDefinition> metrics) throws DataCollectionException {
 
         //
         // find the common source of any possible pair
@@ -65,62 +62,14 @@ public class DataCollectorImpl implements DataCollector {
 
         for(MetricDefinition d: metrics) {
 
-            definitionLoop2: for(MetricDefinition d2: metrics) {
+            MetricSource s  = d.getSource();
 
-                if (d2.equals(d)) {
-                    continue;
-                }
+            if (s == null) {
 
-                List<MetricSource> sl = d.getSources(osName);
-
-                if (sl.isEmpty()) {
-                    throw new DataCollectionException(d + " has no declared sources for " + osName);
-                }
-
-                List<MetricSource> sl2 = d2.getSources(osName);
-
-                if (sl2.isEmpty()) {
-                    throw new DataCollectionException(d2 + " has no declared sources for " + osName);
-                }
-
-                for(MetricSource s: sl) {
-                    for(MetricSource s2: sl2) {
-                        if (s.equals(s2)) {
-                            sources.add(s);
-                            break definitionLoop2;
-                        }
-                    }
-                }
-            }
-        }
-
-        //
-        // identify the metrics that do not have a source yet and add their preferred source
-        //
-        metricLoop: for(MetricDefinition d: metrics) {
-
-            for(MetricSource s: d.getSources(osName)) {
-
-                if (sources.contains(s)) {
-                    //
-                    // we're good
-                    //
-                    continue metricLoop;
-                }
+                throw new DataCollectionException(d + " has no declared sources");
             }
 
-            //
-            // add the preferred source
-            //
-            List<MetricSource> srcs = d.getSources(osName);
-            if (srcs.isEmpty()) {
-                //
-                // d has no source, fail
-                //
-                throw new DataCollectionException(d + " has no declared sources for " + osName);
-            }
-
-            sources.add(srcs.get(0));
+            sources.add(s);
         }
 
         return sources;
@@ -179,7 +128,7 @@ public class DataCollectorImpl implements DataCollector {
      */
     List<Property> readMetrics(List<MetricDefinition> metricDefinitions) throws DataCollectionException {
 
-        Set<MetricSource> sources = establishSources(metricDefinitions, os.getName());
+        Set<MetricSource> sources = establishSources(metricDefinitions);
 
         if (debug) { log.debug("metric sources: " + sources); }
 
@@ -224,7 +173,7 @@ public class DataCollectorImpl implements DataCollector {
             // the specific metric with its preferred source
             //
 
-            MetricSource preferredSource = m.getSources(os.getName()).get(0);
+            MetricSource preferredSource = m.getSource();
 
             try {
 

@@ -18,6 +18,8 @@ package io.novaordis.databot.configuration.yaml;
 
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.databot.configuration.ConfigurationBase;
+import io.novaordis.events.api.metric.MetricDefinitionException;
+import io.novaordis.events.api.metric.MetricDefinitionParser;
 import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -164,8 +166,17 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
         String tok = (String)o;
 
-        //noinspection UnnecessaryLocalVariable
-        MetricDefinition md = MetricDefinition.getInstance(tok);
+        MetricDefinition md;
+
+        try {
+
+            md = MetricDefinitionParser.parse(null, tok);
+        }
+        catch (MetricDefinitionException e) {
+
+            throw new UserErrorException(e);
+        }
+
         return md;
     }
 

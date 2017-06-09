@@ -16,7 +16,6 @@
 
 package io.novaordis.databot;
 
-
 import io.novaordis.events.api.event.TimedEvent;
 import io.novaordis.events.api.metric.MetricDefinition;
 
@@ -36,10 +35,8 @@ public interface DataCollector {
 
     /**
      * Take a reading and return a timed event containing the most current values for specified metrics. May return null
-     * if external circumstances prevented the collector to read data.
-     *
-     * The collector task invoking this method will catch any exception thrown by it and will act accordingly, logging
-     * it but not canceling the timer.
+     * if external circumstances prevented the collector to read data. The collector task invoking this method will
+     * catch any exception thrown by it and will act accordingly, logging it but not canceling the timer.
      *
      * @exception DataCollectionException must have a human readable message.
      */

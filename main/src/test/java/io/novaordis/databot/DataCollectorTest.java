@@ -43,30 +43,30 @@ public abstract class DataCollectorTest {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    @Test
-    public void read() throws Exception {
-
-        MockOS mos = new MockOS();
-
-        DataCollector c = getDataCollectorToTest(mos);
-
-        long t0 = System.currentTimeMillis();
-
-        MockMetricDefinition mmd = new MockMetricDefinition("TEST");
-        MockMetricSource mms = new MockMetricSource();
-        assertTrue(mmd.addSource(mos.getName(), mms));
-
-        mms.addBulkReading(mos, new MockProperty("TEST"));
-
-        List<MetricDefinition> metrics = Collections.singletonList(mmd);
-
-        TimedEvent te = c.read(metrics);
-
-        long t1 = System.currentTimeMillis();
-
-        assertTrue(t0 <= te.getTime());
-        assertTrue(te.getTime() <= t1);
-    }
+//    @Test
+//    public void read() throws Exception {
+//
+//        MockOS mos = new MockOS();
+//
+//        DataCollector c = getDataCollectorToTest(mos);
+//
+//        long t0 = System.currentTimeMillis();
+//
+//        MockMetricDefinition mmd = new MockMetricDefinition("TEST");
+//        MockMetricSource mms = new MockMetricSource();
+//        assertTrue(mmd.addSource(mos.getName(), mms));
+//
+//        mms.addBulkReading(mos, new MockProperty("TEST"));
+//
+//        List<MetricDefinition> metrics = Collections.singletonList(mmd);
+//
+//        TimedEvent te = c.read(metrics);
+//
+//        long t1 = System.currentTimeMillis();
+//
+//        assertTrue(t0 <= te.getTime());
+//        assertTrue(te.getTime() <= t1);
+//    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
