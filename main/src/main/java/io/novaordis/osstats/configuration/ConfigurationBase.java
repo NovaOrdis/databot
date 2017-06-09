@@ -184,7 +184,7 @@ public abstract class ConfigurationBase implements Configuration {
 
         for(MetricDefinition md: mds) {
 
-            s += "    - " + md.getName() + "\n";
+            s += "    - " + md.getId() + "\n";
         }
 
         log.debug(s);

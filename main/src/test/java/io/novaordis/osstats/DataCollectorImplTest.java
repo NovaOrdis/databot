@@ -237,7 +237,7 @@ public class DataCollectorImplTest extends DataCollectorTest {
         assertEquals(1, sources.size());
         MetricSource source = sources.get(0);
 
-        List<Property> bulkCollection = source.collectAllMetrics(mockOs);
+        List<Property> bulkCollection = source.collectMetrics(null);
         assertTrue(bulkCollection.isEmpty());
 
         List<Property> targetedCollection = dc.readMetrics(Collections.singletonList(md));

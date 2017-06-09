@@ -19,9 +19,9 @@ package io.novaordis.osstats;
 import io.novaordis.events.api.event.GenericTimedEvent;
 import io.novaordis.events.api.event.Property;
 import io.novaordis.events.api.event.TimedEvent;
-import io.novaordis.events.api.metric.MetricCollectionException;
 import io.novaordis.events.api.metric.MetricDefinition;
-import io.novaordis.events.api.metric.source.MetricSource;
+import io.novaordis.events.api.metric.MetricException;
+import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.utilities.os.OS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -194,9 +194,9 @@ public class DataCollectorImpl implements DataCollector {
                 //
                 // optimization: collect all possible metrics in one go. It may return an empty list for some sources
                 //
-                props = source.collectAllMetrics(os);
+                props = source.collectMetrics(metricDefinitions);
             }
-            catch(MetricCollectionException e) {
+            catch(MetricException e) {
 
                 throw new DataCollectionException(e);
             }
@@ -213,7 +213,7 @@ public class DataCollectorImpl implements DataCollector {
             //noinspection Convert2streamapi
             for(Property p: allProperties) {
 
-                if (p.getName().equals(m.getName())) {
+                if (p.getName().equals(m.getId())) {
                     properties.add(p);
                     continue metricLoop;
                 }
@@ -243,7 +243,7 @@ public class DataCollectorImpl implements DataCollector {
                 Property p = props.get(0);
                 properties.add(p);
             }
-            catch(MetricCollectionException e) {
+            catch(MetricException e) {
 
                 throw new DataCollectionException(e);
             }

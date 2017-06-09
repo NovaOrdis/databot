@@ -17,13 +17,12 @@
 package io.novaordis.osstats;
 
 import io.novaordis.events.api.event.Property;
-import io.novaordis.events.api.metric.MetricCollectionException;
 import io.novaordis.events.api.metric.MetricDefinition;
-import io.novaordis.events.api.metric.source.MetricSource;
+import io.novaordis.events.api.metric.MetricException;
+import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.utilities.os.OS;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,23 +55,7 @@ public class MockMetricSource implements MetricSource {
     // MetricSource implementation -------------------------------------------------------------------------------------
 
     @Override
-    public List<Property> collectAllMetrics(OS os) throws MetricCollectionException {
-
-        if (breakOnCollect) {
-            throw new MetricCollectionException("SYNTHETIC");
-        }
-
-        Map<MetricDefinition, Property> props = bulkReadingsForOs.get(os);
-
-        if (props == null) {
-            return Collections.emptyList();
-        }
-
-        return new ArrayList<>(props.values());
-    }
-
-    @Override
-    public List<Property> collectMetrics(List<MetricDefinition> metricDefinitions) throws MetricCollectionException {
+    public List<Property> collectMetrics(List<MetricDefinition> metricDefinitions) throws MetricException {
 
         List<Property> result = new ArrayList<>();
 
