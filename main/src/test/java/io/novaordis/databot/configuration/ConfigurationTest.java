@@ -17,6 +17,10 @@
 package io.novaordis.databot.configuration;
 
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.os.LocalOS;
+import io.novaordis.events.api.metric.os.mdefs.CpuUserTime;
+import io.novaordis.events.api.metric.os.mdefs.LoadAverageLastMinute;
+import io.novaordis.events.api.metric.os.mdefs.PhysicalMemoryTotal;
 import io.novaordis.utilities.UserErrorException;
 import org.junit.Test;
 
@@ -105,16 +109,17 @@ public abstract class ConfigurationTest {
 
         assertEquals(3, metrics.size());
 
-        throw new RuntimeException("ReTurn HEre");
+        PhysicalMemoryTotal m = (PhysicalMemoryTotal)metrics.get(0);
+        assertNotNull(m);
+        assertEquals(new LocalOS(), m.getSource());
 
-//        PhysicalMemoryTotal mt = (PhysicalMemoryTotal)metrics.get(0);
-//        assertNotNull(mt);
-//
-//        CpuUserTime ct = (CpuUserTime)metrics.get(1);
-//        assertNotNull(ct);
-//
-//        LoadAverageLastMinute lm = (LoadAverageLastMinute)metrics.get(2);
-//        assertNotNull(lm);
+        CpuUserTime m2 = (CpuUserTime)metrics.get(1);
+        assertNotNull(m2);
+        assertEquals(new LocalOS(), m2.getSource());
+
+        LoadAverageLastMinute m3 = (LoadAverageLastMinute)metrics.get(2);
+        assertNotNull(m3);
+        assertEquals(new LocalOS(), m3.getSource());
     }
 
     /**

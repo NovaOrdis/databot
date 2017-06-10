@@ -199,7 +199,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     @Override
     protected String getReferenceFileName() {
 
-        File f = new File(System.getProperty("basedir"), "src/test/resources/data/configuration/reference.yaml");
+        File f = new File(System.getProperty("basedir"), "src/test/resources/data/configuration/reference-yaml.yaml");
         assertTrue(f.isFile());
         return f.getPath();
     }

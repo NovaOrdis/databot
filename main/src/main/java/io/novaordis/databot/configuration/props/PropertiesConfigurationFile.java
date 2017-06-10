@@ -93,6 +93,7 @@ public class PropertiesConfigurationFile extends ConfigurationBase {
                 setSamplingIntervalSec(Integer.parseInt(s));
             }
             catch(Exception e) {
+
                 throw new UserErrorException("invalid sampling interval value: \"" + s + "\"", e);
             }
         }
