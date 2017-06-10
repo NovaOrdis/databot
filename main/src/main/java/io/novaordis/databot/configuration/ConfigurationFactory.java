@@ -35,6 +35,8 @@ import java.util.List;
  * of the bin.dir system property, if no -c|--configuration= options is provided. It is the responsibility of the
  * shell wrapper to set it; if not set, it is considered user error.
  *
+ * The class also looks for "-Dforeground" and exposes the corresponding setting to the runtime.
+ *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/27/16
  */
@@ -44,11 +46,10 @@ public class ConfigurationFactory {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigurationFactory.class);
 
+    public static final String FOREGROUND_SYSTEM_PROPERTY_NAME = "foreground";
+
     public static final String CONFIGURATION_FILE_SHORT_OPTION = "-c";
     public static final String CONFIGURATION_FILE_LONG_OPTION = "--configuration";
-
-    public static final String FOREGROUND_SHORT_OPTION = "-fg";
-    public static final String FOREGROUND_LONG_OPTION = "--foreground";
 
     // Static Attributes -----------------------------------------------------------------------------------------------
 
@@ -61,11 +62,19 @@ public class ConfigurationFactory {
      */
     public static Configuration buildInstance(String[] cla) throws Exception {
 
+        //
+        // system properties first
+        //
+
+        boolean foreground = Boolean.getBoolean(FOREGROUND_SYSTEM_PROPERTY_NAME);
+
+        //
+        // end of system properties
+        //
+
         String configurationFileName = null;
 
         List<String> commandLineArguments = new ArrayList<>(Arrays.asList(cla));
-
-        boolean foreground = false;
 
         for (int i = 0; i < commandLineArguments.size(); i++) {
 
@@ -95,10 +104,6 @@ public class ConfigurationFactory {
 
                     configurationFileName = crt.substring((CONFIGURATION_FILE_LONG_OPTION + "=").length());
                 }
-            }
-            else if (FOREGROUND_SHORT_OPTION.endsWith(crt) || FOREGROUND_LONG_OPTION.endsWith(crt)) {
-
-                foreground = true;
             }
             else if ("test-user-error".equals(crt)) {
 

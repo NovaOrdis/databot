@@ -18,12 +18,13 @@ os_stats_config_file_name="databot.conf"
 function main() {
 
     local debug_args=""
-    local output_settings=""
     local foreground=false
     local do_kill=false
     local command_line_configuration_file=""
 
     while [ "$1" != "" ]; do
+
+        debug "processing \"$1\""
 
         if [ "$1" = "help" -o "$1" = "--help" ]; then
 
@@ -47,10 +48,6 @@ function main() {
         elif [ "$1" = "--foreground" -o "$1" = "-f" ]; then
 
             foreground=true
-            #
-            # also pass it as a java process argument, to let it know to ignore output.file
-            #
-            args="${args} $1"
 
         elif [ "$1" = "stop" ]; then
 
@@ -120,9 +117,11 @@ function main() {
     local java_bin="java"
     [ "${java_home}" != "" ] && java_bin="${java_home}/bin/java"
 
-    ${verbose} && verbose_system_property="-Dverbose=true"
+    ${verbose} && D_verbose="-Dverbose=true"
 
-    command="${java_bin} -Xms${memory} -Xmx${memory} -cp ${classpath} ${debug_args} ${output_settings} ${verbose_system_property} ${main_class} -c ${configuration_file} ${args}"
+    ${foreground} && D_foreground="-Dforeground=true"
+
+    command="${java_bin} -Xms${memory} -Xmx${memory} -cp ${classpath} ${debug_args} ${D_verbose} ${D_foreground} ${main_class} -c ${configuration_file} ${args}"
 
     ${verbose} && echo "${command}" 1>&2;
 

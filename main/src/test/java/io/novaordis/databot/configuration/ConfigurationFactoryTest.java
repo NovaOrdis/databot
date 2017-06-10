@@ -123,27 +123,29 @@ public class ConfigurationFactoryTest {
     }
 
     @Test
-    public void buildInstance_Foreground_ShortOption() throws Exception {
+    public void buildInstance_Foreground() throws Exception {
 
         File resourceDir = new File(System.getProperty("basedir"), "src/test/resources/data/configuration");
         assertTrue(resourceDir.isDirectory());
+
         File configFile = new File(resourceDir, "reference-props.conf");
         assertTrue(configFile.isFile());
 
-        Configuration c = ConfigurationFactory.buildInstance(new String[]{"-c", configFile.getPath(), "-fg"});
+        Configuration c;
+
+        try {
+
+            System.setProperty(ConfigurationFactory.FOREGROUND_SYSTEM_PROPERTY_NAME, "true");
+
+            c = ConfigurationFactory.buildInstance(new String[]{"-c", configFile.getPath()});
+        }
+        finally {
+
+            System.clearProperty(ConfigurationFactory.FOREGROUND_SYSTEM_PROPERTY_NAME);
+
+        }
 
         assertTrue(c.isForeground());
-    }
-
-    @Test
-    public void buildInstance_Foreground_LongOption() throws Exception {
-
-        File resourceDir = new File(System.getProperty("basedir"), "src/test/resources/data/configuration");
-        assertTrue(resourceDir.isDirectory());
-        File configFile = new File(resourceDir, "reference-props.conf");
-        assertTrue(configFile.isFile());
-
-        Configuration c = ConfigurationFactory.buildInstance(new String[]{"-c", configFile.getPath(), "--foreground"});
     }
 
     @Test
