@@ -20,6 +20,8 @@ import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.databot.configuration.ConfigurationBase;
 import io.novaordis.events.api.metric.MetricDefinitionException;
 import io.novaordis.events.api.metric.MetricDefinitionParser;
+import io.novaordis.events.api.metric.MetricSource;
+import io.novaordis.events.api.metric.MetricSourceRepository;
 import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,9 +144,11 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
             List list = (List)o;
 
+            MetricSourceRepository mr = getMetricSourceRepository();
+
             for(Object le: list) {
 
-                MetricDefinition md = toMetricDefinition(le);
+                MetricDefinition md = toMetricDefinition(mr, le);
                 addMetricDefinition(md);
             }
         }
@@ -152,7 +156,8 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
     // Protected -------------------------------------------------------------------------------------------------------
 
-    protected static MetricDefinition toMetricDefinition(Object o) throws UserErrorException {
+    protected static MetricDefinition toMetricDefinition(MetricSourceRepository sourceRepository, Object o)
+            throws UserErrorException {
 
         if (o == null) {
 
@@ -170,7 +175,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
         try {
 
-            md = MetricDefinitionParser.parse(null, tok);
+            md = MetricDefinitionParser.parse(sourceRepository, tok);
         }
         catch (MetricDefinitionException e) {
 

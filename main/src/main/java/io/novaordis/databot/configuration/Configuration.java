@@ -17,6 +17,7 @@
 package io.novaordis.databot.configuration;
 
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.MetricSourceRepository;
 
 import java.util.List;
 
@@ -64,5 +65,7 @@ public interface Configuration {
      * returned in order in which they were declared in the external configuration.
      */
     List<MetricDefinition> getMetricDefinitions();
+
+    MetricSourceRepository getMetricSourceRepository();
 
 }

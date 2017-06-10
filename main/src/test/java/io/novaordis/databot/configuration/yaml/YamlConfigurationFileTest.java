@@ -19,6 +19,8 @@ package io.novaordis.databot.configuration.yaml;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.configuration.ConfigurationTest;
+import io.novaordis.events.api.metric.MetricSourceRepository;
+import io.novaordis.events.api.metric.os.LocalOS;
 import io.novaordis.utilities.UserErrorException;
 import org.junit.Test;
 
@@ -26,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -141,6 +144,9 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
 
         YamlConfigurationFile c = new YamlConfigurationFile(true, null);
 
+        MetricSourceRepository mr = c.getMetricSourceRepository();
+        assertTrue(mr.isEmpty());
+
         String s = "metrics:\n" +
                 "  - PhysicalMemoryTotal\n" +
                 "  - CpuUserTime\n" +
@@ -159,6 +165,10 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
         assertEquals("CpuUserTime", md2.getId());
         MetricDefinition md3 = mds.get(2);
         assertEquals("LoadAverageLastMinute", md3.getId());
+
+        Set<LocalOS> localOSes = mr.getSources(LocalOS.class);
+        assertEquals(1, localOSes.size());
+        assertTrue(localOSes.contains(new LocalOS()));
     }
 
     // toMetricDefinition() --------------------------------------------------------------------------------------------
@@ -169,7 +179,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
 
         try {
 
-            YamlConfigurationFile.toMetricDefinition(null);
+            YamlConfigurationFile.toMetricDefinition(null, null);
             fail("should have thrown exception");
         }
         catch(IllegalArgumentException e) {
@@ -182,7 +192,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     @Test
     public void toMetricDefinition() throws Exception {
 
-        MetricDefinition md = YamlConfigurationFile.toMetricDefinition("PhysicalMemoryTotal");
+        MetricDefinition md = YamlConfigurationFile.toMetricDefinition(null, "PhysicalMemoryTotal");
         assertEquals("PhysicalMemoryTotal", md.getId());
     }
 

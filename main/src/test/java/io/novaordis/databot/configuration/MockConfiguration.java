@@ -17,6 +17,7 @@
 package io.novaordis.databot.configuration;
 
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.MetricSourceRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +73,11 @@ public class MockConfiguration implements Configuration {
     public List<MetricDefinition> getMetricDefinitions() {
 
         return metrics;
+    }
+
+    @Override
+    public MetricSourceRepository getMetricSourceRepository() {
+        throw new RuntimeException("getMetricSourceRepository() NOT YET IMPLEMENTED");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

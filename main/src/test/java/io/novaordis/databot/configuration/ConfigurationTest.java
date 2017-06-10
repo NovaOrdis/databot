@@ -16,7 +16,10 @@
 
 package io.novaordis.databot.configuration;
 
+import io.novaordis.databot.MockMetricDefinition;
+import io.novaordis.databot.MockMetricSource;
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.MetricSourceRepository;
 import io.novaordis.events.api.metric.os.LocalOS;
 import io.novaordis.events.api.metric.os.mdefs.CpuUserTime;
 import io.novaordis.events.api.metric.os.mdefs.LoadAverageLastMinute;
@@ -26,6 +29,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -68,7 +72,7 @@ public abstract class ConfigurationTest {
         assertFalse(c.isForeground());
     }
 
-    // constructor -----------------------------------------------------------------------------------------------
+    // constructor -----------------------------------------------------------------------------------------------------
 
     @Test
     public void constructor_configurationFileDoesNotExist() throws Exception {
@@ -120,6 +124,13 @@ public abstract class ConfigurationTest {
         LoadAverageLastMinute m3 = (LoadAverageLastMinute)metrics.get(2);
         assertNotNull(m3);
         assertEquals(new LocalOS(), m3.getSource());
+
+        MetricSourceRepository mr = c.getMetricSourceRepository();
+        assertNotNull(mr);
+
+        Set<LocalOS> localOSes = mr.getSources(LocalOS.class);
+        assertEquals(1, localOSes.size());
+        assertTrue(localOSes.contains(new LocalOS()));
     }
 
     /**
@@ -137,6 +148,44 @@ public abstract class ConfigurationTest {
         assertTrue(c.getMetricDefinitions().isEmpty());
     }
 
+    // addMetricDefinition() -------------------------------------------------------------------------------------------
+
+    @Test
+    public void addMetricDefinition() throws Exception {
+
+        ConfigurationBase c = (ConfigurationBase)getConfigurationToTest(false, null);
+
+        assertTrue(c.getMetricDefinitions().isEmpty());
+        assertTrue(c.getMetricSourceRepository().isEmpty());
+
+        MockMetricSource ms = new MockMetricSource();
+
+        MockMetricDefinition md = new MockMetricDefinition(ms, "mock");
+
+        c.addMetricDefinition(md);
+
+        List<MetricDefinition> mds = c.getMetricDefinitions();
+        assertEquals(1, mds.size());
+        assertTrue(mds.contains(md));
+
+        Set<MockMetricSource> mss = c.getMetricSourceRepository().getSources(MockMetricSource.class);
+        assertEquals(1, mss.size());
+        assertTrue(mss.contains(ms));
+
+        MockMetricDefinition md2 = new MockMetricDefinition(ms, "mock-2");
+
+        c.addMetricDefinition(md2);
+
+        mds = c.getMetricDefinitions();
+        assertEquals(2, mds.size());
+        assertEquals(mds.get(0), md);
+        assertEquals(mds.get(1), md2);
+
+        mss = c.getMetricSourceRepository().getSources(MockMetricSource.class);
+        assertEquals(1, mss.size());
+        assertTrue(mss.contains(ms));
+
+    }
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------

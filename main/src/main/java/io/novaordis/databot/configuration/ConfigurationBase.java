@@ -17,6 +17,9 @@
 package io.novaordis.databot.configuration;
 
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.MetricSource;
+import io.novaordis.events.api.metric.MetricSourceRepository;
+import io.novaordis.events.api.metric.MetricSourceRepositoryImpl;
 import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +52,8 @@ public abstract class ConfigurationBase implements Configuration {
     private String outputFileName;
     private boolean outputFileAppend;
 
+    private MetricSourceRepository metricSourceRepository;
+
     private List<MetricDefinition> metricDefinitions;
 
     // Constructors ----------------------------------------------------------------------------------------------------
@@ -63,6 +68,7 @@ public abstract class ConfigurationBase implements Configuration {
         this.samplingInterval = DEFAULT_SAMPLING_INTERVAL_SEC;
         this.outputFileName = DEFAULT_OUTPUT_FILE_NAME;
         this.outputFileAppend = true;
+        this.metricSourceRepository = new MetricSourceRepositoryImpl();
         this.metricDefinitions = new ArrayList<>();
 
         if (filename != null) {
@@ -141,6 +147,12 @@ public abstract class ConfigurationBase implements Configuration {
         return metricDefinitions;
     }
 
+    @Override
+    public MetricSourceRepository getMetricSourceRepository() {
+
+        return metricSourceRepository;
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------
@@ -167,6 +179,13 @@ public abstract class ConfigurationBase implements Configuration {
     protected void addMetricDefinition(MetricDefinition md) {
 
         metricDefinitions.add(md);
+
+        //
+        // also, "collect" its metric source in the repository; if it is already there, adding it will be a noop
+        //
+
+        MetricSource ms = md.getSource();
+        metricSourceRepository.add(ms);
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

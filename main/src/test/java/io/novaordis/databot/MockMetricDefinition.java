@@ -37,7 +37,7 @@ public class MockMetricDefinition extends MockMetricDefinitionBase {
     /**
      * @param source must always have a non-null source.
      */
-    protected MockMetricDefinition(MetricSource source, String id) {
+    public MockMetricDefinition(MetricSource source, String id) {
 
         super(source);
         setId(id);
