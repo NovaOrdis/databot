@@ -36,23 +36,33 @@ function display-version() {
 #
 function get-configuration-file() {
 
-    local databot_conf_file
+    local command_line_configuration_file_name=$1
+    local effective_configuration_file
     local msg
 
-    if [ -n "${DATABOT_CONF}" ]; then
+    if [ -n "${command_line_configuration_file_name}" ]; then
 
-        databot_conf_file=${DATABOT_CONF}
-        msg="DATABOT_CONF"
+        effective_configuration_file=${command_line_configuration_file_name}
+        debug "using command line configuration file name: ${effective_configuration_file}"
+        msg="configuration file specified on command line"
+
+    elif [ -n "${DATABOT_CONF}" ]; then
+
+        effective_configuration_file=${DATABOT_CONF}
+        debug "using \$DATABOT_CONF configuration file name: ${effective_configuration_file}"
+        msg="\$DATABOT_CONF configuration file"
+
     else
 
-        databot_conf_file=~/./databot.yaml
-        msg="default"
+        effective_configuration_file=~/./databot.yaml
+        debug "using default configuration file name: ${effective_configuration_file}"
+        msg="default configuration file"
     fi
 
-    [ -f "${databot_conf_file}" ] || fail "${msg} configuration file ${databot_conf_file} not found"
+    [ -f "${effective_configuration_file}" ] || fail "${msg} not found: ${effective_configuration_file}"
 
-    debug "databot configuration file: ${databot_conf_file}"
-    echo ${databot_conf_file}
+    debug "effective configuration file: ${effective_configuration_file}"
+    echo ${effective_configuration_file}
 }
 
 #

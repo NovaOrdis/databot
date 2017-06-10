@@ -21,6 +21,7 @@ function main() {
     local output_settings=""
     local foreground=false
     local do_kill=false
+    local command_line_configuration_file=""
 
     while [ "$1" != "" ]; do
 
@@ -59,6 +60,16 @@ function main() {
 
             status && exit 0
 
+        elif [ "$1" = "-c" ]; then
+
+            shift;
+            command_line_configuration_file=$1
+            [ -z "${command_line_configuration_file}" ] && fail "a configuration file name must follow after -c"
+
+        elif [[ "$1" =~ ^--configuration= ]]; then
+
+            echo "blah"
+
         else
 
             #
@@ -95,7 +106,7 @@ function main() {
     debug "classpath: ${classpath}"
 
     local configuration_file
-    configuration_file=$(get-configuration-file) || exit 1
+    configuration_file=$(get-configuration-file "${command_line_configuration_file}") || exit 1
     debug "configuration_file: ${configuration_file}"
 
     #
