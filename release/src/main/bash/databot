@@ -10,7 +10,7 @@
     . $(dirname $0)/databot.shlib || \
     { echo "[error]: required library file $(dirname $0)/databot.shlib not found, databot was most likely incorrectly installed" 1>&2; exit 1; }
 
-main_class=io.novaordis.osstats.Main
+main_class=io.novaordis.databot.Main
 memory=256m
 verbose=false
 os_stats_config_file_name="databot.conf"
@@ -44,7 +44,7 @@ function main() {
 
             verbose=true
 
-        elif [ "$1" = "--foreground" -o "$1" = "-fg" ]; then
+        elif [ "$1" = "--foreground" -o "$1" = "-f" ]; then
 
             foreground=true
             #
