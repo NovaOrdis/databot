@@ -203,7 +203,7 @@ public abstract class ConfigurationBase implements Configuration {
 
         for(MetricDefinition md: mds) {
 
-            s += "    - " + md.getId() + "\n";
+            s += "    - " + md.getSource() + "/" + md.getId() + "\n";
         }
 
         log.debug(s);
