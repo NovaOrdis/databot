@@ -435,34 +435,48 @@ public class AsynchronousCsvLineWriterTest {
     @Test
     public void write() throws Exception {
 
+        MockMetricSource ms = new MockMetricSource();
+
+        String metricDefinitionId = "Z";
+        String metricDefinitionId2 = "A";
+
+        MockMetricDefinition md = new MockMetricDefinition(ms, metricDefinitionId);
+        MockMetricDefinition md2 = new MockMetricDefinition(ms, metricDefinitionId2);
+
         MockConfiguration mc = new MockConfiguration();
 
-        throw new RuntimeException("RETURN HERE");
-//        mc.addMetricDefinition(new MockMetricDefinition("z"));
-//        mc.addMetricDefinition(new MockMetricDefinition("a"));
-//
-//        AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(null, mc);
-//        assertTrue(w.isHeaderOn());
-//
-//        MockPrintStream mps = new MockPrintStream();
-//        w.setPrintStream(mps);
-//
-//        MockTimedEvent e = new MockTimedEvent();
-//        e.setProperty(new MockProperty("a", "a-value"));
-//        e.setProperty(new MockProperty("z", "z-value"));
-//
-//        w.write(e);
-//
-//        String header = mps.getLine();
-//        log.info(header);
-//        assertEquals("# timestamp, z, a", header);
-//
-//        String line = mps.getLine();
-//        log.info(line);
-//        assertTrue(line.contains(", z-value, a-value"));
-//
-//        line = mps.getLine();
-//        assertNull(line);
+        mc.addMetricDefinition(md);
+        mc.addMetricDefinition(md2);
+
+        MockPrintStream mps = new MockPrintStream();
+
+        AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(null, mc);
+
+        w.setPrintStream(mps);
+
+        assertTrue(w.isHeaderOn());
+
+        MockProperty mp = new MockProperty(metricDefinitionId, "some value");
+        MockProperty mp2 = new MockProperty(metricDefinitionId2, "some other value");
+
+        MockTimedEvent e = new MockTimedEvent();
+
+        e.setProperty(mp);
+        e.setProperty(mp2);
+
+        w.write(e);
+
+        String header = mps.getLine();
+
+        assertEquals("# timestamp, Z, A", header);
+
+        String line = mps.getLine();
+
+        assertTrue(line.contains(", some value, some other value"));
+
+        line = mps.getLine();
+
+        assertNull(line);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

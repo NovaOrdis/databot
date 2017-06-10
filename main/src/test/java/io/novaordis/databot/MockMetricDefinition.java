@@ -34,15 +34,13 @@ public class MockMetricDefinition extends MockMetricDefinitionBase {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-//    public MockMetricDefinition() {
-//        this("Mock Metric Definition");
-//    }
-
     /**
      * @param source must always have a non-null source.
      */
-    protected MockMetricDefinition(MetricSource source) {
+    protected MockMetricDefinition(MetricSource source, String id) {
+
         super(source);
+        setId(id);
     }
 
     // MetricDefinition implementation ---------------------------------------------------------------------------------

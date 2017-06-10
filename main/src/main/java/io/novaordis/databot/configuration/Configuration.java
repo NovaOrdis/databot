@@ -60,7 +60,8 @@ public interface Configuration {
     boolean isOutputFileAppend();
 
     /**
-     * @return the list of metric definitions to collect and log.
+     * @return the list of metric definitions to collect and log. Order is important, the metric definitions should be
+     * returned in order in which they were declared in the external configuration.
      */
     List<MetricDefinition> getMetricDefinitions();
 

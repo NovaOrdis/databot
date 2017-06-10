@@ -33,7 +33,8 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 /**
- * An instance that writes timed events as CSV lines, to an output stream, asynchronously on its own thread.
+ * An instance takes events from an in-memory blocking queue and writes them, asynchronously on its own thread, as CSV
+ * lines to an output stream.
  *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/29/16
@@ -65,12 +66,14 @@ public class AsynchronousCsvLineWriter implements Runnable {
     public AsynchronousCsvLineWriter(BlockingQueue<Event> eq, Configuration configuration) throws Exception {
 
         if (configuration == null) {
+
             throw new IllegalArgumentException("null configuration");
         }
 
         this.eventQueue = eq;
 
         if (configuration.isForeground()) {
+
             printStream = System.out;
         }
         else if ((outputFileName = configuration.getOutputFileName()) != null) {
@@ -93,19 +96,24 @@ public class AsynchronousCsvLineWriter implements Runnable {
         csvFormatter.setHeaderOn();
 
         //
-        // we want to preserve the relative order of the metrics as declared in the configuration file, so we
-        // set the output format
+        // we want to preserve the relative order of the metrics as declared in the configuration file, so we set the
+        // output format here, where we have access to that order
         //
 
         String outputFormat = "timestamp";
+
         List<MetricDefinition> metrics = configuration.getMetricDefinitions();
+
         if (!metrics.isEmpty()) {
+
             outputFormat += ", ";
             for(Iterator<MetricDefinition> i = metrics.iterator(); i.hasNext(); ) {
 
                 MetricDefinition md = i.next();
                 outputFormat += md.getId();
+
                 if (i.hasNext()) {
+
                     outputFormat += ", ";
                 }
 
