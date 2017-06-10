@@ -88,12 +88,15 @@ function main() {
 
     local java_home
     java_home=$(get-java-home) || fail "failed to get java home"
+    debug "java_home: ${java_home}"
 
     local classpath
     classpath=$(get-classpath $(dirname $0)/..) || fail "failed to build databot classpath"
+    debug "classpath: ${classpath}"
 
     local configuration_file
     configuration_file=$(get-configuration-file) || exit 1
+    debug "configuration_file: ${configuration_file}"
 
     #
     # if jboss metrics are encountered in the configuration file, append the CLI classpath to the regular classpath

@@ -78,23 +78,28 @@ function get-configuration-property() {
 #
 function get-java-home() {
 
+    local java_home
+
     #
     # attempt to use DATABOT_JAVA_HOME with priority
     #
-
     if [ -n "${DATABOT_JAVA_HOME}" ]; then
-        echo "${DATABOT_JAVA_HOME}"
-        return 0
-    fi
 
-    local java_home
+        debug "using java home declared in \$DATABOT_JAVA_HOME: ${DATABOT_JAVA_HOME}"
+        java_home="${DATABOT_JAVA_HOME}"
 
-    if [ -n "${JAVA_HOME}" ]; then
+    elif [ -n "${JAVA_HOME}" ]; then
+
         debug "using JAVA_HOME from environment ${JAVA_HOME}"
         java_home=${JAVA_HOME}
 
+    else
+
+        debug "\$DATABOT_JAVA_HOME and \$JAVA_HOME not defined, will use java binary from PATH"
     fi
+
     echo ${java_home}
+    return 0;
 }
 
 jboss_cli_dependencies="\
