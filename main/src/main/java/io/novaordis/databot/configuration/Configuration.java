@@ -22,6 +22,8 @@ import io.novaordis.events.api.metric.MetricSourceRepository;
 import java.util.List;
 
 /**
+ * The command line/configuration file configuration.
+ *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/27/16
  */
@@ -30,8 +32,12 @@ public interface Configuration {
     // Constants -------------------------------------------------------------------------------------------------------
 
     int DEFAULT_SAMPLING_INTERVAL_SEC = 10;
+
     String DEFAULT_OUTPUT_FILE_NAME = "./os-stats.csv";
+
     boolean DEFAULT_OUTPUT_FILE_APPEND = true;
+
+    int DEFAULT_EVENT_QUEUE_SIZE = 1000;
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -67,5 +73,13 @@ public interface Configuration {
     List<MetricDefinition> getMetricDefinitions();
 
     MetricSourceRepository getMetricSourceRepository();
+
+    /**
+     * The maximum number of events that can be maintained at one time in the in-memory blocking queue, after which
+     * the production is throttled down.
+     *
+     *
+     */
+    int getEventQueueSize();
 
 }

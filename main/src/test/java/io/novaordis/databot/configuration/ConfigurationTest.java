@@ -145,6 +145,7 @@ public abstract class ConfigurationTest {
         assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingIntervalSec());
         assertEquals(Configuration.DEFAULT_OUTPUT_FILE_NAME, c.getOutputFileName());
         assertEquals(Configuration.DEFAULT_OUTPUT_FILE_APPEND, c.isOutputFileAppend());
+        assertEquals(Configuration.DEFAULT_EVENT_QUEUE_SIZE, c.getEventQueueSize());
         assertTrue(c.getMetricDefinitions().isEmpty());
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Nova Ordis LLC
+ * Copyright (c) 2017 Nova Ordis LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,11 @@
 
 package io.novaordis.databot;
 
-import io.novaordis.events.api.event.TimedEvent;
-import io.novaordis.events.api.metric.MetricDefinition;
-
-import java.util.List;
-
 /**
- *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 6/11/17
  */
-@Deprecated
-public interface DataCollector {
+public interface DataConsumer {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -35,13 +28,14 @@ public interface DataCollector {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    /**
-     * Take a reading and return a timed event containing the most current values for specified metrics. May return null
-     * if external circumstances prevented the collector to read data. The collector task invoking this method will
-     * catch any exception thrown by it and will act accordingly, logging it but not canceling the timer.
-     *
-     * @exception DataCollectionException must have a human readable message.
-     */
-    TimedEvent read(List<MetricDefinition> metrics) throws DataCollectionException;
+    //
+    // lifecycle methods -----------------------------------------------------------------------------------------------
+    //
+
+    void start() throws DataConsumerException;
+
+    boolean isStarted();
+
+    void stop();
 
 }

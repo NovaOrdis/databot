@@ -35,11 +35,12 @@ import java.util.Set;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/29/16
  */
+@Deprecated
 public class DataCollectorImpl implements DataCollector {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
-    private static final Logger log = LoggerFactory.getLogger(DataCollectionTimerTask.class);
+    private static final Logger log = LoggerFactory.getLogger(DataBotTimerTask.class);
     private static final boolean debug = log.isDebugEnabled();
 
     // Static ----------------------------------------------------------------------------------------------------------

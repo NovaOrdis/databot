@@ -39,6 +39,8 @@ public class MockConfiguration implements Configuration {
     private boolean outputFileOverwrite;
     private List<MetricDefinition> metrics;
 
+    private int eventQueueSize;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     public MockConfiguration() {
@@ -80,6 +82,12 @@ public class MockConfiguration implements Configuration {
         throw new RuntimeException("getMetricSourceRepository() NOT YET IMPLEMENTED");
     }
 
+    @Override
+    public int getEventQueueSize() {
+
+        return eventQueueSize;
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
 
     public void setForeground(boolean b) {
@@ -100,6 +108,11 @@ public class MockConfiguration implements Configuration {
     public void addMetricDefinition(MetricDefinition md) {
 
         metrics.add(md);
+    }
+
+    public void setEventQueueSize(int i) {
+
+        this.eventQueueSize = i;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

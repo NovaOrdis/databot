@@ -56,7 +56,7 @@ public class DataCollectionTimerTaskTest {
 //        mdc.setBroken(true);
 //        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
 //
-//        DataCollectionTimerTask t = new DataCollectionTimerTask(null, mdc, metrics);
+//        DataBotTimerTask t = new DataBotTimerTask(null, mdc, metrics);
 //
 //        // this MUST NOT throw any exception
 //        t.run();
@@ -71,7 +71,7 @@ public class DataCollectionTimerTaskTest {
 //        BlockingQueue<Event> queue = new ArrayBlockingQueue<>(1);
 //        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
 //
-//        DataCollectionTimerTask t = new DataCollectionTimerTask(queue, mdc, metrics);
+//        DataBotTimerTask t = new DataBotTimerTask(queue, mdc, metrics);
 //
 //        t.run();
 //
@@ -93,7 +93,7 @@ public class DataCollectionTimerTaskTest {
 //
 //        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
 //
-//        DataCollectionTimerTask t = new DataCollectionTimerTask(queue, mdc, metrics);
+//        DataBotTimerTask t = new DataBotTimerTask(queue, mdc, metrics);
 //
 //        t.run();
 //

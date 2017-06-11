@@ -153,6 +153,12 @@ public abstract class ConfigurationBase implements Configuration {
         return metricSourceRepository;
     }
 
+    @Override
+    public int getEventQueueSize() {
+
+        return DEFAULT_EVENT_QUEUE_SIZE;
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------

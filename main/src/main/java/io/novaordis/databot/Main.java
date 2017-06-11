@@ -16,17 +16,13 @@
 
 package io.novaordis.databot;
 
-import io.novaordis.events.api.event.Event;
 import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.configuration.ConfigurationFactory;
-import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.logging.StderrVerboseLogging;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Timer;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -37,7 +33,7 @@ public class Main {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
-    public static final int DEFAULT_EVENT_QUEUE_SIZE = 10;
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -49,63 +45,41 @@ public class Main {
 
             Configuration conf = ConfigurationFactory.buildInstance(args);
 
+            DataBot d = new DataBot(conf);
+
             CountDownLatch exitLatch = new CountDownLatch(1);
 
-            //
-            // the in-memory event queue. The data collector will read and collect readings into events, while
-            // the writer will pick up events from the queue and write them wherever
-            //
-
-            final BlockingQueue<Event> events = new ArrayBlockingQueue<>(DEFAULT_EVENT_QUEUE_SIZE);
-
-            //
-            // the event writer
-            //
-
-            AsynchronousCsvLineWriter aw = new AsynchronousCsvLineWriter(events, conf);
-
-            aw.start();
-
-            //
-            // the data collector - maintains the state between the collections
-            //
-
-            DataCollector dataCollector = new DataCollectorImpl();
-
-            Timer timer = new Timer();
-
-            List<MetricDefinition> metrics = conf.getMetricDefinitions();
-
-            DataCollectionTimerTask t = new DataCollectionTimerTask(events, dataCollector, metrics);
-
-            //
-            // periodically read metrics for the known metric definitions
-            //
-
-            timer.scheduleAtFixedRate(t, 0, conf.getSamplingIntervalSec() * 1000L);
+            d.start();
 
             exitLatch.await();
-        }
-        catch(UserErrorException e) {
 
-            //
-            // we know about this failure, it is supposed to go to stderr
-            //
+            log.debug("databot exits ...");
 
-            Console.error(e.getMessage());
         }
         catch(Throwable t) {
 
-            //
-            // we don't expect that, provide more information
-            //
+            String msg = t.getMessage();
 
-            String msg = "internal failure: " + t.getClass().getSimpleName();
-            if (t.getMessage() != null) {
-                msg += ": " + t.getMessage();
+            if (t instanceof UserErrorException) {
+
+                Console.error(msg);
             }
-            msg += " (consult logs for more details)";
-            Console.error(msg);
+            else {
+
+                //
+                // we don't expect this, provide more context
+                //
+
+                String details = "internal failure: " + t.getClass().getSimpleName();
+
+                if (msg != null) {
+
+                    details += ": " + msg;
+                }
+
+                details += " (consult logs for more details)";
+                Console.error(details);
+            }
         }
     }
 

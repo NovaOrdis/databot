@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package io.novaordis.databot;
+package io.novaordis.databot.consumer;
 
+import io.novaordis.databot.DataConsumer;
+import io.novaordis.databot.DataConsumerException;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.ShutdownEvent;
 import io.novaordis.events.api.event.TimedEvent;
@@ -39,7 +41,7 @@ import java.util.concurrent.BlockingQueue;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/29/16
  */
-public class AsynchronousCsvLineWriter implements Runnable {
+public class AsynchronousCsvLineWriter implements Runnable, DataConsumer {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -63,7 +65,8 @@ public class AsynchronousCsvLineWriter implements Runnable {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public AsynchronousCsvLineWriter(BlockingQueue<Event> eq, Configuration configuration) throws Exception {
+    public AsynchronousCsvLineWriter(BlockingQueue<Event> eq, Configuration configuration)
+            throws DataConsumerException {
 
         if (configuration == null) {
 
@@ -79,7 +82,17 @@ public class AsynchronousCsvLineWriter implements Runnable {
         else if ((outputFileName = configuration.getOutputFileName()) != null) {
 
             boolean append = configuration.isOutputFileAppend();
-            FileOutputStream fos = new FileOutputStream(outputFileName, append);
+
+            FileOutputStream fos;
+
+            try {
+
+                fos = new FileOutputStream(outputFileName, append);
+            }
+            catch(Exception e) {
+
+                throw new DataConsumerException(e);
+            }
             printStream = new PrintStream(fos);
         }
         else {
@@ -120,6 +133,38 @@ public class AsynchronousCsvLineWriter implements Runnable {
             }
         }
         csvFormatter.setOutputFormat(outputFormat);
+    }
+
+    // DataConsumer implementation -------------------------------------------------------------------------------------
+
+    @Override
+    public synchronized void start() {
+
+        if (thread != null) {
+
+            log.debug(this + " already started");
+            return;
+        }
+
+        thread = new Thread(this, DEFAULT_THREAD_NAME);
+        thread.start();
+
+        log.debug(this + " started");
+    }
+
+    /**
+     * @return true if there is a running thread actively processing queue events, of false if the instance was not
+     * started or it was shut down
+     */
+    @Override
+    public synchronized boolean isStarted() {
+
+        return thread != null;
+    }
+
+    @Override
+    public void stop() {
+        throw new RuntimeException("stop() NOT YET IMPLEMENTED");
     }
 
     // Runnable implementation -----------------------------------------------------------------------------------------
@@ -179,29 +224,6 @@ public class AsynchronousCsvLineWriter implements Runnable {
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    public synchronized void start() {
-
-        if (thread != null) {
-
-            log.debug(this + " already started");
-            return;
-        }
-
-        thread = new Thread(this, DEFAULT_THREAD_NAME);
-        thread.start();
-
-        log.debug(this + " started");
-    }
-
-    /**
-     * @return true if there is a running thread actively processing queue events, of false if the instance was not
-     * started or it was shut down
-     */
-    public synchronized boolean isStarted() {
-
-        return thread != null;
-    }
 
     public PrintStream getPrintStream() {
 

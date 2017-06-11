@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-package io.novaordis.databot;
+package io.novaordis.databot.consumer;
 
+import io.novaordis.databot.MockEvent;
+import io.novaordis.databot.MockMetricDefinition;
+import io.novaordis.databot.MockMetricSource;
+import io.novaordis.databot.MockPrintStream;
+import io.novaordis.databot.MockProperty;
+import io.novaordis.databot.MockTimedEvent;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.GenericTimedEvent;
 import io.novaordis.events.api.event.ShutdownEvent;
