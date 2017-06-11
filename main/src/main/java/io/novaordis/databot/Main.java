@@ -19,10 +19,11 @@ package io.novaordis.databot;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.configuration.ConfigurationFactory;
+import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.logging.StderrVerboseLogging;
-import io.novaordis.utilities.os.OS;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -50,15 +51,37 @@ public class Main {
 
             CountDownLatch exitLatch = new CountDownLatch(1);
 
-            final BlockingQueue<Event> eventBuffer = new ArrayBlockingQueue<>(DEFAULT_EVENT_QUEUE_SIZE);
+            //
+            // the in-memory event queue. The data collector will read and collect readings into events, while
+            // the writer will pick up events from the queue and write them wherever
+            //
 
-            AsynchronousCsvLineWriter aw = new AsynchronousCsvLineWriter(eventBuffer, conf);
+            final BlockingQueue<Event> events = new ArrayBlockingQueue<>(DEFAULT_EVENT_QUEUE_SIZE);
+
+            //
+            // the event writer
+            //
+
+            AsynchronousCsvLineWriter aw = new AsynchronousCsvLineWriter(events, conf);
+
             aw.start();
 
-            OS os = OS.getInstance();
-            DataCollector dataCollector = new DataCollectorImpl(os);
+            //
+            // the data collector - maintains the state between the collections
+            //
+
+            DataCollector dataCollector = new DataCollectorImpl();
+
             Timer timer = new Timer();
-            DataCollectionTimerTask t = new DataCollectionTimerTask(eventBuffer, dataCollector, conf.getMetricDefinitions());
+
+            List<MetricDefinition> metrics = conf.getMetricDefinitions();
+
+            DataCollectionTimerTask t = new DataCollectionTimerTask(events, dataCollector, metrics);
+
+            //
+            // periodically read metrics for the known metric definitions
+            //
+
             timer.scheduleAtFixedRate(t, 0, conf.getSamplingIntervalSec() * 1000L);
 
             exitLatch.await();

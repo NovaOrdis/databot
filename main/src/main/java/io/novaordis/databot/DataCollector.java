@@ -22,6 +22,9 @@ import io.novaordis.events.api.metric.MetricDefinition;
 import java.util.List;
 
 /**
+ * The data collector maintains the state between readings. Long lived metric sources, for which creating a connection
+ * is expensive, are maintained by the data collector in a "started" state.
+ *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/29/16
  */

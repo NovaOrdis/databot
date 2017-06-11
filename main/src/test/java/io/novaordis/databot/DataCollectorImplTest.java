@@ -249,7 +249,7 @@ public class DataCollectorImplTest extends DataCollectorTest {
     @Override
     protected DataCollectorImpl getDataCollectorToTest(OS os) throws Exception {
 
-        return new DataCollectorImpl(os);
+        return new DataCollectorImpl();
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

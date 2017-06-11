@@ -22,7 +22,6 @@ import io.novaordis.events.api.event.TimedEvent;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricException;
 import io.novaordis.events.api.metric.MetricSource;
-import io.novaordis.utilities.os.OS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,14 +76,7 @@ public class DataCollectorImpl implements DataCollector {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private OS os;
-
     // Constructors ----------------------------------------------------------------------------------------------------
-
-    public DataCollectorImpl(OS os) {
-        this.os = os;
-        log.debug(this + " created");
-    }
 
     // DataCollectorImpl implementation --------------------------------------------------------------------------------
 
@@ -113,7 +105,7 @@ public class DataCollectorImpl implements DataCollector {
     @Override
     public String toString() {
 
-        return "DataCollectorImpl[" + os + ":" + Integer.toHexString(System.identityHashCode(this)) + "]";
+        return "DataCollectorImpl[" + Integer.toHexString(System.identityHashCode(this)) + "]";
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
