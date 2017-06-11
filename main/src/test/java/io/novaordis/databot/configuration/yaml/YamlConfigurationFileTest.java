@@ -16,6 +16,8 @@
 
 package io.novaordis.databot.configuration.yaml;
 
+import io.novaordis.databot.DataConsumer;
+import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.configuration.ConfigurationTest;
@@ -95,14 +97,13 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     }
 
     @Test
-    public void load_InvalidOutputFileAppend() throws Exception {
+    public void load_MissingOutputFile() throws Exception {
 
         YamlConfigurationFile c = new YamlConfigurationFile(true, null);
 
         String s =
                 "output:\n" +
-                "  file: something\n" +
-                "  append: blah\n";
+                "  append: false\n";
 
         InputStream is = new ByteArrayInputStream(s.getBytes());
 
@@ -114,8 +115,55 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
         catch(UserErrorException e) {
 
             String msg = e.getMessage();
-            assertEquals("invalid '" + YamlConfigurationFile.OUTPUT_APPEND_KEY + "' boolean value: \"blah\"", msg);
+            assertEquals(
+                    "missing '" + YamlConfigurationFile.OUTPUT_KEY + "." + YamlConfigurationFile.OUTPUT_FILE_KEY + "'",
+                    msg);
         }
+    }
+
+    @Test
+    public void load_MissingOutput() throws Exception {
+
+        YamlConfigurationFile c = new YamlConfigurationFile(true, null);
+
+        String s = "something: something else\n";
+
+        InputStream is = new ByteArrayInputStream(s.getBytes());
+
+        try {
+
+            c.load(is);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertEquals("missing '" + YamlConfigurationFile.OUTPUT_KEY + "'", msg);
+        }
+    }
+
+    @Test
+    public void load_AsynchronousCsvWriter() throws Exception {
+
+        YamlConfigurationFile c = new YamlConfigurationFile(true, null);
+
+        MetricSourceRepository mr = c.getMetricSourceRepository();
+        assertTrue(mr.isEmpty());
+
+        String s = "output:\n" +
+                "  file: something\n" +
+                "  append: false\n";
+
+        InputStream is = new ByteArrayInputStream(s.getBytes());
+
+        c.load(is);
+
+        List<DataConsumer> dcs = c.getDataConsumers();
+        assertEquals(1, dcs.size());
+
+        AsynchronousCsvLineWriter w = (AsynchronousCsvLineWriter)dcs.get(0);
+        assertEquals("something", w.getOutputFileName());
+        assertEquals(false, w.isOutputFileAppend());
     }
 
     @Test

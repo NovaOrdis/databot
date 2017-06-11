@@ -105,47 +105,49 @@ public class AsynchronousCsvLineWriterTest {
     @Test
     public void constructor_OutputFile_DoesNotExist() throws Exception {
 
-        MockConfiguration mc = new MockConfiguration();
+        fail("RETURN HERE");
 
-        File dir = new File(System.getProperty("basedir"), "target/test-scratch");
-        assertTrue(dir.isDirectory());
-        File file = new File(dir, "test.csv");
-        assertFalse(file.isFile());
-
-        mc.setOutputFileName(file.getPath());
-
-        AsynchronousCsvLineWriter aw = new AsynchronousCsvLineWriter(new ArrayBlockingQueue<>(1), mc);
-
-        aw.start();
-
-        //
-        // make sure the file is created
-        //
-
-        assertTrue(file.isFile());
-
-        // the file is empty
-        assertEquals("", Files.read(file));
-
-        aw.getEventQueue().put(new ShutdownEvent());
-
-        //
-        // busy wait until the event gets processed
-        //
-        long t0 = System.currentTimeMillis();
-        long timeout = 2000L;
-        while(aw.isStarted() && System.currentTimeMillis() - t0 < timeout) {
-            Thread.sleep(100L);
-        }
-
-        //
-        // make sure the file is still there
-        //
-
-        assertTrue(file.isFile());
-
-        // the file is empty
-        assertEquals("", Files.read(file));
+//        MockConfiguration mc = new MockConfiguration();
+//
+//        File dir = new File(System.getProperty("basedir"), "target/test-scratch");
+//        assertTrue(dir.isDirectory());
+//        File file = new File(dir, "test.csv");
+//        assertFalse(file.isFile());
+//
+//        mc.setOutputFileName(file.getPath());
+//
+//        AsynchronousCsvLineWriter aw = new AsynchronousCsvLineWriter(new ArrayBlockingQueue<>(1), mc);
+//
+//        aw.start();
+//
+//        //
+//        // make sure the file is created
+//        //
+//
+//        assertTrue(file.isFile());
+//
+//        // the file is empty
+//        assertEquals("", Files.read(file));
+//
+//        aw.getEventQueue().put(new ShutdownEvent());
+//
+//        //
+//        // busy wait until the event gets processed
+//        //
+//        long t0 = System.currentTimeMillis();
+//        long timeout = 2000L;
+//        while(aw.isStarted() && System.currentTimeMillis() - t0 < timeout) {
+//            Thread.sleep(100L);
+//        }
+//
+//        //
+//        // make sure the file is still there
+//        //
+//
+//        assertTrue(file.isFile());
+//
+//        // the file is empty
+//        assertEquals("", Files.read(file));
     }
 
     // lifecycle -------------------------------------------------------------------------------------------------------
@@ -258,150 +260,154 @@ public class AsynchronousCsvLineWriterTest {
     @Test
     public void lifecycle_AppendToFile() throws Exception {
 
-        MockConfiguration mc = new MockConfiguration();
+        fail("RETURN HERE");
 
-        //
-        // append
-        //
-        mc.setOutputFileAppend(true);
-
-        File dir = new File(System.getProperty("basedir"), "target/test-scratch");
-        assertTrue(dir.isDirectory());
-        File file = new File(dir, "test.csv");
-        assertFalse(file.isFile());
-
-        //
-        // create the file
-        //
-        Files.write(file, "test\n");
-        assertEquals("test\n", Files.read(file));
-
-        mc.setOutputFileName(file.getPath());
-
-        AsynchronousCsvLineWriter aw = new AsynchronousCsvLineWriter(new ArrayBlockingQueue<>(1), mc);
-
-        aw.start();
-
-        //
-        // make sure the file is created
-        //
-
-        assertTrue(file.isFile());
-
-        // the file has content
-        assertEquals("test\n", Files.read(file));
-
-        //
-        // write an event
-        //
-        aw.getEventQueue().put(new MockTimedEvent());
-
-        //
-        // shutdown
-        //
-
-        aw.getEventQueue().put(new ShutdownEvent());
-
-        //
-        // busy wait until the event gets processed
-        //
-        long t0 = System.currentTimeMillis();
-        long timeout = 2000L;
-        while(aw.isStarted() && System.currentTimeMillis() - t0 < timeout) {
-            Thread.sleep(100L);
-        }
-
-        //
-        // make sure the file is still there
-        //
-
-        assertTrue(file.isFile());
-
-        //
-        // the file must contain the original content and the event representation
-        //
-        String content = Files.read(file);
-
-        StringTokenizer st = new StringTokenizer(content, "\n");
-
-        String line = st.nextToken();
-        assertEquals("test", line);
-
-        line = st.nextToken();
-        assertFalse(line.trim().isEmpty());
+//        MockConfiguration mc = new MockConfiguration();
+//
+//        //
+//        // append
+//        //
+//        mc.setOutputFileAppend(true);
+//
+//        File dir = new File(System.getProperty("basedir"), "target/test-scratch");
+//        assertTrue(dir.isDirectory());
+//        File file = new File(dir, "test.csv");
+//        assertFalse(file.isFile());
+//
+//        //
+//        // create the file
+//        //
+//        Files.write(file, "test\n");
+//        assertEquals("test\n", Files.read(file));
+//
+//        mc.setOutputFileName(file.getPath());
+//
+//        AsynchronousCsvLineWriter aw = new AsynchronousCsvLineWriter(new ArrayBlockingQueue<>(1), mc);
+//
+//        aw.start();
+//
+//        //
+//        // make sure the file is created
+//        //
+//
+//        assertTrue(file.isFile());
+//
+//        // the file has content
+//        assertEquals("test\n", Files.read(file));
+//
+//        //
+//        // write an event
+//        //
+//        aw.getEventQueue().put(new MockTimedEvent());
+//
+//        //
+//        // shutdown
+//        //
+//
+//        aw.getEventQueue().put(new ShutdownEvent());
+//
+//        //
+//        // busy wait until the event gets processed
+//        //
+//        long t0 = System.currentTimeMillis();
+//        long timeout = 2000L;
+//        while(aw.isStarted() && System.currentTimeMillis() - t0 < timeout) {
+//            Thread.sleep(100L);
+//        }
+//
+//        //
+//        // make sure the file is still there
+//        //
+//
+//        assertTrue(file.isFile());
+//
+//        //
+//        // the file must contain the original content and the event representation
+//        //
+//        String content = Files.read(file);
+//
+//        StringTokenizer st = new StringTokenizer(content, "\n");
+//
+//        String line = st.nextToken();
+//        assertEquals("test", line);
+//
+//        line = st.nextToken();
+//        assertFalse(line.trim().isEmpty());
     }
 
     @Test
     public void lifecycle_OverwriteFile() throws Exception {
 
-        MockConfiguration mc = new MockConfiguration();
+        fail("RETURN HERE");
 
-        //
-        // append
-        //
-        mc.setOutputFileAppend(false);
-
-        File dir = new File(System.getProperty("basedir"), "target/test-scratch");
-        assertTrue(dir.isDirectory());
-        File file = new File(dir, "test.csv");
-        assertFalse(file.isFile());
-
-        //
-        // create the file
-        //
-        Files.write(file, "test\n");
-        assertEquals("test\n", Files.read(file));
-
-        mc.setOutputFileName(file.getPath());
-
-        AsynchronousCsvLineWriter aw = new AsynchronousCsvLineWriter(new ArrayBlockingQueue<>(1), mc);
-
-        aw.start();
-
-        //
-        // make sure the file is created
-        //
-
-        assertTrue(file.isFile());
-
-        // the file has been overwritten already
-        assertTrue(Files.read(file).isEmpty());
-
-        //
-        // write an event
-        //
-        aw.getEventQueue().put(new MockTimedEvent());
-
-        //
-        // shutdown
-        //
-
-        aw.getEventQueue().put(new ShutdownEvent());
-
-        //
-        // busy wait until the event gets processed
-        //
-        long t0 = System.currentTimeMillis();
-        long timeout = 2000L;
-        while(aw.isStarted() && System.currentTimeMillis() - t0 < timeout) {
-            Thread.sleep(100L);
-        }
-
-        //
-        // make sure the file is still there
-        //
-
-        assertTrue(file.isFile());
-
-        //
-        // the original content must be gone and the event representation must have overwritten it
-        //
-        String content = Files.read(file);
-
-        StringTokenizer st = new StringTokenizer(content, "\n");
-
-        String line = st.nextToken();
-        assertNotEquals("test", line);
+//        MockConfiguration mc = new MockConfiguration();
+//
+//        //
+//        // append
+//        //
+//        mc.setOutputFileAppend(false);
+//
+//        File dir = new File(System.getProperty("basedir"), "target/test-scratch");
+//        assertTrue(dir.isDirectory());
+//        File file = new File(dir, "test.csv");
+//        assertFalse(file.isFile());
+//
+//        //
+//        // create the file
+//        //
+//        Files.write(file, "test\n");
+//        assertEquals("test\n", Files.read(file));
+//
+//        mc.setOutputFileName(file.getPath());
+//
+//        AsynchronousCsvLineWriter aw = new AsynchronousCsvLineWriter(new ArrayBlockingQueue<>(1), mc);
+//
+//        aw.start();
+//
+//        //
+//        // make sure the file is created
+//        //
+//
+//        assertTrue(file.isFile());
+//
+//        // the file has been overwritten already
+//        assertTrue(Files.read(file).isEmpty());
+//
+//        //
+//        // write an event
+//        //
+//        aw.getEventQueue().put(new MockTimedEvent());
+//
+//        //
+//        // shutdown
+//        //
+//
+//        aw.getEventQueue().put(new ShutdownEvent());
+//
+//        //
+//        // busy wait until the event gets processed
+//        //
+//        long t0 = System.currentTimeMillis();
+//        long timeout = 2000L;
+//        while(aw.isStarted() && System.currentTimeMillis() - t0 < timeout) {
+//            Thread.sleep(100L);
+//        }
+//
+//        //
+//        // make sure the file is still there
+//        //
+//
+//        assertTrue(file.isFile());
+//
+//        //
+//        // the original content must be gone and the event representation must have overwritten it
+//        //
+//        String content = Files.read(file);
+//
+//        StringTokenizer st = new StringTokenizer(content, "\n");
+//
+//        String line = st.nextToken();
+//        assertNotEquals("test", line);
     }
 
     // run() -----------------------------------------------------------------------------------------------------------

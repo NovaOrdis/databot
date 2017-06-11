@@ -16,8 +16,10 @@
 
 package io.novaordis.databot.configuration;
 
+import io.novaordis.databot.DataConsumer;
 import io.novaordis.databot.MockMetricDefinition;
 import io.novaordis.databot.MockMetricSource;
+import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSourceRepository;
 import io.novaordis.events.api.metric.os.LocalOS;
@@ -104,10 +106,14 @@ public abstract class ConfigurationTest {
 
         assertEquals(20, c.getSamplingIntervalSec());
         assertNotEquals(20, Configuration.DEFAULT_SAMPLING_INTERVAL_SEC);
-        assertFalse(c.isOutputFileAppend());
 
-        assertEquals("/tmp/test.csv", c.getOutputFileName());
-        assertNotEquals("/tmp/test.csv", Configuration.DEFAULT_OUTPUT_FILE_NAME);
+        //
+        // metric sources
+        //
+
+        //
+        // metric definitions
+        //
 
         List<MetricDefinition> metrics = c.getMetricDefinitions();
 
@@ -131,6 +137,20 @@ public abstract class ConfigurationTest {
         Set<LocalOS> localOSes = mr.getSources(LocalOS.class);
         assertEquals(1, localOSes.size());
         assertTrue(localOSes.contains(new LocalOS()));
+
+        //
+        // data consumers
+        //
+
+        List<DataConsumer> dcs = c.getDataConsumers();
+
+        assertEquals(1, dcs.size());
+
+        AsynchronousCsvLineWriter w = (AsynchronousCsvLineWriter)dcs.get(0);
+
+        assertFalse(w.isStarted());
+        assertFalse(w.isOutputFileAppend());
+        assertEquals("/tmp/test.csv", w.getOutputFileName());
     }
 
     /**
@@ -143,10 +163,10 @@ public abstract class ConfigurationTest {
         Configuration c = getConfigurationToTest(false, null);
 
         assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingIntervalSec());
-        assertEquals(Configuration.DEFAULT_OUTPUT_FILE_NAME, c.getOutputFileName());
-        assertEquals(Configuration.DEFAULT_OUTPUT_FILE_APPEND, c.isOutputFileAppend());
         assertEquals(Configuration.DEFAULT_EVENT_QUEUE_SIZE, c.getEventQueueSize());
+        assertTrue(c.getMetricSourceRepository().isEmpty());
         assertTrue(c.getMetricDefinitions().isEmpty());
+        assertTrue(c.getDataConsumers().isEmpty());
     }
 
     // addMetricDefinition() -------------------------------------------------------------------------------------------

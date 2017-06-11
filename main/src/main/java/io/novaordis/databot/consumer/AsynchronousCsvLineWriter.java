@@ -21,17 +21,13 @@ import io.novaordis.databot.DataConsumerException;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.ShutdownEvent;
 import io.novaordis.events.api.event.TimedEvent;
-import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.core.ClosedException;
 import io.novaordis.events.core.CsvOutputFormatter;
 import io.novaordis.databot.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -63,10 +59,21 @@ public class AsynchronousCsvLineWriter implements Runnable, DataConsumer {
 
     private CsvOutputFormatter csvFormatter;
 
+    private boolean append;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public AsynchronousCsvLineWriter(BlockingQueue<Event> eq, Configuration configuration)
-            throws DataConsumerException {
+    /**
+     * @param append may be null, which means fall back to default behavior.
+     */
+    public AsynchronousCsvLineWriter(String outputFileName, Boolean append) throws DataConsumerException {
+
+        throw new RuntimeException("NYE");
+    }
+
+
+    public AsynchronousCsvLineWriter(
+            BlockingQueue<Event> eq, Configuration configuration) throws DataConsumerException {
 
         if (configuration == null) {
 
@@ -79,60 +86,60 @@ public class AsynchronousCsvLineWriter implements Runnable, DataConsumer {
 
             printStream = System.out;
         }
-        else if ((outputFileName = configuration.getOutputFileName()) != null) {
 
-            boolean append = configuration.isOutputFileAppend();
-
-            FileOutputStream fos;
-
-            try {
-
-                fos = new FileOutputStream(outputFileName, append);
-            }
-            catch(Exception e) {
-
-                throw new DataConsumerException(e);
-            }
-            printStream = new PrintStream(fos);
-        }
-        else {
-
-            //
-            // not foreground and output file name is null - allow for the possibility that the print stream will
-            // be later installed with setPrintStream()
-            //
-
-            log.debug("print stream must be installed later");
-        }
-
-        csvFormatter = new CsvOutputFormatter();
-        csvFormatter.setHeaderOn();
-
-        //
-        // we want to preserve the relative order of the metrics as declared in the configuration file, so we set the
-        // output format here, where we have access to that order
-        //
-
-        String outputFormat = "timestamp";
-
-        List<MetricDefinition> metrics = configuration.getMetricDefinitions();
-
-        if (!metrics.isEmpty()) {
-
-            outputFormat += ", ";
-            for(Iterator<MetricDefinition> i = metrics.iterator(); i.hasNext(); ) {
-
-                MetricDefinition md = i.next();
-                outputFormat += md.getId();
-
-                if (i.hasNext()) {
-
-                    outputFormat += ", ";
-                }
-
-            }
-        }
-        csvFormatter.setOutputFormat(outputFormat);
+        throw new RuntimeException("RETURN HERE");
+//        else if ((outputFileName = configuration.getOutputFileName()) != null) {
+//
+//            FileOutputStream fos;
+//
+//            try {
+//
+//                fos = new FileOutputStream(outputFileName, append);
+//            }
+//            catch(Exception e) {
+//
+//                throw new DataConsumerException(e);
+//            }
+//            printStream = new PrintStream(fos);
+//        }
+//        else {
+//
+//            //
+//            // not foreground and output file name is null - allow for the possibility that the print stream will
+//            // be later installed with setPrintStream()
+//            //
+//
+//            log.debug("print stream must be installed later");
+//        }
+//
+//        csvFormatter = new CsvOutputFormatter();
+//        csvFormatter.setHeaderOn();
+//
+//        //
+//        // we want to preserve the relative order of the metrics as declared in the configuration file, so we set the
+//        // output format here, where we have access to that order
+//        //
+//
+//        String outputFormat = "timestamp";
+//
+//        List<MetricDefinition> metrics = configuration.getMetricDefinitions();
+//
+//        if (!metrics.isEmpty()) {
+//
+//            outputFormat += ", ";
+//            for(Iterator<MetricDefinition> i = metrics.iterator(); i.hasNext(); ) {
+//
+//                MetricDefinition md = i.next();
+//                outputFormat += md.getId();
+//
+//                if (i.hasNext()) {
+//
+//                    outputFormat += ", ";
+//                }
+//
+//            }
+//        }
+//        csvFormatter.setOutputFormat(outputFormat);
     }
 
     // DataConsumer implementation -------------------------------------------------------------------------------------
@@ -224,6 +231,16 @@ public class AsynchronousCsvLineWriter implements Runnable, DataConsumer {
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    public boolean isOutputFileAppend() {
+
+        return append;
+    }
+
+    public String getOutputFileName() {
+
+        return outputFileName;
+    }
 
     public PrintStream getPrintStream() {
 

@@ -16,6 +16,7 @@
 
 package io.novaordis.databot.configuration;
 
+import io.novaordis.databot.DataConsumer;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSourceRepository;
 
@@ -34,15 +35,6 @@ public interface Configuration {
     int DEFAULT_SAMPLING_INTERVAL_SEC = 10;
 
     int DEFAULT_EVENT_QUEUE_SIZE = 1000;
-
-
-
-
-    String DEFAULT_OUTPUT_FILE_NAME = "./os-stats.csv";
-
-    boolean DEFAULT_OUTPUT_FILE_APPEND = true;
-
-
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -67,25 +59,17 @@ public interface Configuration {
     int getEventQueueSize();
 
     /**
-     * @return the name of the output file. If not specified, the default value is /tmp/os-stats.csv.  Note that if
-     * --foreground option is used, the output will forcibly send to /dev/stdout, regardless of the value of the output
-     * file.
-     */
-    String getOutputFileName();
-
-    /**
-     * @return true if the process is to append to a file that already exists, or false if to overwrite.
-     */
-
-    boolean isOutputFileAppend();
-
-    /**
      * @return the list of metric definitions to collect and log. Order is important, the metric definitions should be
-     * returned in order in which they were declared in the external configuration.
+     * returned in the order in which they were declared in the external configuration.
      */
     List<MetricDefinition> getMetricDefinitions();
 
     MetricSourceRepository getMetricSourceRepository();
 
+    /**
+     * @return the data consumers to consume the events. Order is important, the data consumers should be returned in
+     * the order in which they were declared in the external configuration.
+     */
+    List<DataConsumer> getDataConsumers();
 
 }

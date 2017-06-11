@@ -16,11 +16,12 @@
 
 package io.novaordis.databot.configuration.yaml;
 
+import io.novaordis.databot.DataConsumerException;
+import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.databot.configuration.ConfigurationBase;
 import io.novaordis.events.api.metric.MetricDefinitionException;
 import io.novaordis.events.api.metric.MetricDefinitionParser;
-import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceRepository;
 import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
@@ -104,20 +105,31 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
         o = m.get(OUTPUT_KEY);
 
-        if (o != null) {
+        if (o == null) {
+
+            throw new UserErrorException("missing '" + OUTPUT_KEY + "'");
+        }
+        else {
+
+            String outputFileName;
+            Boolean append = null;
 
             Map sm = (Map)o;
 
             o = sm.get(OUTPUT_FILE_KEY);
 
-            if (o != null) {
+            if (o == null) {
+
+                throw new UserErrorException("missing '" + OUTPUT_KEY + "." + OUTPUT_FILE_KEY + "'");
+            }
+            else {
 
                 if (!(o instanceof String)) {
 
                     throw new UserErrorException("invalid output file name: \"" + o + "\"");
                 }
 
-                setOutputFileName((String)o);
+                outputFileName = (String)o;
             }
 
             o = sm.get(OUTPUT_APPEND_KEY);
@@ -129,7 +141,17 @@ public class YamlConfigurationFile extends ConfigurationBase {
                     throw new UserErrorException("invalid '" + OUTPUT_APPEND_KEY + "' boolean value: \"" + o + "\"");
                 }
 
-                setOutputFileAppend((Boolean)o);
+                append = (Boolean)o;
+            }
+
+            try {
+
+                AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(outputFileName, append);
+                addDataConsumer(w);
+            }
+            catch(DataConsumerException e) {
+
+                throw new UserErrorException(e);
             }
         }
 

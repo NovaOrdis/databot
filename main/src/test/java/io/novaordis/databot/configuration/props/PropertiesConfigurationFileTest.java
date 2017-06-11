@@ -16,9 +16,11 @@
 
 package io.novaordis.databot.configuration.props;
 
+import io.novaordis.databot.DataConsumer;
 import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.configuration.ConfigurationFactoryTest;
 import io.novaordis.databot.configuration.ConfigurationTest;
+import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.utilities.UserErrorException;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -27,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.List;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -103,6 +106,28 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
             assertEquals("invalid '" + PropertiesConfigurationFile.OUTPUT_FILE_APPEND_PROPERTY_NAME +
                     "' boolean value: \"blah\"", msg);
         }
+    }
+
+    @Test
+    public void load_AsynchronousCsvWriter() throws Exception {
+
+        PropertiesConfigurationFile p = new PropertiesConfigurationFile(true, null);
+
+        Properties props = new Properties();
+        props.setProperty(PropertiesConfigurationFile.OUTPUT_FILE_APPEND_PROPERTY_NAME, "something");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        props.store(baos, "comments");
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
+        p.load(bais);
+
+        List<DataConsumer> dcs = p.getDataConsumers();
+        assertEquals(1, dcs.size());
+
+        AsynchronousCsvLineWriter w = (AsynchronousCsvLineWriter)dcs.get(0);
+        assertEquals("something", w.getOutputFileName());
+        assertEquals(false, w.isOutputFileAppend());
     }
 
     @Test

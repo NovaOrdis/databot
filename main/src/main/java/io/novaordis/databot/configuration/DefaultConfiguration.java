@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Nova Ordis LLC
+ * Copyright (c) 2017 Nova Ordis LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,17 @@
 
 package io.novaordis.databot.configuration;
 
-import io.novaordis.databot.DataConsumer;
-import io.novaordis.events.api.metric.MetricDefinition;
-import io.novaordis.events.api.metric.MetricSource;
-import io.novaordis.events.api.metric.MetricSourceRepository;
 import io.novaordis.utilities.UserErrorException;
 
 import java.io.InputStream;
-import java.util.List;
 
 /**
+ * Used for testing.
+ *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 7/29/16
+ * @since 6/11/17
  */
-public class MockConfiguration extends ConfigurationBase {
+public class DefaultConfiguration extends ConfigurationBase {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -39,9 +36,9 @@ public class MockConfiguration extends ConfigurationBase {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockConfiguration() throws UserErrorException {
+    public DefaultConfiguration() throws UserErrorException {
 
-        super(false, null);
+        super(true, null);
     }
 
     // ConfigurationBase overrides -------------------------------------------------------------------------------------
@@ -49,54 +46,12 @@ public class MockConfiguration extends ConfigurationBase {
     @Override
     protected void load(InputStream is) throws UserErrorException {
 
-        throw new RuntimeException("load() NOT YET IMPLEMENTED");
+        //
+        // noop, we preserve the defaults
+        //
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    public void setForeground(boolean b) {
-
-        super.setForeground(b);
-    }
-
-    /**
-     * The relative order is preserved.
-     */
-    public void addMetricDefinition(MetricDefinition md) {
-
-        super.addMetricDefinition(md);
-    }
-
-    public void setEventQueueSize(int i) {
-
-        super.setEventQueueSize(i);
-    }
-
-    public void setMetricSourceRepository(MetricSourceRepository r) {
-
-        //
-        // we're not actually replacing the repository, but we transfer the content
-        //
-
-        //noinspection Convert2streamapi
-        for(MetricSource s: r.getSources()) {
-
-            addMetricSource(s);
-        }
-    }
-
-    public void setDataConsumers(List<DataConsumer> dcs) {
-
-        //
-        // we're not actually replacing the repository, but we transfer the content
-        //
-
-        //noinspection Convert2streamapi
-        for(DataConsumer d: dcs) {
-
-            addDataConsumer(d);
-        }
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

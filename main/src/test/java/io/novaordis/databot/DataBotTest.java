@@ -16,8 +16,9 @@
 
 package io.novaordis.databot;
 
+import io.novaordis.databot.configuration.Configuration;
+import io.novaordis.databot.configuration.DefaultConfiguration;
 import io.novaordis.databot.configuration.MockConfiguration;
-import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceRepository;
 import io.novaordis.events.api.metric.MetricSourceRepositoryImpl;
@@ -27,6 +28,8 @@ import io.novaordis.events.api.metric.os.LocalOS;
 import io.novaordis.events.api.metric.os.RemoteOS;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -68,7 +71,30 @@ public class DataBotTest {
     }
 
     @Test
-    public void constructorAndInitialization() throws Exception {
+    public void constructorAndInitialization_Defaults() throws Exception {
+
+        Configuration c = new DefaultConfiguration();
+
+        //
+        // construct and initialize
+        //
+
+        DataBot d = new DataBot(c);
+
+        assertEquals(c.getEventQueueSize(), d.getEventQueueSize());
+        assertEquals(0, d.getEventCount());
+
+        assertFalse(d.isStarted());
+
+        List<MetricSource> sources = d.getMetricSources();
+        assertTrue(sources.isEmpty());
+
+        List<DataConsumer> consumers = d.getDataConsumers();
+        assertTrue(consumers.isEmpty());
+    }
+
+    @Test
+    public void constructorAndInitialization_ComplexSimulation() throws Exception {
 
         int eventQueueSize = 7;
 
@@ -79,10 +105,16 @@ public class DataBotTest {
         r.add(new JmxBus("jmx://mock-remote-jmx-bus/"));
         r.add(new JBossController("jbosscli://mock-remote-jboss-controller/"));
 
-        MockConfiguration mc = new MockConfiguration();
-        mc.setMetricSourceRepository(r);
+        MockDataConsumer mdc = new MockDataConsumer();
+        MockDataConsumer mdc2 = new MockDataConsumer();
+        List<DataConsumer> dataConsumers = new ArrayList<>();
+        dataConsumers.add(mdc);
+        dataConsumers.add(mdc2);
 
+        MockConfiguration mc = new MockConfiguration();
         mc.setEventQueueSize(eventQueueSize);
+        mc.setMetricSourceRepository(r);
+        mc.setDataConsumers(dataConsumers);
 
         //
         // construct and initialize
@@ -115,11 +147,12 @@ public class DataBotTest {
 
         List<DataConsumer> consumers = d.getDataConsumers();
 
-        assertEquals(1, consumers.size());
+        assertEquals(2, consumers.size());
 
-        AsynchronousCsvLineWriter writer = (AsynchronousCsvLineWriter)consumers.get(0);
-
-        assertFalse(writer.isStarted());
+        assertEquals(mdc, consumers.get(0));
+        assertFalse(mdc.isStarted());
+        assertEquals(mdc2, consumers.get(1));
+        assertFalse(mdc2.isStarted());
     }
 
     // lifecycle -------------------------------------------------------------------------------------------------------
@@ -128,23 +161,25 @@ public class DataBotTest {
     public void lifecycle() throws Exception {
 
         MockMetricSource ms = new MockMetricSource();
+        MockDataConsumer mdc = new MockDataConsumer();
 
         MetricSourceRepository r = new MetricSourceRepositoryImpl();
         r.add(ms);
 
         MockConfiguration mc = new MockConfiguration();
+
         mc.setMetricSourceRepository(r);
+        mc.setDataConsumers(Collections.singletonList(mdc));
 
         DataBot d = new DataBot(mc);
 
         assertFalse(d.isStarted());
 
         List<DataConsumer> consumers = d.getDataConsumers();
+        assertEquals(1, consumers.size());
+        assertEquals(mdc, consumers.get(0));
+        assertFalse(consumers.get(0).isStarted());
 
-        for(DataConsumer c: consumers) {
-
-            assertFalse(c.isStarted());
-        }
 
         d.start();
 

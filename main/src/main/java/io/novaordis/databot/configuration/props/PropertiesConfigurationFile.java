@@ -16,6 +16,7 @@
 
 package io.novaordis.databot.configuration.props;
 
+import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.databot.configuration.ConfigurationBase;
 import io.novaordis.events.api.metric.MetricDefinitionException;
@@ -98,11 +99,18 @@ public class PropertiesConfigurationFile extends ConfigurationBase {
             }
         }
 
+        String outputFileName;
+        Boolean append = null;
+
         s = properties.getProperty(OUTPUT_FILE_PROPERTY_NAME);
 
-        if (s != null) {
+        if (s == null) {
 
-            setOutputFileName(s);
+            throw new UserErrorException("missing '" + OUTPUT_FILE_PROPERTY_NAME + "'");
+        }
+        else {
+
+            outputFileName = s;
         }
 
         s = properties.getProperty(OUTPUT_FILE_APPEND_PROPERTY_NAME);
@@ -114,17 +122,28 @@ public class PropertiesConfigurationFile extends ConfigurationBase {
 
             if ("true".equals(ls) || "yes".equals(ls)) {
 
-                setOutputFileAppend(true);
+                append = true;
             }
             else if ("false".equals(ls) || "no".equals(ls)) {
 
-                setOutputFileAppend(false);
+                append = false;
             }
             else {
 
                 throw new UserErrorException(
                         "invalid '" + OUTPUT_FILE_APPEND_PROPERTY_NAME + "' boolean value: \"" + s + "\"");
             }
+        }
+
+        try {
+
+            AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(outputFileName, append);
+            addDataConsumer(w);
+
+        }
+        catch(Exception e) {
+
+            throw new UserErrorException(e);
         }
 
         s = properties.getProperty(METRICS_PROPERTY_NAME);

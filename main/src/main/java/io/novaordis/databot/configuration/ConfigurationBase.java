@@ -16,6 +16,7 @@
 
 package io.novaordis.databot.configuration;
 
+import io.novaordis.databot.DataConsumer;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceRepository;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -49,12 +51,14 @@ public abstract class ConfigurationBase implements Configuration {
     private boolean foreground;
 
     private int samplingInterval;
-    private String outputFileName;
-    private boolean outputFileAppend;
 
     private MetricSourceRepository metricSourceRepository;
 
     private List<MetricDefinition> metricDefinitions;
+
+    private List<DataConsumer> dataConsumers;
+
+    private int eventQueueSize;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -63,13 +67,15 @@ public abstract class ConfigurationBase implements Configuration {
      */
     protected ConfigurationBase(boolean foreground, String filename) throws UserErrorException {
 
-        this.foreground = foreground;
+        setForeground(foreground);
 
         this.samplingInterval = DEFAULT_SAMPLING_INTERVAL_SEC;
-        this.outputFileName = DEFAULT_OUTPUT_FILE_NAME;
-        this.outputFileAppend = true;
+
+        setEventQueueSize(DEFAULT_EVENT_QUEUE_SIZE);
+
         this.metricSourceRepository = new MetricSourceRepositoryImpl();
         this.metricDefinitions = new ArrayList<>();
+        this.dataConsumers = new ArrayList<>();
 
         if (filename != null) {
 
@@ -130,15 +136,9 @@ public abstract class ConfigurationBase implements Configuration {
     }
 
     @Override
-    public String getOutputFileName() {
+    public int getEventQueueSize() {
 
-        return outputFileName;
-    }
-
-    @Override
-    public boolean isOutputFileAppend() {
-
-        return outputFileAppend;
+        return eventQueueSize;
     }
 
     @Override
@@ -153,10 +153,13 @@ public abstract class ConfigurationBase implements Configuration {
         return metricSourceRepository;
     }
 
+    /**
+     * Returns the underlying storage so handle with care.
+     */
     @Override
-    public int getEventQueueSize() {
+    public List<DataConsumer> getDataConsumers() {
 
-        return DEFAULT_EVENT_QUEUE_SIZE;
+        return dataConsumers;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
@@ -172,16 +175,6 @@ public abstract class ConfigurationBase implements Configuration {
         this.samplingInterval = i;
     }
 
-    protected void setOutputFileName(String s) {
-
-        this.outputFileName = s;
-    }
-
-    protected void setOutputFileAppend(boolean b) {
-
-        this.outputFileAppend = b;
-    }
-
     protected void addMetricDefinition(MetricDefinition md) {
 
         metricDefinitions.add(md);
@@ -191,7 +184,27 @@ public abstract class ConfigurationBase implements Configuration {
         //
 
         MetricSource ms = md.getSource();
+        addMetricSource(ms);
+    }
+
+    protected void addMetricSource(MetricSource ms) {
+
         metricSourceRepository.add(ms);
+    }
+
+    protected void addDataConsumer(DataConsumer dc) {
+
+        throw new RuntimeException("NYE "+ dc);
+    }
+
+    protected void setForeground(boolean b) {
+
+        this.foreground = b;
+    }
+
+    protected void setEventQueueSize(int i) {
+
+        this.eventQueueSize = i;
     }
 
     // Private ---------------------------------------------------------------------------------------------------------
@@ -201,15 +214,32 @@ public abstract class ConfigurationBase implements Configuration {
         String s =
                 "\n\nconfiguration:\n\n" +
                         " sampling interval:     " + getSamplingIntervalSec() + " seconds\n" +
-                        " output file:           " + getOutputFileName() + "\n" +
-                        " append to output file: " + isOutputFileAppend() + "\n" +
-                        " metrics:\n";
+                        " event queue size:      " + getEventQueueSize() + "\n" +
+                        " metric sources:\n";
+
+        Set<MetricSource> mss = getMetricSourceRepository().getSources();
+
+        for(MetricSource ms : mss) {
+
+            s += "    - " + ms + "\n";
+        }
+
+        s += " metrics:\n";
 
         List<MetricDefinition> mds = getMetricDefinitions();
 
         for(MetricDefinition md: mds) {
 
             s += "    - " + md.getSource() + "/" + md.getId() + "\n";
+        }
+
+        s += " data consumers:\n";
+
+        List<DataConsumer> dcs = getDataConsumers();
+
+        for(DataConsumer c: dcs) {
+
+            s += "    - " + c + "\n";
         }
 
         log.debug(s);
