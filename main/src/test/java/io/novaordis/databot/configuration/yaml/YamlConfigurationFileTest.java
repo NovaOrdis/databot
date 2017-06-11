@@ -55,7 +55,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     // load() ----------------------------------------------------------------------------------------------------------
 
     @Test
-    public void load_EmtpyConfigurationFile() throws Exception {
+    public void load_EmptyConfigurationFile() throws Exception {
 
         YamlConfigurationFile c = new YamlConfigurationFile(true, null);
 

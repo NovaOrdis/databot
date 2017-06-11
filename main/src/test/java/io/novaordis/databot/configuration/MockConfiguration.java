@@ -41,11 +41,15 @@ public class MockConfiguration implements Configuration {
 
     private int eventQueueSize;
 
+    private MetricSourceRepository metricSourceRepository;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     public MockConfiguration() {
 
         this.metrics = new ArrayList<>();
+
+        this.eventQueueSize = Configuration.DEFAULT_EVENT_QUEUE_SIZE;
     }
 
     // Configuration implementation ------------------------------------------------------------------------------------
@@ -79,7 +83,8 @@ public class MockConfiguration implements Configuration {
 
     @Override
     public MetricSourceRepository getMetricSourceRepository() {
-        throw new RuntimeException("getMetricSourceRepository() NOT YET IMPLEMENTED");
+
+        return metricSourceRepository;
     }
 
     @Override
@@ -113,6 +118,11 @@ public class MockConfiguration implements Configuration {
     public void setEventQueueSize(int i) {
 
         this.eventQueueSize = i;
+    }
+
+    public void setMetricSourceRepository(MetricSourceRepository r) {
+
+        this.metricSourceRepository = r;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

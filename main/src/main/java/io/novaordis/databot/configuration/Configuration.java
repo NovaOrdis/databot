@@ -33,11 +33,16 @@ public interface Configuration {
 
     int DEFAULT_SAMPLING_INTERVAL_SEC = 10;
 
+    int DEFAULT_EVENT_QUEUE_SIZE = 1000;
+
+
+
+
     String DEFAULT_OUTPUT_FILE_NAME = "./os-stats.csv";
 
     boolean DEFAULT_OUTPUT_FILE_APPEND = true;
 
-    int DEFAULT_EVENT_QUEUE_SIZE = 1000;
+
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -52,6 +57,14 @@ public interface Configuration {
      * @return the sampling interval, in seconds. If not specified, the default is 10 seconds.
      */
     int getSamplingIntervalSec();
+
+    /**
+     * The maximum number of events that can be maintained at one time in the in-memory blocking queue, after which
+     * the production is throttled down.
+     *
+     *
+     */
+    int getEventQueueSize();
 
     /**
      * @return the name of the output file. If not specified, the default value is /tmp/os-stats.csv.  Note that if
@@ -74,12 +87,5 @@ public interface Configuration {
 
     MetricSourceRepository getMetricSourceRepository();
 
-    /**
-     * The maximum number of events that can be maintained at one time in the in-memory blocking queue, after which
-     * the production is throttled down.
-     *
-     *
-     */
-    int getEventQueueSize();
 
 }

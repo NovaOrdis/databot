@@ -20,9 +20,13 @@ import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.metric.MetricSource;
+import io.novaordis.events.api.metric.MetricSourceRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -45,6 +49,8 @@ public class DataBot {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
+    private static final Logger log = LoggerFactory.getLogger(DataBot.class);
+
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
@@ -61,11 +67,15 @@ public class DataBot {
 
     private final BlockingQueue<Event> events;
 
+    private final int eventQueueSize;
+
     private final List<DataConsumer> consumers;
 
     private final Timer timer;
 
     private final DataBotTimerTask timerTask;
+
+    private volatile boolean started;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -78,7 +88,9 @@ public class DataBot {
 
         this.configuration = configuration;
 
-        this.events = new ArrayBlockingQueue<>(configuration.getEventQueueSize());
+        this.eventQueueSize = configuration.getEventQueueSize();
+
+        this.events = new ArrayBlockingQueue<>(eventQueueSize);
 
         this.sources = new ArrayList<>();
 
@@ -87,6 +99,8 @@ public class DataBot {
         this.timer = new Timer();
 
         this.timerTask = new DataBotTimerTask(this);
+
+        this.started = false;
 
         initialize();
     }
@@ -102,7 +116,7 @@ public class DataBot {
      *
      * @exception DataBotException if a consumer cannot be successfully started.
      */
-    public void start() throws DataBotException {
+    public synchronized void start() throws DataBotException {
 
         //
         // start the consumers - they must start correctly or this instance will end up in an invalid state
@@ -119,27 +133,53 @@ public class DataBot {
 
         timer.scheduleAtFixedRate(timerTask, 0, configuration.getSamplingIntervalSec() * 1000L);
 
-        throw new RuntimeException("NYE");
-    }
-
-    public boolean isStarted() {
+        started = true;
 
         throw new RuntimeException("NYE");
     }
 
+    public synchronized boolean isStarted() {
+
+        return started;
+    }
+
+    public synchronized void stop() {
+
+        throw new RuntimeException("NYE");
+    }
+
+    /**
+     * @return the underlying storage, so handle with care.
+     */
     public List<MetricSource> getMetricSources() {
 
         return sources;
     }
 
+    /**
+     * @return the underlying storage, so handle with care.
+     */
+    public List<DataConsumer> getDataConsumers() {
+
+        return consumers;
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     /**
-     * Report the effective queue size, as read from the queue.
+     * Report the number of events in the queue at the time of the reading.
+     */
+    int getEventCount() {
+
+        return events.size();
+    }
+
+    /**
+     * Report the maximum number of events that can be accommodated by the event queue, before starting to block.
      */
     int getEventQueueSize() {
 
-        return events.size();
+        return eventQueueSize;
     }
 
     /**
@@ -157,10 +197,23 @@ public class DataBot {
      */
     void initialize() throws DataConsumerException {
 
+        //
+        // get the sources from configuration and copy their references locally
+        //
+
+        MetricSourceRepository sourceRepository = configuration.getMetricSourceRepository();
+
+        Set<MetricSource> configSources = sourceRepository.getSources();
 
         //
-        // create sources
+        // this is where we may enforce a specific order, if we wanted it
         //
+
+        for(MetricSource s: configSources) {
+
+            log.debug("registering metric source " + s);
+            this.sources.add(s);
+        }
 
         //
         // create consumers:

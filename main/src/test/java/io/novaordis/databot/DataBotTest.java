@@ -17,7 +17,14 @@
 package io.novaordis.databot;
 
 import io.novaordis.databot.configuration.MockConfiguration;
+import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricSource;
+import io.novaordis.events.api.metric.MetricSourceRepository;
+import io.novaordis.events.api.metric.MetricSourceRepositoryImpl;
+import io.novaordis.events.api.metric.jboss.JBossController;
+import io.novaordis.events.api.metric.jmx.JmxBus;
+import io.novaordis.events.api.metric.os.LocalOS;
+import io.novaordis.events.api.metric.os.RemoteOS;
 import org.junit.Test;
 
 import java.util.List;
@@ -61,29 +68,83 @@ public class DataBotTest {
     }
 
     @Test
-    public void constructor_and_initialization() throws Exception {
+    public void constructorAndInitialization() throws Exception {
+
+        int eventQueueSize = 7;
+
+        MetricSourceRepository r = new MetricSourceRepositoryImpl();
+
+        r.add(new LocalOS());
+        r.add(new RemoteOS("ssh://mock-remote-ssh-server/"));
+        r.add(new JmxBus("jmx://mock-remote-jmx-bus/"));
+        r.add(new JBossController("jbosscli://mock-remote-jboss-controller/"));
 
         MockConfiguration mc = new MockConfiguration();
+        mc.setMetricSourceRepository(r);
 
-        mc.setEventQueueSize(7);
+        mc.setEventQueueSize(eventQueueSize);
+
+        //
+        // construct and initialize
+        //
 
         DataBot d = new DataBot(mc);
 
-        assertEquals(d.getEventQueueSize(), mc.getEventQueueSize());
+        assertEquals(eventQueueSize, d.getEventQueueSize());
+        assertEquals(0, d.getEventCount());
 
         assertFalse(d.isStarted());
+
+        List<MetricSource> sources = d.getMetricSources();
+
+        assertEquals(4, sources.size());
+
+        MetricSource expected;
+
+        expected = new LocalOS();
+        assertTrue(sources.contains(expected));
+
+        expected = new RemoteOS("ssh://mock-remote-ssh-server/");
+        assertTrue(sources.contains(expected));
+
+        expected = new JmxBus("jmx://mock-remote-jmx-bus/");
+        assertTrue(sources.contains(expected));
+
+        expected = new JBossController("jbosscli://mock-remote-jboss-controller/");
+        assertTrue(sources.contains(expected));
+
+        List<DataConsumer> consumers = d.getDataConsumers();
+
+        assertEquals(1, consumers.size());
+
+        AsynchronousCsvLineWriter writer = (AsynchronousCsvLineWriter)consumers.get(0);
+
+        assertFalse(writer.isStarted());
     }
 
-    // start() ---------------------------------------------------------------------------------------------------------
+    // lifecycle -------------------------------------------------------------------------------------------------------
 
     @Test
-    public void start() throws Exception {
+    public void lifecycle() throws Exception {
+
+        MockMetricSource ms = new MockMetricSource();
+
+        MetricSourceRepository r = new MetricSourceRepositoryImpl();
+        r.add(ms);
 
         MockConfiguration mc = new MockConfiguration();
+        mc.setMetricSourceRepository(r);
 
         DataBot d = new DataBot(mc);
 
         assertFalse(d.isStarted());
+
+        List<DataConsumer> consumers = d.getDataConsumers();
+
+        for(DataConsumer c: consumers) {
+
+            assertFalse(c.isStarted());
+        }
 
         d.start();
 
@@ -100,6 +161,26 @@ public class DataBotTest {
             assertFalse(s.isStarted());
         }
 
+        consumers = d.getDataConsumers();
+
+        for(DataConsumer c: consumers) {
+
+            assertTrue(c.isStarted());
+        }
+
+        //
+        // wait to make sure that the timer task is scheduled as planned
+        //
+
+        fail("insure timer task");
+
+        d.stop();
+
+        //
+        // make sure all is stopped
+        //
+
+        fail("insure stopped");
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
