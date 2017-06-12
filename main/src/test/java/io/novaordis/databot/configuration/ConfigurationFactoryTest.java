@@ -82,10 +82,13 @@ public class ConfigurationFactoryTest {
     public void buildInstance_ConfigurationFile_LongOption_NoFileNameFollows() throws Exception {
 
         try {
+
             ConfigurationFactory.buildInstance(new String[]{"--configuration", "something"});
             fail("should throw exception");
+
         }
         catch(UserErrorException e) {
+
             String msg = e.getMessage();
             log.info(msg);
             assertEquals("correct configuration file syntax is --configuration=<file-name>", msg);
@@ -115,8 +118,9 @@ public class ConfigurationFactoryTest {
         File configFile = new File(resourceDir, "reference-props.conf");
         assertTrue(configFile.isFile());
 
-        Configuration c = ConfigurationFactory.buildInstance(new String[] {
-                "--configuration="+configFile.getAbsolutePath() });
+        String[] args = new String[] {"--configuration="+configFile.getAbsolutePath()};
+
+        Configuration c = ConfigurationFactory.buildInstance(args);
 
         assertEquals(20, c.getSamplingIntervalSec());
         assertFalse(c.isForeground());

@@ -18,7 +18,6 @@ package io.novaordis.databot.configuration;
 
 import io.novaordis.databot.DataConsumer;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
-import io.novaordis.events.api.measure.PercentageArithmeticException;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceRepository;
@@ -32,7 +31,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -197,7 +195,7 @@ public abstract class ConfigurationBase implements Configuration {
 
     protected void addDataConsumer(DataConsumer dc) {
 
-        throw new RuntimeException("NYE "+ dc);
+        dataConsumers.add(dc);
     }
 
     protected void setForeground(boolean b) {

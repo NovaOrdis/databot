@@ -27,8 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
-import java.util.StringTokenizer;
 
 /**
  * A configuration instance backed by a property file.
@@ -49,6 +50,80 @@ public class PropertiesConfigurationFile extends ConfigurationBase {
 
     // Static ----------------------------------------------------------------------------------------------------------
 
+    /**
+     * Parses the value of the "metrics" (or equivalent) property. We expect a comma separated string, where values
+     * that contain commas or spaces are double-quote enclosed.
+     */
+    public static List<String> parseMetricDefinitions(String s) {
+
+        List<String> result = new ArrayList<>();
+
+        int from = 0;
+        boolean withinQuotes = false;
+
+        for(int i = 0; i < s.length(); i ++) {
+
+            char crt = s.charAt(i);
+
+            if (crt == '"') {
+
+                if (!withinQuotes) {
+
+                    withinQuotes = true;
+                    from = i + 1;
+                    continue;
+                }
+                else {
+
+                    //
+                    // end quotes
+                    //
+
+                    withinQuotes = false;
+
+                    String tok = s.substring(from, i).trim();
+
+                    if (!tok.isEmpty()) {
+
+                        result.add(tok);
+                    }
+
+                    from = i + 1;
+
+                }
+            }
+
+            if (crt == ',') {
+
+                if (withinQuotes) {
+
+                    continue;
+                }
+
+                String tok = s.substring(from, i).trim();
+
+                if (!tok.isEmpty()) {
+
+                    result.add(tok);
+                }
+
+                from = i + 1;
+            }
+        }
+
+        if (from < s.length() - 1) {
+
+            String tok = s.substring(from).trim();
+
+            if (!tok.isEmpty()) {
+
+                result.add(tok);
+            }
+        }
+
+        return result;
+    }
+
     // Attributes ------------------------------------------------------------------------------------------------------
 
     // Constructors ----------------------------------------------------------------------------------------------------
@@ -67,7 +142,7 @@ public class PropertiesConfigurationFile extends ConfigurationBase {
     @Override
     protected void load(InputStream is) throws UserErrorException {
 
-        log.debug("loading configuration");
+        log.debug("loading configuration from input stream");
 
         Properties properties = new Properties();
 
@@ -150,15 +225,13 @@ public class PropertiesConfigurationFile extends ConfigurationBase {
 
         if (s != null) {
 
-            StringTokenizer st = new StringTokenizer(s, ", ");
+            List<String> metricDefinitions = PropertiesConfigurationFile.parseMetricDefinitions(s);
 
-            while(st.hasMoreTokens()) {
-
-                String tok = st.nextToken();
+            for(String mds: metricDefinitions) {
 
                 try {
 
-                    MetricDefinition md = MetricDefinitionParser.parse(null, tok);
+                    MetricDefinition md = MetricDefinitionParser.parse(null, mds);
 
                     addMetricDefinition(md);
                 }

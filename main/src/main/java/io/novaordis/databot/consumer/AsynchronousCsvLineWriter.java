@@ -238,7 +238,7 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
      */
     public boolean isHeaderOn() {
 
-        return csvFormatter.isHeaderOn();
+        return csvFormatter != null && csvFormatter.isHeaderOn();
     }
 
     /**

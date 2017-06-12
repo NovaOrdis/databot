@@ -17,11 +17,16 @@
 package io.novaordis.databot.configuration;
 
 import io.novaordis.databot.DataConsumer;
+import io.novaordis.databot.MockDataConsumer;
 import io.novaordis.databot.MockMetricDefinition;
 import io.novaordis.databot.MockMetricSource;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSourceRepository;
+import io.novaordis.events.api.metric.jboss.JBossCliMetricDefinition;
+import io.novaordis.events.api.metric.jboss.JBossController;
+import io.novaordis.events.api.metric.jmx.JmxBus;
+import io.novaordis.events.api.metric.jmx.JmxMetricDefinition;
 import io.novaordis.events.api.metric.os.LocalOS;
 import io.novaordis.events.api.metric.os.mdefs.CpuUserTime;
 import io.novaordis.events.api.metric.os.mdefs.LoadAverageLastMinute;
@@ -117,7 +122,7 @@ public abstract class ConfigurationTest {
 
         List<MetricDefinition> metrics = c.getMetricDefinitions();
 
-        assertEquals(3, metrics.size());
+        assertEquals(5, metrics.size());
 
         PhysicalMemoryTotal m = (PhysicalMemoryTotal)metrics.get(0);
         assertNotNull(m);
@@ -131,12 +136,31 @@ public abstract class ConfigurationTest {
         assertNotNull(m3);
         assertEquals(new LocalOS(), m3.getSource());
 
+        JmxMetricDefinition m4 = (JmxMetricDefinition)metrics.get(3);
+        assertNotNull(m4);
+        assertEquals("jboss.as:subsystem=messaging,hornetq-server=default,jms-queue=DLQ/messageCount", m4.getLabel());
+
+        JBossCliMetricDefinition m5 = (JBossCliMetricDefinition)metrics.get(4);
+        assertNotNull(m5);
+        assertEquals("/subsystem=messaging/hornetq-server=default/jms-queue=DLQ/message-count", m5.getLabel());
+
         MetricSourceRepository mr = c.getMetricSourceRepository();
         assertNotNull(mr);
 
         Set<LocalOS> localOSes = mr.getSources(LocalOS.class);
         assertEquals(1, localOSes.size());
         assertTrue(localOSes.contains(new LocalOS()));
+
+        Set<JmxBus> jmxBuses = mr.getSources(JmxBus.class);
+        assertEquals(1, jmxBuses.size());
+        JmxBus jmxBus = jmxBuses.iterator().next();
+        assertEquals("admin@localhost:9999", jmxBus.getAddress());
+
+        Set<JBossController> jbossControllers = mr.getSources(JBossController.class);
+        assertEquals(1, jbossControllers.size());
+        JBossController jbossController = jbossControllers.iterator().next();
+        assertEquals("admin@localhost:9999", jbossController.getAddress());
+
 
         //
         // data consumers
@@ -206,6 +230,36 @@ public abstract class ConfigurationTest {
         assertEquals(1, mss.size());
         assertTrue(mss.contains(ms));
 
+    }
+
+    // addDataConsumer() -----------------------------------------------------------------------------------------------
+
+    @Test
+    public void addDataConsumer() throws Exception {
+
+        ConfigurationBase cb = (ConfigurationBase)getConfigurationToTest(true, null);
+
+        List<DataConsumer> dcs = cb.getDataConsumers();
+        assertTrue(dcs.isEmpty());
+
+        MockDataConsumer mdc = new MockDataConsumer();
+
+        cb.addDataConsumer(mdc);
+
+        dcs = cb.getDataConsumers();
+
+        assertEquals(1, dcs.size());
+        assertEquals(mdc, dcs.get(0));
+
+        MockDataConsumer mdc2 = new MockDataConsumer();
+
+        cb.addDataConsumer(mdc2);
+
+        dcs = cb.getDataConsumers();
+
+        assertEquals(2, dcs.size());
+        assertEquals(mdc, dcs.get(0));
+        assertEquals(mdc2, dcs.get(1));
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

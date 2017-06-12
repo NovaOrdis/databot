@@ -21,6 +21,7 @@ import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.configuration.ConfigurationFactoryTest;
 import io.novaordis.databot.configuration.ConfigurationTest;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
+import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.utilities.UserErrorException;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -53,6 +54,8 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
     // Constructors ----------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    // Tests -----------------------------------------------------------------------------------------------------------
 
     // constructor -----------------------------------------------------------------------------------------------------
 
@@ -89,6 +92,7 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
         PropertiesConfigurationFile p = new PropertiesConfigurationFile(true, null);
 
         Properties props = new Properties();
+        props.setProperty(PropertiesConfigurationFile.OUTPUT_FILE_PROPERTY_NAME, "something.prop");
         props.setProperty(PropertiesConfigurationFile.OUTPUT_FILE_APPEND_PROPERTY_NAME, "blah");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -114,7 +118,7 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
         PropertiesConfigurationFile p = new PropertiesConfigurationFile(true, null);
 
         Properties props = new Properties();
-        props.setProperty(PropertiesConfigurationFile.OUTPUT_FILE_APPEND_PROPERTY_NAME, "something");
+        props.setProperty(PropertiesConfigurationFile.OUTPUT_FILE_PROPERTY_NAME, "something");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         props.store(baos, "comments");
@@ -127,32 +131,62 @@ public class PropertiesConfigurationFileTest extends ConfigurationTest {
 
         AsynchronousCsvLineWriter w = (AsynchronousCsvLineWriter)dcs.get(0);
         assertEquals("something", w.getOutputFileName());
-        assertEquals(false, w.isOutputFileAppend());
+
+        assertEquals(AsynchronousCsvLineWriter.DEFAULT_APPEND, w.isOutputFileAppend());
     }
 
     @Test
-    public void load_Metrics() throws Exception {
+    public void load() throws Exception {
 
         PropertiesConfigurationFile p = new PropertiesConfigurationFile(true, null);
 
         Properties props = new Properties();
-        props.setProperty(PropertiesConfigurationFile.OUTPUT_FILE_APPEND_PROPERTY_NAME, "blah");
+        props.setProperty(PropertiesConfigurationFile.OUTPUT_FILE_PROPERTY_NAME, "something.props");
+        props.setProperty(PropertiesConfigurationFile.OUTPUT_FILE_APPEND_PROPERTY_NAME, "false");
+        props.setProperty(PropertiesConfigurationFile.METRICS_PROPERTY_NAME, "PhysicalMemoryTotal");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         props.store(baos, "comments");
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 
-        try {
+        p.load(bais);
 
-            p.load(bais);
-            fail("should have thrown exception");
-        }
-        catch(UserErrorException e) {
-            String msg = e.getMessage();
-            log.info(msg);
-            assertEquals("invalid '" + PropertiesConfigurationFile.OUTPUT_FILE_APPEND_PROPERTY_NAME +
-                    "' boolean value: \"blah\"", msg);
-        }
+        List<DataConsumer> dcs = p.getDataConsumers();
+        assertEquals(1, dcs.size());
+        AsynchronousCsvLineWriter w = (AsynchronousCsvLineWriter)dcs.get(0);
+        assertEquals("something.props", w.getOutputFileName());
+        assertEquals(false, w.isOutputFileAppend());
+
+        List<MetricDefinition> mds = p.getMetricDefinitions();
+        assertEquals(1, mds.size());
+        assertEquals("PhysicalMemoryTotal", mds.get(0).getId());
+
+    }
+
+    // parseMetricDefinitions() ----------------------------------------------------------------------------------------
+
+    @Test
+    public void parseMetricDefinitions() throws Exception {
+
+        List<String> result = PropertiesConfigurationFile.parseMetricDefinitions("a, b, c");
+        assertEquals(3, result.size());
+
+        assertEquals("a", result.get(0));
+        assertEquals("b", result.get(1));
+        assertEquals("c", result.get(2));
+    }
+
+    @Test
+    public void parseMetricDefinitions_Quotes() throws Exception {
+
+        String s = "a, \"b, something, something else\", c";
+
+        List<String> result = PropertiesConfigurationFile.parseMetricDefinitions(s);
+        assertEquals(3, result.size());
+
+        assertEquals("a", result.get(0));
+        assertEquals("b, something, something else", result.get(1));
+        assertEquals("c", result.get(2));
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

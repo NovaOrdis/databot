@@ -171,7 +171,10 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
 
         YamlConfigurationFile c = new YamlConfigurationFile(true, null);
 
-        String s = "metrics: something\n";
+        String s =
+                "output:\n" +
+                "  file: something.csv\n" +
+                "metrics: something\n";
 
         InputStream is = new ByteArrayInputStream(s.getBytes());
 
@@ -195,7 +198,10 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
         MetricSourceRepository mr = c.getMetricSourceRepository();
         assertTrue(mr.isEmpty());
 
-        String s = "metrics:\n" +
+        String s =
+                "output:\n" +
+                "  file: something.csv\n" +
+                "metrics:\n" +
                 "  - PhysicalMemoryTotal\n" +
                 "  - CpuUserTime\n" +
                 "  - LoadAverageLastMinute\n";

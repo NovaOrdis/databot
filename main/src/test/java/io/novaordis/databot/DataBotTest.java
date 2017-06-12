@@ -19,6 +19,7 @@ package io.novaordis.databot;
 import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.configuration.DefaultConfiguration;
 import io.novaordis.databot.configuration.MockConfiguration;
+import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceRepository;
 import io.novaordis.events.api.metric.MetricSourceRepositoryImpl;
@@ -31,6 +32,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -91,6 +93,10 @@ public class DataBotTest {
 
         List<DataConsumer> consumers = d.getDataConsumers();
         assertTrue(consumers.isEmpty());
+
+        BlockingQueue<Event> eventQueue = d.getEventQueue();
+        assertEquals(c.getEventQueueSize(), eventQueue.remainingCapacity());
+
     }
 
     @Test
@@ -170,6 +176,7 @@ public class DataBotTest {
 
         mc.setMetricSourceRepository(r);
         mc.setDataConsumers(Collections.singletonList(mdc));
+        mc.setSamplingIntervalSec(1);
 
         DataBot d = new DataBot(mc);
 
@@ -179,7 +186,7 @@ public class DataBotTest {
         assertEquals(1, consumers.size());
         assertEquals(mdc, consumers.get(0));
         assertFalse(consumers.get(0).isStarted());
-
+        assertEquals(0, d.getTimerTaskExecutionCount());
 
         d.start();
 
@@ -204,10 +211,19 @@ public class DataBotTest {
         }
 
         //
-        // wait to make sure that the timer task is scheduled as planned
+        // wait twice the sampling interval to make sure that the timer task is scheduled as planned
         //
 
-        fail("insure timer task");
+        long waitTimeMs = 1000L * mc.getSamplingIntervalSec();
+        long t0 = System.currentTimeMillis();
+
+        while(System.currentTimeMillis() - t0 < waitTimeMs) {
+
+            Thread.sleep(200L);
+        }
+
+        long timerTaskExecutionCount = d.getTimerTaskExecutionCount();
+        assertTrue(timerTaskExecutionCount > 0);
 
         d.stop();
 
@@ -215,7 +231,17 @@ public class DataBotTest {
         // make sure all is stopped
         //
 
-        fail("insure stopped");
+        //
+        // wait twice the sampling interval to make sure that the timer task has time to shut down
+        //
+
+        waitTimeMs = 1000L * mc.getSamplingIntervalSec();
+        t0 = System.currentTimeMillis();
+
+        while(System.currentTimeMillis() - t0 < waitTimeMs) {
+
+            Thread.sleep(200L);
+        }
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

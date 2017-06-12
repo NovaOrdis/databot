@@ -59,17 +59,22 @@ public class MockConfiguration extends ConfigurationBase {
         super.setForeground(b);
     }
 
+    public void setEventQueueSize(int i) {
+
+        super.setEventQueueSize(i);
+    }
+
+    public void setSamplingIntervalSec(int s) {
+
+        super.setSamplingIntervalSec(s);
+    }
+
     /**
      * The relative order is preserved.
      */
     public void addMetricDefinition(MetricDefinition md) {
 
         super.addMetricDefinition(md);
-    }
-
-    public void setEventQueueSize(int i) {
-
-        super.setEventQueueSize(i);
     }
 
     public void setMetricSourceRepository(MetricSourceRepository r) {

@@ -22,6 +22,8 @@ import io.novaordis.events.api.metric.MetricException;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceException;
 import io.novaordis.utilities.os.OS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +38,8 @@ public class MockMetricSource implements MetricSource {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
+    private static final Logger log = LoggerFactory.getLogger(MockMetricSource.class);
+
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
@@ -44,6 +48,8 @@ public class MockMetricSource implements MetricSource {
     private Map<MetricDefinition, Property> readingsForMetrics;
 
     private boolean breakOnCollect;
+
+    private boolean started;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -84,17 +90,24 @@ public class MockMetricSource implements MetricSource {
 
     @Override
     public void start() throws MetricSourceException {
-        throw new RuntimeException("start() NOT YET IMPLEMENTED");
+
+        started = true;
+
+        log.info(this + " started");
     }
 
     @Override
     public boolean isStarted() {
-        throw new RuntimeException("isStarted() NOT YET IMPLEMENTED");
+
+        return started;
     }
 
     @Override
     public void stop() {
-        throw new RuntimeException("stop() NOT YET IMPLEMENTED");
+
+        started = false;
+
+        log.info(this + " stopped");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

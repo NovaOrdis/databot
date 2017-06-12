@@ -36,6 +36,11 @@ public class DataBotTimerTask extends TimerTask {
 
     private static final Logger log = LoggerFactory.getLogger(DataBotTimerTask.class);
 
+    //
+    // counts how many executions were triggered since this task was created
+    //
+    private volatile long executionCount;
+
     // Static ----------------------------------------------------------------------------------------------------------
 
     static void handleSource(MetricSource source) {
@@ -92,6 +97,8 @@ public class DataBotTimerTask extends TimerTask {
     @Override
     public void run() {
 
+        executionCount ++;
+
         //
         // insure that each metric source is started; if not, start it and then collect metrics from it
         //
@@ -114,6 +121,11 @@ public class DataBotTimerTask extends TimerTask {
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    long getExecutionCount() {
+
+        return executionCount;
+    }
 
     // Private ---------------------------------------------------------------------------------------------------------
 

@@ -10,5 +10,7 @@ output:
 
 metrics:
   - PhysicalMemoryTotal
+  - CpuUserTime
+  - LoadAverageLastMinute
   - jmx://admin:admin123@localhost:9999/jboss.as:subsystem=messaging,hornetq-server=default,jms-queue=DLQ/messageCount
   - jbosscli://admin:admin123@localhost:9999/subsystem=messaging/hornetq-server=default/jms-queue=DLQ/message-count

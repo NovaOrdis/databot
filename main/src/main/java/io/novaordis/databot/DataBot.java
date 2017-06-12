@@ -18,6 +18,7 @@ package io.novaordis.databot;
 
 import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.events.api.event.Event;
+import io.novaordis.events.api.event.ShutdownEvent;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceRepository;
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The central instance of a data collector node (DataBot). This instance:
@@ -56,25 +58,23 @@ public class DataBot {
 
     private final Configuration configuration;
 
-    private final List<MetricSource> sources;
+    private volatile boolean started;
+
+    private final List<DataConsumer> consumers;
 
     //
     // the in-memory event queue. The data collection threads will independently read and convert the readings into
     // events, which will be placed into the queue. The consumers, either local file writers or network forwarders,
     // will pick up events from the queue and process/forward them.
     //
-
-    private final BlockingQueue<Event> events;
-
     private final int eventQueueSize;
+    private final BlockingQueue<Event> eventQueue;
 
-    private final List<DataConsumer> consumers;
+    private final List<MetricSource> sources;
 
     private final Timer timer;
 
     private final DataBotTimerTask timerTask;
-
-    private volatile boolean started;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -89,7 +89,7 @@ public class DataBot {
 
         this.eventQueueSize = configuration.getEventQueueSize();
 
-        this.events = new ArrayBlockingQueue<>(eventQueueSize);
+        this.eventQueue = new ArrayBlockingQueue<>(eventQueueSize);
 
         this.sources = new ArrayList<>();
 
@@ -134,7 +134,7 @@ public class DataBot {
 
         started = true;
 
-        throw new RuntimeException("NYE");
+        log.info(this + " started");
     }
 
     public synchronized boolean isStarted() {
@@ -144,7 +144,95 @@ public class DataBot {
 
     public synchronized void stop() {
 
-        throw new RuntimeException("NYE");
+        log.debug("stopping " + this);
+
+        //
+        // once we initiate the stop process, the instance will be stopped one way or another (clean or dirty).
+        //
+
+        started = false;
+
+        boolean clean = true;
+
+        //
+        // stop the timer
+        //
+
+        log.debug("stopping the timer ...");
+
+        timer.purge();
+        timer.cancel();
+
+        //
+        // stop metric sources
+        //
+
+        for(MetricSource s: sources) {
+
+            try {
+
+                log.debug("stopping " + s  + " ...");
+
+                s.stop();
+
+                log.debug(s + " stopped");
+            }
+            catch(Exception e) {
+
+                clean = false;
+
+                log.error("failed to cleanly stop " + s, e);
+            }
+        }
+
+        //
+        // send a shutdown event on the queue
+        //
+
+        try {
+
+            int offerTimeoutSecs = 5;
+
+            boolean shutdownSent = eventQueue.offer(new ShutdownEvent(), offerTimeoutSecs, TimeUnit.SECONDS);
+
+            if (!shutdownSent) {
+
+                clean = false;
+
+                log.error("failed to place a shutdown event on the event queue, timed out after " +
+                        offerTimeoutSecs + "seconds");
+            }
+        }
+        catch (InterruptedException e) {
+
+            clean = false;
+
+            log.debug("interrupted while attempting to place a shutdown event on the event queue");
+        }
+
+        //
+        // stop the data consumers
+        //
+
+        for(DataConsumer c: consumers) {
+
+            try {
+
+                log.debug("stopping " + c  + " ...");
+
+                c.stop();
+
+                log.debug(c + " stopped");
+            }
+            catch(Exception e) {
+
+                clean = false;
+
+                log.error("failed to cleanly stop " + c, e);
+            }
+        }
+
+        log.info(this + " stopped " + (clean ? "successfully" : "with errors"));
     }
 
     /**
@@ -170,7 +258,7 @@ public class DataBot {
      */
     int getEventCount() {
 
-        return events.size();
+        return eventQueue.size();
     }
 
     /**
@@ -186,7 +274,12 @@ public class DataBot {
      */
     BlockingQueue<Event> getEventQueue() {
 
-        return events;
+        return eventQueue;
+    }
+
+    long getTimerTaskExecutionCount() {
+
+        return timerTask.getExecutionCount();
     }
 
     // Protected -------------------------------------------------------------------------------------------------------
@@ -220,7 +313,7 @@ public class DataBot {
 
         for(DataConsumer c: configuration.getDataConsumers()) {
 
-            c.setEventQueue(events);
+            c.setEventQueue(eventQueue);
             consumers.add(c);
 
         }

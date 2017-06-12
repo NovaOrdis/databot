@@ -17,6 +17,8 @@
 package io.novaordis.databot;
 
 import io.novaordis.events.api.event.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.BlockingQueue;
 
@@ -28,9 +30,15 @@ public class MockDataConsumer implements DataConsumer {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
+    private static final Logger log = LoggerFactory.getLogger(MockDataConsumer.class);
+
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
+
+    private BlockingQueue<Event> eventQueue;
+
+    private boolean started;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -38,27 +46,38 @@ public class MockDataConsumer implements DataConsumer {
 
     @Override
     public void setEventQueue(BlockingQueue<Event> q) {
-        throw new RuntimeException("setEventQueue() NOT YET IMPLEMENTED");
+
+        this.eventQueue = q;
+
+        log.info(this + " was configured with an event queue " + q);
     }
 
     @Override
     public BlockingQueue<Event> getEventQueue() {
-        throw new RuntimeException("getEventQueue() NOT YET IMPLEMENTED");
+
+        return eventQueue;
     }
 
     @Override
     public void start() throws DataConsumerException {
-        throw new RuntimeException("start() NOT YET IMPLEMENTED");
+
+        started = true;
+
+        log.info(this + " was started");
     }
 
     @Override
     public boolean isStarted() {
-        throw new RuntimeException("isStarted() NOT YET IMPLEMENTED");
+
+        return started;
     }
 
     @Override
     public void stop() {
-        throw new RuntimeException("stop() NOT YET IMPLEMENTED");
+
+        started = false;
+
+        log.info(this + " was stopped");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
