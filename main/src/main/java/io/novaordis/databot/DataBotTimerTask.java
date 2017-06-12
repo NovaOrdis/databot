@@ -16,7 +16,7 @@
 
 package io.novaordis.databot;
 
-import io.novaordis.events.api.metric.MetricSource;
+import io.novaordis.events.api.metric.MetricDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,17 +43,87 @@ public class DataBotTimerTask extends TimerTask {
 
     // Static ----------------------------------------------------------------------------------------------------------
 
-    static void handleSource(MetricSource source) {
+    // Attributes ------------------------------------------------------------------------------------------------------
 
-        throw new RuntimeException("NYE");
+    private DataBot dataBot;
 
-//        List<MetricDefinition> metrics = conf.getMetricDefinitions();
+    // Constructors ----------------------------------------------------------------------------------------------------
+
+    public DataBotTimerTask(DataBot dataBot) {
+
+        this.dataBot = dataBot;
+    }
+
+    // TimerTask overrides ---------------------------------------------------------------------------------------------
+
+    @Override
+    public void run() {
+
+        executionCount ++;
+
+        List<MetricDefinition> metricDefinitions = dataBot.getConfiguration().getMetricDefinitions();
+
+
+        // TODO bw3s5fsf4
+
+        throw new RuntimeException("RETURN HERE");
+
+//        //
+//        // separate the metric definitions according their sources
+//        //
+//
+//        Map<Address, Set<MetricDefinition>> metricDefinitionsPerSourceAddress = new HashMap<>();
+//
+//        for(MetricDefinition md: metricDefinitions) {
+//
+//            Address a = md.getMetricSourceAddress();
+//
+//            Set<MetricDefinition> mds = metricDefinitionsPerSourceAddress.get(a);
+//
+//            if (mds == null) {
+//
+//                mds = new HashSet<>();
+//                metricDefinitionsPerSourceAddress.put(a, mds);
+//            }
+//
+//            mds.add(md);
+//        }
+//
+//        List<Property> properties = new ArrayList<>();
+//
+//        //
+//        // process metrics per source
+//        //
+//
+//        long readingBegins = System.currentTimeMillis();
+//
+//
+//        for(Address a: metricDefinitionsPerSourceAddress.keySet()) {
+//
+//            Set<Property> fromSource = collect(a, metricDefinitionsPerSourceAddress.get(a));
+//            properties.addAll(fromSource);
+//        }
+//
+//        long readingEnds = System.currentTimeMillis();
+//
+//        log.debug("reading complete in " + (readingEnds - readingBegins) + " ms");
+//
+//        //
+//        // create the timed event
+//        //
+//
+//        long t = readingBegins + (readingEnds - readingBegins) / 2;
+//
+//        // It is possible to get an empty property list. This happens when the underlying layer fails to take a
+//        // reading. The underlying layer warned already, so we just generate an empty event, it'll show up in the
+//        // data set.
+//
+//        TimedEvent te = new GenericTimedEvent(t, properties);
 //
 //        BlockingQueue<Event> eventQueue = dataBot.getEventQueue();
 //
 //        try {
 //
-//            TimedEvent te = dataCollector.read(metrics);
 //
 //            boolean sent = eventQueue.offer(te);
 //
@@ -77,43 +147,86 @@ public class DataBotTimerTask extends TimerTask {
 //            log.warn(message);
 //            log.debug(message, t);
 //        }
+
+
+
+
+//    List<Property> readMetrics(List<MetricDefinition> metricDefinitions) throws DataCollectionException {
+//
+//        Set<MetricSource> sources = establishSources(metricDefinitions);
+//
+//        if (debug) { log.debug("metric sources: " + sources); }
+//
+//        Set<Property> allProperties = new HashSet<>();
+//
+//        for(MetricSource source: sources) {
+//
+//            List<Property> props;
+//
+//            try {
+//
+//                //
+//                // optimization: collect all possible metrics in one go. It may return an empty list for some sources
+//                //
+//                props = source.collectMetrics(metricDefinitions);
+//            }
+//            catch(MetricException e) {
+//
+//                throw new DataCollectionException(e);
+//            }
+//
+//            allProperties.addAll(props);
+//        }
+//
+//        List<Property> properties = new ArrayList<>();
+//
+//        if (debug) { log.debug("metric definitions: " + metricDefinitions); }
+//
+//        metricLoop: for(MetricDefinition m: metricDefinitions) {
+//
+//            //noinspection Convert2streamapi
+//            for(Property p: allProperties) {
+//
+//                if (p.getName().equals(m.getId())) {
+//                    properties.add(p);
+//                    continue metricLoop;
+//                }
+//            }
+//
+//            //
+//            // this happens when the "bulk" metric collection for a source returns an empty list. Attempt collecting
+//            // the specific metric with its preferred source
+//            //
+//
+//            MetricSource preferredSource = m.getSource();
+//
+//            try {
+//
+//                List<Property> props = preferredSource.collectMetrics(Collections.singletonList(m));
+//
+//                //
+//                // because we're only passing one metric definition, we expect one property
+//                //
+//
+//                if (props.size() != 1) {
+//
+//                    throw new DataCollectionException(
+//                            m + " produced " + (props.size() == 0 ? "no" : props.size()) + " values");
+//                }
+//
+//                Property p = props.get(0);
+//                properties.add(p);
+//            }
+//            catch(MetricException e) {
+//
+//                throw new DataCollectionException(e);
+//            }
+//
+//        }
+//
+//        return properties;
 //    }
 
-    }
-
-    // Attributes ------------------------------------------------------------------------------------------------------
-
-    private DataBot dataBot;
-
-    // Constructors ----------------------------------------------------------------------------------------------------
-
-    public DataBotTimerTask(DataBot dataBot) {
-
-        this.dataBot = dataBot;
-    }
-
-    // TimerTask overrides ---------------------------------------------------------------------------------------------
-
-    @Override
-    public void run() {
-
-        executionCount ++;
-
-        //
-        // insure that each metric source is started; if not, start it and then collect metrics from it
-        //
-
-        List<MetricSource> sources = dataBot.getMetricSources();
-
-        //noinspection Convert2streamapi
-        for (MetricSource s : sources) {
-
-            //
-            // interact with source
-            //
-
-            handleSource(s);
-        }
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

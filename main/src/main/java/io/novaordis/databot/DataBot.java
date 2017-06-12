@@ -52,6 +52,8 @@ public class DataBot {
 
     private static final Logger log = LoggerFactory.getLogger(DataBot.class);
 
+    public static final String TIMER_THREAD_NAME = "DataBot Timer Thread";
+
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
@@ -249,6 +251,11 @@ public class DataBot {
     public List<DataConsumer> getDataConsumers() {
 
         return consumers;
+    }
+
+    public Configuration getConfiguration() {
+
+        return configuration;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

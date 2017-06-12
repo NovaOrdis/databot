@@ -21,7 +21,6 @@ import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricException;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceException;
-import io.novaordis.utilities.os.OS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +43,6 @@ public class MockMetricSource implements MetricSource {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private Map<OS, Map<MetricDefinition, Property>> bulkReadingsForOs;
     private Map<MetricDefinition, Property> readingsForMetrics;
 
     private boolean breakOnCollect;
@@ -55,7 +53,6 @@ public class MockMetricSource implements MetricSource {
 
     public MockMetricSource() {
 
-        bulkReadingsForOs = new HashMap<>();
         readingsForMetrics = new HashMap<>();
     }
 
@@ -111,21 +108,6 @@ public class MockMetricSource implements MetricSource {
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    public void addBulkReading(OS os, Property p) {
-
-        throw new RuntimeException("NYE");
-
-//        Map<MetricDefinition, Property> properties = bulkReadingsForOs.get(os);
-//
-//        if (properties == null) {
-//
-//            properties = new HashMap<>();
-//            bulkReadingsForOs.put(os, properties);
-//        }
-//
-//        properties.put(new MockMetricDefinition("mock"), p);
-    }
 
     public void addReadingForMetric(MetricDefinition d, Property p) {
 

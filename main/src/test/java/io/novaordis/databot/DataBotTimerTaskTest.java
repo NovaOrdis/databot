@@ -16,6 +16,7 @@
 
 package io.novaordis.databot;
 
+import io.novaordis.databot.configuration.MockConfiguration;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.metric.MetricDefinition;
 import org.junit.Test;
@@ -30,16 +31,17 @@ import java.util.concurrent.BlockingQueue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/29/16
  */
-public class DataCollectionTimerTaskTest {
+public class DataBotTimerTaskTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
-    private static final Logger log = LoggerFactory.getLogger(DataCollectionTimerTaskTest.class);
+    private static final Logger log = LoggerFactory.getLogger(DataBotTimerTaskTest.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -49,29 +51,46 @@ public class DataCollectionTimerTaskTest {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-//    @Test
-//    public void theTimerTaskDoesNotThrowUncheckedExceptions() throws Exception {
+    @Test
+    public void theTimerTaskDoesNotThrowUncheckedExceptions() throws Exception {
+
+        fail("RETURN HERE");
+
+//        MockConfiguration mc = new MockConfiguration();
+//        DataBot d = new DataBot(mc);
+//
+//
 //
 //        MockDataCollector mdc = new MockDataCollector();
 //        mdc.setBroken(true);
-//        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
 //
-//        DataBotTimerTask t = new DataBotTimerTask(null, mdc, metrics);
+//        MockMetricSource mms = new MockMetricSource();
+//        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition(mms, "mock-metric-definition"));
+//
+//
+//        DataBotTimerTask t = new DataBotTimerTask(d);
 //
 //        // this MUST NOT throw any exception
 //        t.run();
 //
 //        log.info("we're good");
-//    }
+    }
+
+    @Test
+    public void lifecycle() throws Exception {
+
+        fail("RETURN HERE");
+
+//        MockConfiguration mc = new MockConfiguration();
+//        DataBot d = new DataBot(mc);
 //
-//    @Test
-//    public void lifecycle() throws Exception {
 //
 //        MockDataCollector mdc = new MockDataCollector();
 //        BlockingQueue<Event> queue = new ArrayBlockingQueue<>(1);
-//        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
+//        MockMetricSource mms = new MockMetricSource();
+//        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition(mms, "mock-metric-definition"));
 //
-//        DataBotTimerTask t = new DataBotTimerTask(queue, mdc, metrics);
+//        DataBotTimerTask t = new DataBotTimerTask(d);
 //
 //        t.run();
 //
@@ -80,10 +99,16 @@ public class DataCollectionTimerTaskTest {
 //        MockTimedEvent mte = (MockTimedEvent)queue.take();
 //
 //        assertNotNull(mte);
-//    }
+    }
+
+    @Test
+    public void failureToOfferTheEventToTheQueue() throws Exception {
+
+        fail("RETURN HERE");
+
+//        MockConfiguration mc = new MockConfiguration();
+//        DataBot d = new DataBot(mc);
 //
-//    @Test
-//    public void failureToOfferTheEventToTheQueue() throws Exception {
 //
 //        MockDataCollector mdc = new MockDataCollector();
 //
@@ -91,9 +116,10 @@ public class DataCollectionTimerTaskTest {
 //        BlockingQueue<Event> queue = new ArrayBlockingQueue<>(1);
 //        assertTrue(queue.isEmpty());
 //
-//        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition());
+//        MockMetricSource mms = new MockMetricSource();
+//        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition(mms, "mock-metric-definition"));
 //
-//        DataBotTimerTask t = new DataBotTimerTask(queue, mdc, metrics);
+//        DataBotTimerTask t = new DataBotTimerTask(d);
 //
 //        t.run();
 //
@@ -106,7 +132,7 @@ public class DataCollectionTimerTaskTest {
 //        t.run();
 //
 //        log.info("we're good");
-//    }
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
