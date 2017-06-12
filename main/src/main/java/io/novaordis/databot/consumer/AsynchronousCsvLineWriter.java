@@ -69,8 +69,6 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
 
     private CsvOutputFormatter csvFormatter;
 
-    private boolean printHeader;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
     /**
@@ -89,7 +87,7 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
 
         this.outputFileName = outputFileName;
         this.append = append == null ? DEFAULT_APPEND : append;
-        this.printHeader = printHeader == null ? DEFAULT_PRINT_HEADER : printHeader;
+        boolean doPrintHeader = printHeader == null ? DEFAULT_PRINT_HEADER : printHeader;
 
         if (outputFileName == null) {
 
@@ -113,7 +111,7 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
 
         csvFormatter = new CsvOutputFormatter();
 
-        if (this.printHeader) {
+        if (doPrintHeader) {
 
             csvFormatter.setHeaderOn();
         }
