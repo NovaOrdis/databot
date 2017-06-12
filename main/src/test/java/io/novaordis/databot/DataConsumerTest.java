@@ -16,15 +16,17 @@
 
 package io.novaordis.databot;
 
-import io.novaordis.events.api.event.Event;
+import org.junit.Test;
 
-import java.util.concurrent.BlockingQueue;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 6/11/17
  */
-public class MockDataConsumer implements DataConsumer {
+public abstract class DataConsumerTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -34,38 +36,34 @@ public class MockDataConsumer implements DataConsumer {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // DataConsumer implementation -------------------------------------------------------------------------------------
-
-    @Override
-    public void setEventQueue(BlockingQueue<Event> q) {
-        throw new RuntimeException("setEventQueue() NOT YET IMPLEMENTED");
-    }
-
-    @Override
-    public BlockingQueue<Event> getEventQueue() {
-        throw new RuntimeException("getEventQueue() NOT YET IMPLEMENTED");
-    }
-
-    @Override
-    public void start() throws DataConsumerException {
-        throw new RuntimeException("start() NOT YET IMPLEMENTED");
-    }
-
-    @Override
-    public boolean isStarted() {
-        throw new RuntimeException("isStarted() NOT YET IMPLEMENTED");
-    }
-
-    @Override
-    public void stop() {
-        throw new RuntimeException("stop() NOT YET IMPLEMENTED");
-    }
-
     // Public ----------------------------------------------------------------------------------------------------------
+
+    // Tests -----------------------------------------------------------------------------------------------------------
+
+    @Test
+    public void start_NoEventQueue() throws Exception {
+
+        DataConsumer c = getDataConsumerToTest();
+
+        assertNull(c.getEventQueue());
+
+        try {
+
+            c.start();
+            fail("should have thrown exception");
+        }
+        catch(IllegalStateException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("null event queue"));
+        }
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    protected abstract DataConsumer getDataConsumerToTest() throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

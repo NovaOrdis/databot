@@ -146,7 +146,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
             try {
 
-                AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(outputFileName, append);
+                AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(outputFileName, append, null);
                 addDataConsumer(w);
             }
             catch(DataConsumerException e) {
@@ -174,6 +174,12 @@ public class YamlConfigurationFile extends ConfigurationBase {
                 addMetricDefinition(md);
             }
         }
+
+        //
+        // we capture the metric order, to be later reflected in output
+        //
+
+        captureMetricOrder();
     }
 
     // Protected -------------------------------------------------------------------------------------------------------

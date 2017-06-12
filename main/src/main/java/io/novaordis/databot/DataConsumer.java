@@ -16,6 +16,10 @@
 
 package io.novaordis.databot;
 
+import io.novaordis.events.api.event.Event;
+
+import java.util.concurrent.BlockingQueue;
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 6/11/17
@@ -28,10 +32,24 @@ public interface DataConsumer {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
+    /**
+     * The queue to consume events from.
+     */
+    void setEventQueue(BlockingQueue<Event> q);
+
+    /**
+     * The queue to consume events from.
+     */
+    BlockingQueue<Event> getEventQueue();
+
     //
     // lifecycle methods -----------------------------------------------------------------------------------------------
     //
 
+    /**
+     * @throws DataConsumerException
+     * @throws IllegalStateException if the instance was not properly configured before start
+     */
     void start() throws DataConsumerException;
 
     boolean isStarted();

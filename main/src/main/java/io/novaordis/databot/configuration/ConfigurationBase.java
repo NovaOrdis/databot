@@ -17,6 +17,8 @@
 package io.novaordis.databot.configuration;
 
 import io.novaordis.databot.DataConsumer;
+import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
+import io.novaordis.events.api.measure.PercentageArithmeticException;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceRepository;
@@ -30,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -205,6 +208,32 @@ public abstract class ConfigurationBase implements Configuration {
     protected void setEventQueueSize(int i) {
 
         this.eventQueueSize = i;
+    }
+
+    /**
+     * This is a method to be invoked by subclasses after at the end of the load() method after both the data consumers
+     * and the metrics have been parsed, and it is intended to capture the metric order, to be later reflected in
+     * data consumer output.
+     */
+    protected void captureMetricOrder() {
+
+        if (metricDefinitions.isEmpty()) {
+
+            return;
+        }
+
+        if (dataConsumers.isEmpty()) {
+
+            return;
+        }
+
+        for(DataConsumer c: dataConsumers) {
+
+            if (c instanceof AsynchronousCsvLineWriter) {
+
+                ((AsynchronousCsvLineWriter)c).setFieldOrder(metricDefinitions);
+            }
+        }
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

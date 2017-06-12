@@ -137,7 +137,7 @@ public class PropertiesConfigurationFile extends ConfigurationBase {
 
         try {
 
-            AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(outputFileName, append);
+            AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(outputFileName, append, null);
             addDataConsumer(w);
 
         }
@@ -168,6 +168,12 @@ public class PropertiesConfigurationFile extends ConfigurationBase {
                 }
             }
         }
+
+        //
+        // we capture the metric order, to be later reflected in output
+        //
+
+        captureMetricOrder();
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

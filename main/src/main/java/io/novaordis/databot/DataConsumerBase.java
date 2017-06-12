@@ -24,7 +24,7 @@ import java.util.concurrent.BlockingQueue;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 6/11/17
  */
-public class MockDataConsumer implements DataConsumer {
+public abstract class DataConsumerBase implements DataConsumer {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -32,33 +32,32 @@ public class MockDataConsumer implements DataConsumer {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    private BlockingQueue<Event> eventQueue;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     // DataConsumer implementation -------------------------------------------------------------------------------------
 
     @Override
-    public void setEventQueue(BlockingQueue<Event> q) {
-        throw new RuntimeException("setEventQueue() NOT YET IMPLEMENTED");
-    }
-
-    @Override
     public BlockingQueue<Event> getEventQueue() {
-        throw new RuntimeException("getEventQueue() NOT YET IMPLEMENTED");
+
+        return eventQueue;
     }
 
     @Override
-    public void start() throws DataConsumerException {
-        throw new RuntimeException("start() NOT YET IMPLEMENTED");
+    public void setEventQueue(BlockingQueue<Event> q) {
+
+        this.eventQueue = q;
     }
 
     @Override
-    public boolean isStarted() {
-        throw new RuntimeException("isStarted() NOT YET IMPLEMENTED");
-    }
+    public synchronized void start() throws DataConsumerException {
 
-    @Override
-    public void stop() {
-        throw new RuntimeException("stop() NOT YET IMPLEMENTED");
+        if (eventQueue == null) {
+
+            throw new IllegalStateException(
+                    "null event queue, " + this + " was not properly configured before starting");
+        }
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

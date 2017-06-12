@@ -17,7 +17,6 @@
 package io.novaordis.databot;
 
 import io.novaordis.databot.configuration.Configuration;
-import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceRepository;
@@ -216,16 +215,15 @@ public class DataBot {
         }
 
         //
-        // create consumers:
+        // initialize data consumers
         //
 
-        //
-        // the event writer
-        //
+        for(DataConsumer c: configuration.getDataConsumers()) {
 
-        AsynchronousCsvLineWriter csvWriter = new AsynchronousCsvLineWriter(events, configuration);
+            c.setEventQueue(events);
+            consumers.add(c);
 
-        consumers.add(csvWriter);
+        }
     }
 
     // Private ---------------------------------------------------------------------------------------------------------
