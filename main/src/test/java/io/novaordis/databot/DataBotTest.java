@@ -21,17 +21,23 @@ import io.novaordis.databot.configuration.DefaultConfiguration;
 import io.novaordis.databot.configuration.MockConfiguration;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.metric.MetricSource;
-import io.novaordis.events.api.metric.MetricSourceRepository;
-import io.novaordis.events.api.metric.MetricSourceRepositoryImpl;
+import io.novaordis.events.api.metric.MetricSourceFactoryImpl;
 import io.novaordis.events.api.metric.jboss.JBossController;
 import io.novaordis.events.api.metric.jmx.JmxBus;
 import io.novaordis.events.api.metric.os.LocalOS;
 import io.novaordis.events.api.metric.os.RemoteOS;
+import io.novaordis.jboss.cli.model.JBossControllerAddress;
+import io.novaordis.utilities.address.Address;
+import io.novaordis.utilities.address.AddressImpl;
+import io.novaordis.utilities.address.LocalOSAddress;
+import io.novaordis.utilities.address.OSAddressImpl;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
 import static org.junit.Assert.assertEquals;
@@ -88,7 +94,7 @@ public class DataBotTest {
 
         assertFalse(d.isStarted());
 
-        List<MetricSource> sources = d.getMetricSources();
+        Set<MetricSource> sources = d.getMetricSources();
         assertTrue(sources.isEmpty());
 
         List<DataConsumer> consumers = d.getDataConsumers();
@@ -104,12 +110,12 @@ public class DataBotTest {
 
         int eventQueueSize = 7;
 
-        MetricSourceRepository r = new MetricSourceRepositoryImpl();
+        Set<Address> metricSourceAddresses = new HashSet<>();
 
-        r.add(new LocalOS());
-        r.add(new RemoteOS("ssh://mock-remote-ssh-server/"));
-        r.add(new JmxBus("jmx://mock-remote-jmx-bus/"));
-        r.add(new JBossController("jbosscli://mock-remote-jboss-controller/"));
+        metricSourceAddresses.add(new LocalOSAddress());
+        metricSourceAddresses.add(new OSAddressImpl("ssh://mock-remote-ssh-server/"));
+        metricSourceAddresses.add(new AddressImpl("jmx://mock-remote-jmx-bus/"));
+        metricSourceAddresses.add(new JBossControllerAddress("jbosscli://mock-remote-jboss-controller/"));
 
         MockDataConsumer mdc = new MockDataConsumer();
         MockDataConsumer mdc2 = new MockDataConsumer();
@@ -119,7 +125,7 @@ public class DataBotTest {
 
         MockConfiguration mc = new MockConfiguration();
         mc.setEventQueueSize(eventQueueSize);
-        mc.setMetricSourceRepository(r);
+        mc.setMetricSourceAddresses(metricSourceAddresses);
         mc.setDataConsumers(dataConsumers);
 
         //
@@ -133,7 +139,7 @@ public class DataBotTest {
 
         assertFalse(d.isStarted());
 
-        List<MetricSource> sources = d.getMetricSources();
+        Set<MetricSource> sources = d.getMetricSources();
 
         assertEquals(4, sources.size());
 
@@ -166,21 +172,29 @@ public class DataBotTest {
     @Test
     public void lifecycle() throws Exception {
 
-        MockMetricSource ms = new MockMetricSource();
+        AddressImpl sourceAddress = new AddressImpl("mock-host");
+
         MockDataConsumer mdc = new MockDataConsumer();
 
-        MetricSourceRepository r = new MetricSourceRepositoryImpl();
-        r.add(ms);
+        Set<Address> addresses = new HashSet<>();
+        addresses.add(sourceAddress);
 
         MockConfiguration mc = new MockConfiguration();
 
-        mc.setMetricSourceRepository(r);
+        mc.setMetricSourceAddresses(addresses);
         mc.setDataConsumers(Collections.singletonList(mdc));
         mc.setSamplingIntervalSec(1);
+
+        mc.setMetricSourceFactory(new MockMetricSourceFactory());
 
         DataBot d = new DataBot(mc);
 
         assertFalse(d.isStarted());
+
+        Set<MetricSource> sources = d.getMetricSources();
+        assertEquals(1, sources.size());
+        MockMetricSource source = (MockMetricSource)sources.iterator().next();
+        assertEquals(sourceAddress, source.getAddress());
 
         List<DataConsumer> consumers = d.getDataConsumers();
         assertEquals(1, consumers.size());
@@ -192,7 +206,7 @@ public class DataBotTest {
 
         assertTrue(d.isStarted());
 
-        List<MetricSource> sources = d.getMetricSources();
+        sources = d.getMetricSources();
 
         //
         // sources are not started at this time, they will be started on the next timer run

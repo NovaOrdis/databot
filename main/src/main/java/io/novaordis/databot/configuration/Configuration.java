@@ -18,9 +18,12 @@ package io.novaordis.databot.configuration;
 
 import io.novaordis.databot.DataConsumer;
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.MetricSourceFactory;
 import io.novaordis.events.api.metric.MetricSourceRepository;
+import io.novaordis.utilities.address.Address;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * The command line/configuration file configuration.
@@ -64,12 +67,18 @@ public interface Configuration {
      */
     List<MetricDefinition> getMetricDefinitions();
 
-    MetricSourceRepository getMetricSourceRepository();
+    Set<Address> getMetricSourceAddresses();
 
     /**
      * @return the data consumers to consume the events. Order is important, the data consumers should be returned in
      * the order in which they were declared in the external configuration.
      */
     List<DataConsumer> getDataConsumers();
+
+    /**
+     * May return null, which means that no special metric source factory is configured, and the DataBot instance will
+     * use the default, internal factory.
+     */
+    MetricSourceFactory getMetricSourceFactory();
 
 }

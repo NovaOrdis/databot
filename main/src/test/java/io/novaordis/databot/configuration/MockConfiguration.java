@@ -18,12 +18,13 @@ package io.novaordis.databot.configuration;
 
 import io.novaordis.databot.DataConsumer;
 import io.novaordis.events.api.metric.MetricDefinition;
-import io.novaordis.events.api.metric.MetricSource;
-import io.novaordis.events.api.metric.MetricSourceRepository;
+import io.novaordis.events.api.metric.MetricSourceFactory;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.address.Address;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -77,16 +78,16 @@ public class MockConfiguration extends ConfigurationBase {
         super.addMetricDefinition(md);
     }
 
-    public void setMetricSourceRepository(MetricSourceRepository r) {
+    public void setMetricSourceAddresses(Set<Address> addresses) {
 
         //
-        // we're not actually replacing the repository, but we transfer the content
+        // we're not actually replacing the set, but we transfer the content
         //
 
         //noinspection Convert2streamapi
-        for(MetricSource s: r.getSources()) {
+        for(Address a : addresses) {
 
-            addMetricSource(s);
+            addMetricSourceAddress(a);
         }
     }
 
@@ -101,6 +102,12 @@ public class MockConfiguration extends ConfigurationBase {
 
             addDataConsumer(d);
         }
+    }
+
+    @Override
+    public void setMetricSourceFactory(MetricSourceFactory f) {
+
+        super.setMetricSourceFactory(f);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

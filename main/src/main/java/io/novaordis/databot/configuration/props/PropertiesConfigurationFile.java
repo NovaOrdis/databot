@@ -231,11 +231,11 @@ public class PropertiesConfigurationFile extends ConfigurationBase {
 
                 try {
 
-                    MetricDefinition md = MetricDefinitionParser.parse(null, mds);
+                    MetricDefinition md = MetricDefinitionParser.parse(mds);
 
                     addMetricDefinition(md);
                 }
-                catch(MetricDefinitionException e) {
+                catch(Exception e) {
 
                     throw new UserErrorException(e);
                 }

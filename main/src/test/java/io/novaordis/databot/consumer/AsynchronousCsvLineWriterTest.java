@@ -20,7 +20,6 @@ import io.novaordis.databot.DataConsumer;
 import io.novaordis.databot.DataConsumerTest;
 import io.novaordis.databot.MockEvent;
 import io.novaordis.databot.MockMetricDefinition;
-import io.novaordis.databot.MockMetricSource;
 import io.novaordis.databot.MockPrintStream;
 import io.novaordis.databot.MockProperty;
 import io.novaordis.databot.MockTimedEvent;
@@ -29,6 +28,7 @@ import io.novaordis.events.api.event.GenericTimedEvent;
 import io.novaordis.events.api.event.ShutdownEvent;
 import io.novaordis.events.core.CsvOutputFormatter;
 import io.novaordis.utilities.Files;
+import io.novaordis.utilities.address.AddressImpl;
 import org.junit.After;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -460,13 +460,13 @@ public class AsynchronousCsvLineWriterTest extends DataConsumerTest {
     @Test
     public void write() throws Exception {
 
-        MockMetricSource ms = new MockMetricSource();
+        AddressImpl sourceAddress = new AddressImpl("mock-host");
 
         String metricDefinitionId = "Z";
         String metricDefinitionId2 = "A";
 
-        MockMetricDefinition md = new MockMetricDefinition(ms, metricDefinitionId);
-        MockMetricDefinition md2 = new MockMetricDefinition(ms, metricDefinitionId2);
+        MockMetricDefinition md = new MockMetricDefinition(sourceAddress, metricDefinitionId);
+        MockMetricDefinition md2 = new MockMetricDefinition(sourceAddress, metricDefinitionId2);
 
         MockPrintStream mps = new MockPrintStream();
 

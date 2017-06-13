@@ -20,7 +20,12 @@ import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.ShutdownEvent;
 import io.novaordis.events.api.metric.MetricSource;
+import io.novaordis.events.api.metric.MetricSourceException;
+import io.novaordis.events.api.metric.MetricSourceFactory;
+import io.novaordis.events.api.metric.MetricSourceFactoryImpl;
 import io.novaordis.events.api.metric.MetricSourceRepository;
+import io.novaordis.events.api.metric.MetricSourceRepositoryImpl;
+import io.novaordis.utilities.address.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +77,9 @@ public class DataBot {
     private final int eventQueueSize;
     private final BlockingQueue<Event> eventQueue;
 
-    private final List<MetricSource> sources;
+    private final MetricSourceFactory sourceFactory;
+
+    private final MetricSourceRepository sources;
 
     private final Timer timer;
 
@@ -93,7 +100,12 @@ public class DataBot {
 
         this.eventQueue = new ArrayBlockingQueue<>(eventQueueSize);
 
-        this.sources = new ArrayList<>();
+        this.sourceFactory =
+                configuration.getMetricSourceFactory() != null ?
+                        configuration.getMetricSourceFactory() :
+                        new MetricSourceFactoryImpl();
+
+        this.sources = new MetricSourceRepositoryImpl();
 
         this.consumers = new ArrayList<>();
 
@@ -103,7 +115,18 @@ public class DataBot {
 
         this.started = false;
 
-        initialize();
+        try {
+
+            //
+            // any errors at this stage will stop the boot process
+            //
+
+            initialize();
+        }
+        catch(Exception e) {
+
+            throw new DataBotException(e);
+        }
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
@@ -160,7 +183,7 @@ public class DataBot {
         // stop the timer
         //
 
-        log.debug("stopping the timer ...");
+        log.debug("stopping the timer " + timer + " ...");
 
         timer.purge();
         timer.cancel();
@@ -169,7 +192,7 @@ public class DataBot {
         // stop metric sources
         //
 
-        for(MetricSource s: sources) {
+        for(MetricSource s: sources.getSources()) {
 
             try {
 
@@ -237,12 +260,14 @@ public class DataBot {
         log.info(this + " stopped " + (clean ? "successfully" : "with errors"));
     }
 
-    /**
-     * @return the underlying storage, so handle with care.
-     */
-    public List<MetricSource> getMetricSources() {
+    public Set<MetricSource> getMetricSources() {
 
-        return sources;
+        return sources.getSources();
+    }
+
+    public MetricSourceFactory getMetricSourceFactory() {
+
+        return sourceFactory;
     }
 
     /**
@@ -292,25 +317,30 @@ public class DataBot {
     // Protected -------------------------------------------------------------------------------------------------------
 
     /**
-     * Create active instances (sources, consumers) but do not start them.
+     * Create active instances (sources, consumers) but do not start them. The method will fail with a checked
+     * exception, with the intention of starting the boot process, in case a metric source address is incorrectly
+     * specified. Note that the metric source does not have to be accessible, as we we don't attempt to connect
+     * yet, but all addresses must be syntactically correct at initialization.
      */
-    void initialize() throws DataConsumerException {
+    void initialize() throws MetricSourceException, DataConsumerException {
 
         //
-        // get the sources from configuration and copy their references locally
+        // get the source addresses from configuration and initialize the corresponding metric sources, but do
+        // not start them yet.
         //
 
-        MetricSourceRepository sourceRepository = configuration.getMetricSourceRepository();
+        Set<Address> addresses = configuration.getMetricSourceAddresses();
 
-        Set<MetricSource> configSources = sourceRepository.getSources();
+        for(Address a: addresses) {
 
-        //
-        // this is where we may enforce a specific order, if we wanted it
-        //
+            //
+            // create the metric source; this is where we may enforce a specific order, if we wanted it
+            //
 
-        for(MetricSource s: configSources) {
+            MetricSource s = sourceFactory.buildMetricSource(a);
 
             log.debug("registering metric source " + s);
+
             this.sources.add(s);
         }
 

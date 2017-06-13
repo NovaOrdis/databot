@@ -21,6 +21,7 @@ import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricException;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceException;
+import io.novaordis.utilities.address.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,23 +50,33 @@ public class MockMetricSource implements MetricSource {
 
     private boolean started;
 
+    private Address address;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     public MockMetricSource() {
 
+        this(null);
+    }
+
+    public MockMetricSource(Address a) {
+
         readingsForMetrics = new HashMap<>();
+        this.address = a;
     }
 
     // MetricSource implementation -------------------------------------------------------------------------------------
 
     @Override
-    public String getAddress() {
-        throw new RuntimeException("getAddress() NOT YET IMPLEMENTED");
+    public Address getAddress() {
+
+        return address;
     }
 
     @Override
-    public boolean hasAddress(String address) {
-        throw new RuntimeException("hasAddress() NOT YET IMPLEMENTED");
+    public boolean hasAddress(Address address) {
+
+        return this.address != null && this.address.equals(address);
     }
 
     @Override
@@ -90,7 +101,7 @@ public class MockMetricSource implements MetricSource {
 
         started = true;
 
-        log.info(this + " started");
+        log.info(this + " was started");
     }
 
     @Override
@@ -104,7 +115,7 @@ public class MockMetricSource implements MetricSource {
 
         started = false;
 
-        log.info(this + " stopped");
+        log.info(this + " was stopped");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

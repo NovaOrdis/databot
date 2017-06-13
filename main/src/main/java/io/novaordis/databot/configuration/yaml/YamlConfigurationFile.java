@@ -20,9 +20,7 @@ import io.novaordis.databot.DataConsumerException;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.databot.configuration.ConfigurationBase;
-import io.novaordis.events.api.metric.MetricDefinitionException;
 import io.novaordis.events.api.metric.MetricDefinitionParser;
-import io.novaordis.events.api.metric.MetricSourceRepository;
 import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,11 +164,9 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
             List list = (List)o;
 
-            MetricSourceRepository mr = getMetricSourceRepository();
-
             for(Object le: list) {
 
-                MetricDefinition md = toMetricDefinition(mr, le);
+                MetricDefinition md = toMetricDefinition(le);
                 addMetricDefinition(md);
             }
         }
@@ -184,8 +180,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
     // Protected -------------------------------------------------------------------------------------------------------
 
-    protected static MetricDefinition toMetricDefinition(MetricSourceRepository sourceRepository, Object o)
-            throws UserErrorException {
+    protected static MetricDefinition toMetricDefinition(Object o) throws UserErrorException {
 
         if (o == null) {
 
@@ -203,9 +198,9 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
         try {
 
-            md = MetricDefinitionParser.parse(sourceRepository, tok);
+            md = MetricDefinitionParser.parse(tok);
         }
-        catch (MetricDefinitionException e) {
+        catch (Exception e) {
 
             throw new UserErrorException(e);
         }

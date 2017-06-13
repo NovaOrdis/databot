@@ -19,19 +19,18 @@ package io.novaordis.databot.configuration;
 import io.novaordis.databot.DataConsumer;
 import io.novaordis.databot.MockDataConsumer;
 import io.novaordis.databot.MockMetricDefinition;
-import io.novaordis.databot.MockMetricSource;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
-import io.novaordis.events.api.metric.MetricSourceRepository;
 import io.novaordis.events.api.metric.jboss.JBossCliMetricDefinition;
-import io.novaordis.events.api.metric.jboss.JBossController;
-import io.novaordis.events.api.metric.jmx.JmxBus;
 import io.novaordis.events.api.metric.jmx.JmxMetricDefinition;
-import io.novaordis.events.api.metric.os.LocalOS;
 import io.novaordis.events.api.metric.os.mdefs.CpuUserTime;
 import io.novaordis.events.api.metric.os.mdefs.LoadAverageLastMinute;
 import io.novaordis.events.api.metric.os.mdefs.PhysicalMemoryTotal;
+import io.novaordis.jboss.cli.model.JBossControllerAddress;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.address.Address;
+import io.novaordis.utilities.address.AddressImpl;
+import io.novaordis.utilities.address.LocalOSAddress;
 import org.junit.Test;
 
 import java.io.File;
@@ -126,41 +125,34 @@ public abstract class ConfigurationTest {
 
         PhysicalMemoryTotal m = (PhysicalMemoryTotal)metrics.get(0);
         assertNotNull(m);
-        assertEquals(new LocalOS(), m.getSource());
+        assertEquals(new LocalOSAddress(), m.getMetricSourceAddress());
 
         CpuUserTime m2 = (CpuUserTime)metrics.get(1);
         assertNotNull(m2);
-        assertEquals(new LocalOS(), m2.getSource());
+        assertEquals(new LocalOSAddress(), m2.getMetricSourceAddress());
 
         LoadAverageLastMinute m3 = (LoadAverageLastMinute)metrics.get(2);
         assertNotNull(m3);
-        assertEquals(new LocalOS(), m3.getSource());
+        assertEquals(new LocalOSAddress(), m3.getMetricSourceAddress());
 
         JmxMetricDefinition m4 = (JmxMetricDefinition)metrics.get(3);
         assertNotNull(m4);
         assertEquals("jboss.as:subsystem=messaging,hornetq-server=default,jms-queue=DLQ/messageCount", m4.getLabel());
+        assertEquals(new AddressImpl("jmx", "admin", null, "localhost", 9999), m4.getMetricSourceAddress());
 
         JBossCliMetricDefinition m5 = (JBossCliMetricDefinition)metrics.get(4);
         assertNotNull(m5);
         assertEquals("/subsystem=messaging/hornetq-server=default/jms-queue=DLQ/message-count", m5.getLabel());
+        assertTrue(new JBossControllerAddress("admin", null, "localhost", 9999).equals(m5.getMetricSourceAddress()));
 
-        MetricSourceRepository mr = c.getMetricSourceRepository();
-        assertNotNull(mr);
+        Set<Address> addresses = c.getMetricSourceAddresses();
+        assertNotNull(addresses);
 
-        Set<LocalOS> localOSes = mr.getSources(LocalOS.class);
-        assertEquals(1, localOSes.size());
-        assertTrue(localOSes.contains(new LocalOS()));
+        assertEquals(3, addresses.size());
 
-        Set<JmxBus> jmxBuses = mr.getSources(JmxBus.class);
-        assertEquals(1, jmxBuses.size());
-        JmxBus jmxBus = jmxBuses.iterator().next();
-        assertEquals("admin@localhost:9999", jmxBus.getAddress());
-
-        Set<JBossController> jbossControllers = mr.getSources(JBossController.class);
-        assertEquals(1, jbossControllers.size());
-        JBossController jbossController = jbossControllers.iterator().next();
-        assertEquals("admin@localhost:9999", jbossController.getAddress());
-
+        assertTrue(addresses.contains(new LocalOSAddress()));
+        assertTrue(addresses.contains(new AddressImpl("jmx", "admin", null, "localhost", 9999)));
+        assertTrue(addresses.contains(new JBossControllerAddress("admin", null, "localhost", 9999)));
 
         //
         // data consumers
@@ -188,7 +180,7 @@ public abstract class ConfigurationTest {
 
         assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingIntervalSec());
         assertEquals(Configuration.DEFAULT_EVENT_QUEUE_SIZE, c.getEventQueueSize());
-        assertTrue(c.getMetricSourceRepository().isEmpty());
+        assertTrue(c.getMetricSourceAddresses().isEmpty());
         assertTrue(c.getMetricDefinitions().isEmpty());
         assertTrue(c.getDataConsumers().isEmpty());
     }
@@ -201,11 +193,11 @@ public abstract class ConfigurationTest {
         ConfigurationBase c = (ConfigurationBase)getConfigurationToTest(false, null);
 
         assertTrue(c.getMetricDefinitions().isEmpty());
-        assertTrue(c.getMetricSourceRepository().isEmpty());
+        assertTrue(c.getMetricSourceAddresses().isEmpty());
 
-        MockMetricSource ms = new MockMetricSource();
+        AddressImpl a = new AddressImpl("mock-host");
 
-        MockMetricDefinition md = new MockMetricDefinition(ms, "mock");
+        MockMetricDefinition md = new MockMetricDefinition(a, "mock");
 
         c.addMetricDefinition(md);
 
@@ -213,11 +205,11 @@ public abstract class ConfigurationTest {
         assertEquals(1, mds.size());
         assertTrue(mds.contains(md));
 
-        Set<MockMetricSource> mss = c.getMetricSourceRepository().getSources(MockMetricSource.class);
+        Set<Address> mss = c.getMetricSourceAddresses();
         assertEquals(1, mss.size());
-        assertTrue(mss.contains(ms));
+        assertTrue(mss.contains(md.getMetricSourceAddress()));
 
-        MockMetricDefinition md2 = new MockMetricDefinition(ms, "mock-2");
+        MockMetricDefinition md2 = new MockMetricDefinition(a, "mock-2");
 
         c.addMetricDefinition(md2);
 
@@ -226,10 +218,9 @@ public abstract class ConfigurationTest {
         assertEquals(mds.get(0), md);
         assertEquals(mds.get(1), md2);
 
-        mss = c.getMetricSourceRepository().getSources(MockMetricSource.class);
+        mss = c.getMetricSourceAddresses();
         assertEquals(1, mss.size());
-        assertTrue(mss.contains(ms));
-
+        assertTrue(mss.contains(a));
     }
 
     // addDataConsumer() -----------------------------------------------------------------------------------------------

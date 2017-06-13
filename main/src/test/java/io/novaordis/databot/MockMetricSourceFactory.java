@@ -16,77 +16,34 @@
 
 package io.novaordis.databot;
 
-import io.novaordis.events.api.event.Event;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.BlockingQueue;
+import io.novaordis.events.api.metric.MetricSource;
+import io.novaordis.events.api.metric.MetricSourceException;
+import io.novaordis.events.api.metric.MetricSourceFactory;
+import io.novaordis.utilities.address.Address;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 6/11/17
+ * @since 6/13/17
  */
-public class MockDataConsumer implements DataConsumer {
+public class MockMetricSourceFactory implements MetricSourceFactory {
 
     // Constants -------------------------------------------------------------------------------------------------------
-
-    private static final Logger log = LoggerFactory.getLogger(MockDataConsumer.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private BlockingQueue<Event> eventQueue;
-
-    private boolean started;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // DataConsumer implementation -------------------------------------------------------------------------------------
+    // MetricSourceFactory implementation ------------------------------------------------------------------------------
 
     @Override
-    public void setEventQueue(BlockingQueue<Event> q) {
+    public MetricSource buildMetricSource(Address a) throws MetricSourceException {
 
-        this.eventQueue = q;
-
-        log.info(this + " was configured with an event queue " + q);
-    }
-
-    @Override
-    public BlockingQueue<Event> getEventQueue() {
-
-        return eventQueue;
-    }
-
-    @Override
-    public void start() throws DataConsumerException {
-
-        started = true;
-
-        log.info(this + " was started");
-    }
-
-    @Override
-    public boolean isStarted() {
-
-        return started;
-    }
-
-    @Override
-    public void stop() {
-
-        started = false;
-
-        log.info(this + " was stopped");
+        return new MockMetricSource(a);
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
-
-    @Override
-    public String toString() {
-
-        return "MockDataConsumer[" + Integer.toHexString(System.identityHashCode(this)) + "]";
-    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

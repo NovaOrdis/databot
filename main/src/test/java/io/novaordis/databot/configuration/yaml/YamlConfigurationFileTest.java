@@ -21,9 +21,9 @@ import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.configuration.ConfigurationTest;
-import io.novaordis.events.api.metric.MetricSourceRepository;
-import io.novaordis.events.api.metric.os.LocalOS;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.address.Address;
+import io.novaordis.utilities.address.LocalOSAddress;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -147,8 +147,8 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
 
         YamlConfigurationFile c = new YamlConfigurationFile(true, null);
 
-        MetricSourceRepository mr = c.getMetricSourceRepository();
-        assertTrue(mr.isEmpty());
+        Set<Address> addresses = c.getMetricSourceAddresses();
+        assertTrue(addresses.isEmpty());
 
         String s = "output:\n" +
                 "  file: something\n" +
@@ -195,8 +195,8 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
 
         YamlConfigurationFile c = new YamlConfigurationFile(true, null);
 
-        MetricSourceRepository mr = c.getMetricSourceRepository();
-        assertTrue(mr.isEmpty());
+        Set<Address> addresses = c.getMetricSourceAddresses();
+        assertTrue(addresses.isEmpty());
 
         String s =
                 "output:\n" +
@@ -220,9 +220,9 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
         MetricDefinition md3 = mds.get(2);
         assertEquals("LoadAverageLastMinute", md3.getId());
 
-        Set<LocalOS> localOSes = mr.getSources(LocalOS.class);
-        assertEquals(1, localOSes.size());
-        assertTrue(localOSes.contains(new LocalOS()));
+        addresses = c.getMetricSourceAddresses();
+        assertEquals(1, addresses.size());
+        assertTrue(addresses.contains(new LocalOSAddress()));
     }
 
     // toMetricDefinition() --------------------------------------------------------------------------------------------
@@ -233,7 +233,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
 
         try {
 
-            YamlConfigurationFile.toMetricDefinition(null, null);
+            YamlConfigurationFile.toMetricDefinition(null);
             fail("should have thrown exception");
         }
         catch(IllegalArgumentException e) {
@@ -246,7 +246,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     @Test
     public void toMetricDefinition() throws Exception {
 
-        MetricDefinition md = YamlConfigurationFile.toMetricDefinition(null, "PhysicalMemoryTotal");
+        MetricDefinition md = YamlConfigurationFile.toMetricDefinition("PhysicalMemoryTotal");
         assertEquals("PhysicalMemoryTotal", md.getId());
     }
 

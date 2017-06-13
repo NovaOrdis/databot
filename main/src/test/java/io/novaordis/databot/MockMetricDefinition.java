@@ -16,7 +16,7 @@
 
 package io.novaordis.databot;
 
-import io.novaordis.events.api.metric.MetricSource;
+import io.novaordis.utilities.address.Address;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -35,11 +35,11 @@ public class MockMetricDefinition extends MockMetricDefinitionBase {
     // Constructors ----------------------------------------------------------------------------------------------------
 
     /**
-     * @param source must always have a non-null source.
+     * @param sourceAddress must always have a non-null source.
      */
-    public MockMetricDefinition(MetricSource source, String id) {
+    public MockMetricDefinition(Address sourceAddress, String id) {
 
-        super(source);
+        super(sourceAddress);
         setId(id);
     }
 

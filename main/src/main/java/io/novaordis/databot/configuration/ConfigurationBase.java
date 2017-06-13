@@ -19,10 +19,9 @@ package io.novaordis.databot.configuration;
 import io.novaordis.databot.DataConsumer;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
-import io.novaordis.events.api.metric.MetricSource;
-import io.novaordis.events.api.metric.MetricSourceRepository;
-import io.novaordis.events.api.metric.MetricSourceRepositoryImpl;
+import io.novaordis.events.api.metric.MetricSourceFactory;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.address.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -53,13 +53,15 @@ public abstract class ConfigurationBase implements Configuration {
 
     private int samplingInterval;
 
-    private MetricSourceRepository metricSourceRepository;
+    private Set<Address> metricSourceAddresses;
 
     private List<MetricDefinition> metricDefinitions;
 
     private List<DataConsumer> dataConsumers;
 
     private int eventQueueSize;
+
+    private MetricSourceFactory sourceFactory;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -74,7 +76,7 @@ public abstract class ConfigurationBase implements Configuration {
 
         setEventQueueSize(DEFAULT_EVENT_QUEUE_SIZE);
 
-        this.metricSourceRepository = new MetricSourceRepositoryImpl();
+        this.metricSourceAddresses = new HashSet<>();
         this.metricDefinitions = new ArrayList<>();
         this.dataConsumers = new ArrayList<>();
 
@@ -148,10 +150,13 @@ public abstract class ConfigurationBase implements Configuration {
         return metricDefinitions;
     }
 
+    /**
+     * @return the underlying storage.
+     */
     @Override
-    public MetricSourceRepository getMetricSourceRepository() {
+    public Set<Address> getMetricSourceAddresses() {
 
-        return metricSourceRepository;
+        return metricSourceAddresses;
     }
 
     /**
@@ -161,6 +166,12 @@ public abstract class ConfigurationBase implements Configuration {
     public List<DataConsumer> getDataConsumers() {
 
         return dataConsumers;
+    }
+
+    @Override
+    public MetricSourceFactory getMetricSourceFactory() {
+
+        return sourceFactory;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
@@ -184,13 +195,13 @@ public abstract class ConfigurationBase implements Configuration {
         // also, "collect" its metric source in the repository; if it is already there, adding it will be a noop
         //
 
-        MetricSource ms = md.getSource();
-        addMetricSource(ms);
+        Address a = md.getMetricSourceAddress();
+        addMetricSourceAddress(a);
     }
 
-    protected void addMetricSource(MetricSource ms) {
+    protected void addMetricSourceAddress(Address a) {
 
-        metricSourceRepository.add(ms);
+        metricSourceAddresses.add(a);
     }
 
     protected void addDataConsumer(DataConsumer dc) {
@@ -225,6 +236,7 @@ public abstract class ConfigurationBase implements Configuration {
             return;
         }
 
+        //noinspection Convert2streamapi
         for(DataConsumer c: dataConsumers) {
 
             if (c instanceof AsynchronousCsvLineWriter) {
@@ -232,6 +244,11 @@ public abstract class ConfigurationBase implements Configuration {
                 ((AsynchronousCsvLineWriter)c).setFieldOrder(metricDefinitions);
             }
         }
+    }
+
+    protected void setMetricSourceFactory(MetricSourceFactory f) {
+
+        this.sourceFactory = f;
     }
 
     // Private ---------------------------------------------------------------------------------------------------------
@@ -244,11 +261,11 @@ public abstract class ConfigurationBase implements Configuration {
                         " event queue size:      " + getEventQueueSize() + "\n" +
                         " metric sources:\n";
 
-        Set<MetricSource> mss = getMetricSourceRepository().getSources();
+        Set<Address> as = getMetricSourceAddresses();
 
-        for(MetricSource ms : mss) {
+        for(Address a : as) {
 
-            s += "    - " + ms + "\n";
+            s += "    - " + a + "\n";
         }
 
         s += " metrics:\n";
@@ -257,7 +274,7 @@ public abstract class ConfigurationBase implements Configuration {
 
         for(MetricDefinition md: mds) {
 
-            s += "    - " + md.getSource() + "/" + md.getId() + "\n";
+            s += "    - " + md.getMetricSourceAddress() + "/" + md.getId() + "\n";
         }
 
         s += " data consumers:\n";
