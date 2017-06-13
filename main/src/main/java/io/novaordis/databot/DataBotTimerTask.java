@@ -16,12 +16,22 @@
 
 package io.novaordis.databot;
 
+import io.novaordis.databot.configuration.Configuration;
+import io.novaordis.databot.failure.DataBotException;
+import io.novaordis.databot.failure.EventQueueFullException;
+import io.novaordis.events.api.event.Event;
+import io.novaordis.events.api.event.GenericTimedEvent;
+import io.novaordis.events.api.event.Property;
+import io.novaordis.events.api.event.TimedEvent;
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.MetricSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.TimerTask;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * A timer task that insure the sources are started, starts them if they're not, collects the required metrics, wraps
@@ -40,8 +50,32 @@ public class DataBotTimerTask extends TimerTask {
     // counts how many executions were triggered since this task was created
     //
     private volatile long executionCount;
+    private volatile long successfulExecutionCount;
+
+    //
+    // we collect the last cause of data run failure
+    //
+    private volatile Throwable causeOfLastFailure;
 
     // Static ----------------------------------------------------------------------------------------------------------
+
+    public static String toLogMessage(Throwable t) {
+
+        if (t == null) {
+
+            return null;
+        }
+
+        String msg = t.getMessage();
+
+        if (msg == null) {
+
+            return t.getClass().getSimpleName() + " with no message, see stack trace below for more details";
+        }
+
+        return msg + " (" + t.getClass().getSimpleName() + ")";
+
+    }
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
@@ -51,7 +85,7 @@ public class DataBotTimerTask extends TimerTask {
 
     public DataBotTimerTask(DataBot dataBot) {
 
-        this.dataBot = dataBot;
+        setDataBot(dataBot);
     }
 
     // TimerTask overrides ---------------------------------------------------------------------------------------------
@@ -61,12 +95,100 @@ public class DataBotTimerTask extends TimerTask {
 
         executionCount ++;
 
-        List<MetricDefinition> metricDefinitions = dataBot.getConfiguration().getMetricDefinitions();
+        try {
+
+            dataCollectionRun();
+
+            successfulExecutionCount ++;
+
+        }
+        catch (Throwable t) {
+
+            causeOfLastFailure = t;
+
+            //
+            // no matter of what happens during a data collection run, do not exit - keep going until explicitely
+            // stopped; report the errors, though. The exceptions must not bubble up because an unchecked exception
+            // cancels the timer.
+            //
+
+            log.error("data collection run failed: " + toLogMessage(t), t);
+        }
+    }
+
+    // Public ----------------------------------------------------------------------------------------------------------
+
+    public DataBot getDataBot() {
+
+        return dataBot;
+    }
+
+    /**
+     * @return the cause of the last data run failure, if any. May return null if we did not experience any
+     * failure so far.
+     */
+    public Throwable getCauseOfLastFailure() {
+
+        return causeOfLastFailure;
+    }
+
+    // Package protected -----------------------------------------------------------------------------------------------
+
+    // Protected -------------------------------------------------------------------------------------------------------
+
+    /**
+     * @return the number of times the data collection run was executed since this instance was created. Not all
+     *  runs are necessarily successful. To get the number of successful runs, use getSuccessfulExecutionCount()
+     *
+     *  @see DataBotTimerTask#getSuccessfulExecutionCount()
+     */
+    long getExecutionCount() {
+
+        return executionCount;
+    }
+
+    /**
+     * @return the number of successful data collection runs since this instance was created.
+     *
+     *  @see DataBotTimerTask#getExecutionCount()
+     */
+    long getSuccessfulExecutionCount() {
+
+        return successfulExecutionCount;
+    }
+
+    void setDataBot(DataBot dataBot) {
+
+        this.dataBot = dataBot;
+    }
+
+    /**
+     * Even if the method throws unchecked exceptions, the calling layer will correctly handle those.
+     *
+     * @exception DataBotException exceptional conditions during the data collection run. The upper layer will
+     *  handle appropriately.
+     */
+    void dataCollectionRun() throws DataBotException {
+
+        log.debug(this + " executing data run ...");
+
+        TimedEvent event = collectMetrics();
+
+        BlockingQueue<Event> eventQueue = dataBot.getEventQueue();
+
+        boolean sent = eventQueue.offer(event);
+
+        if (!sent) {
+
+            //
+            // we will just drop the event and notify the upper layer
+            //
+
+            throw new EventQueueFullException();
+        }
+    }
 
 
-        // TODO bw3s5fsf4
-
-        throw new RuntimeException("RETURN HERE");
 
 //        //
 //        // separate the metric definitions according their sources
@@ -120,33 +242,6 @@ public class DataBotTimerTask extends TimerTask {
 //
 //        TimedEvent te = new GenericTimedEvent(t, properties);
 //
-//        BlockingQueue<Event> eventQueue = dataBot.getEventQueue();
-//
-//        try {
-//
-//
-//            boolean sent = eventQueue.offer(te);
-//
-//            if (!sent) {
-//
-//                log.warn("os-stats internal queue is full, which means events are not flushed to their destination");
-//
-//                //
-//                // ... and just drop the event on the floor
-//                //
-//            }
-//        }
-//        catch(Throwable t) {
-//
-//            //
-//            // IMPORTANT: an unchecked exception cancels the timer, and we don't want that, so log it and swallow it
-//            //
-//            String message = t.getMessage();
-//            message = message != null ? message : t.getClass().getSimpleName();
-//            message = "failed to collect data: " + message;
-//            log.warn(message);
-//            log.debug(message, t);
-//        }
 
 
 
@@ -227,18 +322,38 @@ public class DataBotTimerTask extends TimerTask {
 //        return properties;
 //    }
 
+
+    TimedEvent collectMetrics() {
+
+        log.debug(this + " collecting metrics ...");
+
+        Configuration configuration = dataBot.getConfiguration();
+
+        List<MetricDefinition> metricDefinitions = configuration.getMetricDefinitions();
+
+        List<MetricSource> sources = consolidateSources(metricDefinitions);
+
+        //noinspection Convert2streamapi
+        for(MetricSource s: sources) {
+
+            List<Property> properties = collectMetricsForSource(s);
+        }
+
+        GenericTimedEvent event = new GenericTimedEvent();
+
+        return event;
     }
 
-    // Public ----------------------------------------------------------------------------------------------------------
+    List<MetricSource> consolidateSources(List<MetricDefinition> metricDefinitions) {
 
-    // Package protected -----------------------------------------------------------------------------------------------
-
-    // Protected -------------------------------------------------------------------------------------------------------
-
-    long getExecutionCount() {
-
-        return executionCount;
+        return Collections.emptyList();
     }
+
+    List<Property> collectMetricsForSource(MetricSource source) {
+
+        return Collections.emptyList();
+    }
+
 
     // Private ---------------------------------------------------------------------------------------------------------
 

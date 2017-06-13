@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package io.novaordis.databot;
-
-import io.novaordis.databot.failure.DataBotException;
+package io.novaordis.databot.failure;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 8/5/16
+ * @since 6/13/17
  */
-public class DataConsumerException extends DataBotException {
+public class EventQueueFullException extends DataBotException {
 
     // Constants -------------------------------------------------------------------------------------------------------
+
+    public static final String MESSAGE = "event queue full";
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -32,19 +32,9 @@ public class DataConsumerException extends DataBotException {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    /**
-     * @param message must be human readable, as it will be displayed in logs.
-     */
-    public DataConsumerException(String message) {
-        super(message);
-    }
+    public EventQueueFullException() {
 
-    public DataConsumerException(Throwable cause) {
-        super(null, cause);
-    }
-
-    public DataConsumerException(String msg, Throwable cause) {
-        super(msg, cause);
+        super(MESSAGE);
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

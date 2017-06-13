@@ -53,7 +53,7 @@ public class Main {
 
             exitLatch.await();
 
-            log.debug("databot exits ...");
+            log.debug("databot stopped");
 
         }
         catch(Throwable t) {

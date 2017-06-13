@@ -17,6 +17,7 @@
 package io.novaordis.databot;
 
 import io.novaordis.databot.configuration.Configuration;
+import io.novaordis.databot.failure.DataBotException;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.ShutdownEvent;
 import io.novaordis.events.api.metric.MetricSource;
@@ -109,7 +110,7 @@ public class DataBot {
 
         this.consumers = new ArrayList<>();
 
-        this.timer = new Timer();
+        this.timer = new Timer(TIMER_THREAD_NAME);
 
         this.timerTask = new DataBotTimerTask(this);
 
@@ -130,6 +131,26 @@ public class DataBot {
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    public Set<MetricSource> getMetricSources() {
+
+        return sources.getSources();
+    }
+
+    /**
+     * @return the underlying storage, so handle with care.
+     */
+    public List<DataConsumer> getDataConsumers() {
+
+        return consumers;
+    }
+
+    public Configuration getConfiguration() {
+
+        return configuration;
+    }
+
+    // Lifecycle -------------------------------------------------------------------------------------------------------
 
     /**
      * Starts all its consumers and schedules the periodic read timer.
@@ -258,29 +279,6 @@ public class DataBot {
         }
 
         log.info(this + " stopped " + (clean ? "successfully" : "with errors"));
-    }
-
-    public Set<MetricSource> getMetricSources() {
-
-        return sources.getSources();
-    }
-
-    public MetricSourceFactory getMetricSourceFactory() {
-
-        return sourceFactory;
-    }
-
-    /**
-     * @return the underlying storage, so handle with care.
-     */
-    public List<DataConsumer> getDataConsumers() {
-
-        return consumers;
-    }
-
-    public Configuration getConfiguration() {
-
-        return configuration;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

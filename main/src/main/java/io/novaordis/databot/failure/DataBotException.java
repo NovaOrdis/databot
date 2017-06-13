@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.novaordis.databot;
+package io.novaordis.databot.failure;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>

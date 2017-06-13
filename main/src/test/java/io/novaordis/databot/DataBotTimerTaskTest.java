@@ -17,19 +17,15 @@
 package io.novaordis.databot;
 
 import io.novaordis.databot.configuration.MockConfiguration;
+import io.novaordis.databot.failure.EventQueueFullException;
 import io.novaordis.events.api.event.Event;
-import io.novaordis.events.api.metric.MetricDefinition;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -50,6 +46,83 @@ public class DataBotTimerTaskTest {
     // Constructors ----------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    // run() -----------------------------------------------------------------------------------------------------------
+
+    @Test
+    public void run_DataCollectionEncountersUnexpectedFailure_RunMustContinue() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+
+        DataBot db = new DataBot(mc);
+
+        DataBotTimerTask t = new DataBotTimerTask(db);
+
+        assertEquals(0L, t.getExecutionCount());
+        assertEquals(0L, t.getSuccessfulExecutionCount());
+
+        //
+        // trigger an NPE
+        //
+
+        t.setDataBot(null);
+
+        assertNull(t.getDataBot());
+
+        t.run();
+
+        assertEquals(1L, t.getExecutionCount());
+        assertEquals(0L, t.getSuccessfulExecutionCount());
+
+        Throwable c = t.getCauseOfLastFailure();
+        assertTrue(c instanceof NullPointerException);
+    }
+
+    @Test
+    public void run_DataCollectionFailsBecauseTheInternalQueueIsFull_RunMustContinue() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+
+        //
+        // this queue will only accept one event then block
+        //
+        mc.setEventQueueSize(1);
+
+        DataBot db = new DataBot(mc);
+
+        DataBotTimerTask t = new DataBotTimerTask(db);
+
+        assertEquals(0L, t.getExecutionCount());
+        assertEquals(0L, t.getSuccessfulExecutionCount());
+
+        //
+        // fill the queue
+        //
+
+        t.run();
+
+        assertEquals(1L, t.getExecutionCount());
+        assertEquals(1L, t.getSuccessfulExecutionCount());
+        assertNull(t.getCauseOfLastFailure());
+
+        //
+        // queue is full
+        //
+
+        t.run();
+
+        assertEquals(2L, t.getExecutionCount());
+        assertEquals(1L, t.getSuccessfulExecutionCount());
+        EventQueueFullException cause = (EventQueueFullException)t.getCauseOfLastFailure();
+        assertNotNull(cause);
+    }
+
+    @Test
+    public void run_NoMetricsProducesEmptyTimedEvents() throws Exception {
+
+        fail("RETURN HERE");
+
+    }
 
     @Test
     public void theTimerTaskDoesNotThrowUncheckedExceptions() throws Exception {
@@ -132,6 +205,34 @@ public class DataBotTimerTaskTest {
 //        t.run();
 //
 //        log.info("we're good");
+    }
+
+    // toLogMessage() --------------------------------------------------------------------------------------------------
+
+    @Test
+    public void toLogMessage_null() throws Exception {
+
+        assertNull(DataBotTimerTask.toLogMessage(null));
+    }
+
+    @Test
+    public void toLogMessage_nullMessage() throws Exception {
+
+        RuntimeException e = new RuntimeException();
+        assertEquals(null, e.getMessage());
+
+        String s = DataBotTimerTask.toLogMessage(e);
+        assertEquals("RuntimeException with no message, see stack trace below for more details", s);
+    }
+
+    @Test
+    public void toLogMessage() throws Exception {
+
+        RuntimeException e = new RuntimeException("some thing");
+        assertEquals("some thing", e.getMessage());
+
+        String s = DataBotTimerTask.toLogMessage(e);
+        assertEquals("some thing (RuntimeException)", s);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
