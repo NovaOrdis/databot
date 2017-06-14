@@ -70,11 +70,13 @@ public abstract class ConfigurationBase implements Configuration {
     // Constructors ----------------------------------------------------------------------------------------------------
 
     /**
-     * @param filename null is acceptable, will return default values.
+     * @param fileName null is acceptable, will return default values.
      */
-    protected ConfigurationBase(boolean foreground, String filename) throws UserErrorException {
+    protected ConfigurationBase(boolean foreground, String fileName) throws UserErrorException {
 
         setForeground(foreground);
+
+        this.fileName = fileName;
 
         this.samplingInterval = DEFAULT_SAMPLING_INTERVAL_SEC;
 
@@ -84,18 +86,18 @@ public abstract class ConfigurationBase implements Configuration {
         this.metricDefinitions = new ArrayList<>();
         this.dataConsumers = new ArrayList<>();
 
-        if (filename != null) {
+        if (fileName != null) {
 
             FileInputStream fis = null;
 
             try {
 
-                fis = new FileInputStream(filename);
+                fis = new FileInputStream(fileName);
                 load(fis);
             }
             catch(FileNotFoundException fe) {
 
-                throw new UserErrorException("configuration file " + filename + " does not exist or cannot be read");
+                throw new UserErrorException("configuration file " + fileName + " does not exist or cannot be read");
             }
             catch (UserErrorException e) {
 
@@ -103,7 +105,7 @@ public abstract class ConfigurationBase implements Configuration {
                 // add the file name to the error message
                 //
 
-                throw new UserErrorException(e.getMessage() + ": " + filename);
+                throw new UserErrorException(e.getMessage() + ": " + fileName);
 
             }
             finally {

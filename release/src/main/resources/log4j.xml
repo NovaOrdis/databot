@@ -24,13 +24,15 @@
     </appender>
     -->
 
-    <category name="org.hibernate">
-        <priority value="WARN"/>
+    <category name="io.novaordis.utilities.os.StreamConsumer">
+        <priority value="INFO"/>
     </category>
 
     <root>
         <appender-ref ref="CONSOLE"/>
-        <!-- <appender-ref ref="FILE"/> -->
+        <!--
+            <appender-ref ref="FILE"/>
+        -->
     </root>
 
 </log4j:configuration>
