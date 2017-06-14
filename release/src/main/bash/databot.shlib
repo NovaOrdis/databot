@@ -206,11 +206,19 @@ function locate-newest-jar() {
 }
 
 function get-classpath() {
+
     local home_dir=$1
     [ -z "${home_dir}" ] && fail "no 'home_dir' specified"
-    local first=true
+
+    #
+    # start with the ./lib directory, to catch the log4j.xml file
+    #
+    echo -n "${home_dir}/lib/}"
+
+    #local first=true
     for i in ${home_dir}/lib/*.jar; do
-        ${first} && first=false || echo -n ":"
+        #${first} && first=false || echo -n ":"
+        echo -n ":"
         echo -n ${i}
     done
 }
