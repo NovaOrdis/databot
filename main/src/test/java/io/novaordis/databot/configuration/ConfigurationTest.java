@@ -145,6 +145,8 @@ public abstract class ConfigurationTest {
         assertEquals("/subsystem=messaging/hornetq-server=default/jms-queue=DLQ/message-count", m5.getLabel());
         assertTrue(new JBossControllerAddress("admin", null, "localhost", 9999).equals(m5.getMetricSourceAddress()));
 
+        assertEquals(3, c.getMetricSourceCount());
+
         Set<Address> addresses = c.getMetricSourceAddresses();
         assertNotNull(addresses);
 
@@ -180,6 +182,7 @@ public abstract class ConfigurationTest {
 
         assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingIntervalSec());
         assertEquals(Configuration.DEFAULT_EVENT_QUEUE_SIZE, c.getEventQueueSize());
+        assertEquals(0, c.getMetricSourceCount());
         assertTrue(c.getMetricSourceAddresses().isEmpty());
         assertTrue(c.getMetricDefinitions().isEmpty());
         assertTrue(c.getDataConsumers().isEmpty());
@@ -192,6 +195,7 @@ public abstract class ConfigurationTest {
 
         ConfigurationBase c = (ConfigurationBase)getConfigurationToTest(false, null);
 
+        assertEquals(0, c.getMetricSourceCount());
         assertTrue(c.getMetricDefinitions().isEmpty());
         assertTrue(c.getMetricSourceAddresses().isEmpty());
 
@@ -221,6 +225,14 @@ public abstract class ConfigurationTest {
         mss = c.getMetricSourceAddresses();
         assertEquals(1, mss.size());
         assertTrue(mss.contains(a));
+    }
+
+    // getMetricDefinitions() ------------------------------------------------------------------------------------------
+
+    @Test
+    public void getMetricDefinitions() throws Exception {
+
+        fail("add tests for getMetricDefinitions() and getMetricDefinitions(Address)");
     }
 
     // addDataConsumer() -----------------------------------------------------------------------------------------------

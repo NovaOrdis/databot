@@ -183,12 +183,13 @@ public class DataBotTimerTaskTest {
         assertTrue(event.getProperties().isEmpty());
     }
 
+    // dataCollectionRun() ---------------------------------------------------------------------------------------------
+
     @Test
     public void dataCollectionRun() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
         DataBot db = new DataBot(mc);
-
         DataBotTimerTask t = db.getTimerTask();
 
         t.dataCollectionRun();
@@ -214,7 +215,40 @@ public class DataBotTimerTaskTest {
     @Test
     public void dataCollectionRun_QueueFull() throws Exception {
 
-        fail("RETURN HERE");
+        MockConfiguration mc = new MockConfiguration();
+        mc.setEventQueueSize(1);
+
+        DataBot db = new DataBot(mc);
+        DataBotTimerTask t = db.getTimerTask();
+
+        //
+        // pre-fill the queue
+        //
+
+        assertTrue(db.getEventQueue().offer(new MockEvent()));
+
+        try {
+
+            t.dataCollectionRun();
+            fail("should have thrown exception");
+        }
+        catch(EventQueueFullException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("full"));
+        }
+    }
+
+    // collectMetrics() ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void collectMetrics() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+        DataBot db = new DataBot(mc);
+        DataBotTimerTask t = db.getTimerTask();
+
+        t.collectMetrics();
     }
 
     // toLogMessage() --------------------------------------------------------------------------------------------------

@@ -24,14 +24,17 @@ import io.novaordis.events.api.event.GenericTimedEvent;
 import io.novaordis.events.api.event.Property;
 import io.novaordis.events.api.event.TimedEvent;
 import io.novaordis.events.api.metric.MetricDefinition;
-import io.novaordis.events.api.metric.MetricSource;
+import io.novaordis.utilities.address.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * A timer task that insure the sources are started, starts them if they're not, collects the required metrics, wraps
@@ -168,7 +171,8 @@ public class DataBotTimerTask extends TimerTask {
     }
 
     /**
-     * Even if the method throws unchecked exceptions, the calling layer will correctly handle those.
+     * The method collects all declared metrics, consolidates them in a TimeEvent and places the event on the internal
+     * event queue. Even if the method throws unchecked exceptions, the calling layer will correctly handle those.
      *
      * @exception DataBotException exceptional conditions during the data collection run. The upper layer will
      *  handle appropriately.
@@ -199,171 +203,76 @@ public class DataBotTimerTask extends TimerTask {
         }
     }
 
-//        //
-//        // separate the metric definitions according their sources
-//        //
-//
-//        Map<Address, Set<MetricDefinition>> metricDefinitionsPerSourceAddress = new HashMap<>();
-//
-//        for(MetricDefinition md: metricDefinitions) {
-//
-//            Address a = md.getMetricSourceAddress();
-//
-//            Set<MetricDefinition> mds = metricDefinitionsPerSourceAddress.get(a);
-//
-//            if (mds == null) {
-//
-//                mds = new HashSet<>();
-//                metricDefinitionsPerSourceAddress.put(a, mds);
-//            }
-//
-//            mds.add(md);
-//        }
-//
-//        List<Property> properties = new ArrayList<>();
-//
-//        //
-//        // process metrics per source
-//        //
-//
-//        long readingBegins = System.currentTimeMillis();
-//
-//
-//        for(Address a: metricDefinitionsPerSourceAddress.keySet()) {
-//
-//            Set<Property> fromSource = collect(a, metricDefinitionsPerSourceAddress.get(a));
-//            properties.addAll(fromSource);
-//        }
-//
-//        long readingEnds = System.currentTimeMillis();
-//
-//        log.debug("reading complete in " + (readingEnds - readingBegins) + " ms");
-//
-//        //
-//        // create the timed event
-//        //
-//
-//        long t = readingBegins + (readingEnds - readingBegins) / 2;
-//
-//        // It is possible to get an empty property list. This happens when the underlying layer fails to take a
-//        // reading. The underlying layer warned already, so we just generate an empty event, it'll show up in the
-//        // data set.
-//
-//        TimedEvent te = new GenericTimedEvent(t, properties);
-//
-
-//
-//        ......
-//
-
-
-//    List<Property> readMetrics(List<MetricDefinition> metricDefinitions) throws DataCollectionException {
-//
-//        Set<MetricSource> sources = establishSources(metricDefinitions);
-//
-//        if (debug) { log.debug("metric sources: " + sources); }
-//
-//        Set<Property> allProperties = new HashSet<>();
-//
-//        for(MetricSource source: sources) {
-//
-//            List<Property> props;
-//
-//            try {
-//
-//                //
-//                // optimization: collect all possible metrics in one go. It may return an empty list for some sources
-//                //
-//                props = source.collectMetrics(metricDefinitions);
-//            }
-//            catch(MetricException e) {
-//
-//                throw new DataCollectionException(e);
-//            }
-//
-//            allProperties.addAll(props);
-//        }
-//
-//        List<Property> properties = new ArrayList<>();
-//
-//        if (debug) { log.debug("metric definitions: " + metricDefinitions); }
-//
-//        metricLoop: for(MetricDefinition m: metricDefinitions) {
-//
-//            //noinspection Convert2streamapi
-//            for(Property p: allProperties) {
-//
-//                if (p.getName().equals(m.getId())) {
-//                    properties.add(p);
-//                    continue metricLoop;
-//                }
-//            }
-//
-//            //
-//            // this happens when the "bulk" metric collection for a source returns an empty list. Attempt collecting
-//            // the specific metric with its preferred source
-//            //
-//
-//            MetricSource preferredSource = m.getSource();
-//
-//            try {
-//
-//                List<Property> props = preferredSource.collectMetrics(Collections.singletonList(m));
-//
-//                //
-//                // because we're only passing one metric definition, we expect one property
-//                //
-//
-//                if (props.size() != 1) {
-//
-//                    throw new DataCollectionException(
-//                            m + " produced " + (props.size() == 0 ? "no" : props.size()) + " values");
-//                }
-//
-//                Property p = props.get(0);
-//                properties.add(p);
-//            }
-//            catch(MetricException e) {
-//
-//                throw new DataCollectionException(e);
-//            }
-//
-//        }
-//
-//        return properties;
-//    }
-
-
     TimedEvent collectMetrics() {
 
         log.debug(this + " collecting metrics ...");
 
         Configuration configuration = dataBot.getConfiguration();
 
-        List<MetricDefinition> metricDefinitions = configuration.getMetricDefinitions();
+        Set<Address> sourceAddresses = configuration.getMetricSourceAddresses();
 
-        List<MetricSource> sources = consolidateSources(metricDefinitions);
+        List<Future<List<Property>>> futures = new ArrayList<>();
 
-        //noinspection Convert2streamapi
-        for(MetricSource s: sources) {
+        long collectionStartTimestamp = System.currentTimeMillis();
 
-            List<Property> properties = collectMetricsForSource(s);
+        for(Address a: sourceAddresses) {
+
+            //
+            // dispatch an internal thread per source to collect metrics
+            //
+
+            List<MetricDefinition> metricsForSource = configuration.getMetricDefinitions(a);
+            SourceQueryTask q = new SourceQueryTask(metricsForSource);
+            Future<List<Property>> future = dataBot.getSourceExecutor().submit(q);
+            futures.add(future);
         }
 
+        //
+        // wait for metric values of source failure
+        //
+
+        List<Property> allProperties = new ArrayList<>();
+
+        for(Future<List<Property>> f: futures) {
+
+            try {
+
+                List<Property> properties = f.get();
+                allProperties.addAll(properties);
+            }
+            catch (InterruptedException e) {
+
+                throw new RuntimeException("NOT YET IMPLEMENTED");
+            }
+            catch (ExecutionException e) {
+
+                Throwable cause = e.getCause();
+                throw new RuntimeException("NOT YET IMPLEMENTED");
+            }
+        }
+
+        long collectionEndTimestamp = System.currentTimeMillis();
+
+        log.debug("collection done in " + (collectionEndTimestamp - collectionStartTimestamp) + " ms");
+
+        //
+        // create the timed event
+        //
+
+        //
+        // TODO: come up with more precise timing
+        //
+
+        long t = collectionStartTimestamp + (collectionEndTimestamp - collectionStartTimestamp) / 2;
+
+        // It is possible to get an empty property list. This happens when the underlying layer fails to take a
+        // reading. The underlying layer warned already, so we just generate an empty event, it'll show up in the
+        // data set.
+
         //noinspection UnnecessaryLocalVariable
-        GenericTimedEvent event = new GenericTimedEvent();
+        TimedEvent te = new GenericTimedEvent(t, allProperties);
 
-        return event;
-    }
-
-    List<MetricSource> consolidateSources(List<MetricDefinition> metricDefinitions) {
-
-        return Collections.emptyList();
-    }
-
-    List<Property> collectMetricsForSource(MetricSource source) {
-
-        return Collections.emptyList();
+        return te;
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

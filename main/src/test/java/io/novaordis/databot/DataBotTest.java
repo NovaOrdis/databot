@@ -39,9 +39,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -103,6 +106,12 @@ public class DataBotTest {
         BlockingQueue<Event> eventQueue = d.getEventQueue();
         assertEquals(c.getEventQueueSize(), eventQueue.remainingCapacity());
 
+        ThreadFactory tf = d.getSourceThreadFactory();
+        assertNotNull(tf);
+
+        ExecutorService se = d.getSourceExecutor();
+        assertFalse(se.isShutdown());
+        assertFalse(se.isTerminated());
     }
 
     @Test
@@ -256,6 +265,10 @@ public class DataBotTest {
 
             Thread.sleep(200L);
         }
+
+        ExecutorService sourceExecutor = d.getSourceExecutor();
+        assertTrue(sourceExecutor.isShutdown());
+        assertTrue(sourceExecutor.isTerminated());
     }
 
 //    @Test

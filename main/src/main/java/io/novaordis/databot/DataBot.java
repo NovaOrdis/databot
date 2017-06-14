@@ -37,6 +37,9 @@ import java.util.Timer;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -85,6 +88,13 @@ public class DataBot {
 
     private final MetricSourceRepository sources;
 
+    //
+    // manages the threads that will be used to query sources
+    //
+    private final ExecutorService sourceExecutor;
+
+    private final ThreadFactory sourceThreadFactory;
+
     private final Timer timer;
 
     private final DataBotTimerTask timerTask;
@@ -112,6 +122,13 @@ public class DataBot {
                         new MetricSourceFactoryImpl();
 
         this.sources = new MetricSourceRepositoryImpl();
+
+        this.sourceThreadFactory = new MetricSourceThreadFactory();
+
+        //
+        // we configure the source executor with as many threads as sources
+        //
+        this.sourceExecutor = Executors.newFixedThreadPool(configuration.getMetricSourceCount(), sourceThreadFactory);
 
         this.consumers = new ArrayList<>();
 
@@ -226,6 +243,12 @@ public class DataBot {
         timer.cancel();
 
         //
+        // stop the source executor service
+        //
+
+        sourceExecutor.shutdown();
+
+        //
         // stop metric sources
         //
 
@@ -333,6 +356,16 @@ public class DataBot {
         return timerTask;
     }
 
+    ExecutorService getSourceExecutor() {
+
+        return sourceExecutor;
+    }
+
+    ThreadFactory getSourceThreadFactory() {
+
+        return sourceThreadFactory;
+    }
+
     // Protected -------------------------------------------------------------------------------------------------------
 
     /**
@@ -364,6 +397,10 @@ public class DataBot {
         }
 
         //
+        // the source executor service is already started, nothing to do there
+        //
+
+        //
         // initialize data consumers, but not start them yet
         //
 
@@ -373,7 +410,6 @@ public class DataBot {
 
             consumers.add(c);
             log.debug(this + " installed data consumer " + c);
-
         }
     }
 

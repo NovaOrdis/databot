@@ -67,7 +67,14 @@ public interface Configuration {
      */
     List<MetricDefinition> getMetricDefinitions();
 
+    /**
+     * @return all definitions associated with the given address, or an empty list if no such definitions exist.
+     */
+    List<MetricDefinition> getMetricDefinitions(Address a);
+
     Set<Address> getMetricSourceAddresses();
+
+    int getMetricSourceCount();
 
     /**
      * @return the data consumers to consume the events. Order is important, the data consumers should be returned in

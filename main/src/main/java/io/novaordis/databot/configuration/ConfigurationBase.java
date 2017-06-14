@@ -30,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -150,6 +151,37 @@ public abstract class ConfigurationBase implements Configuration {
         return metricDefinitions;
     }
 
+    @Override
+    public List<MetricDefinition> getMetricDefinitions(Address a) {
+
+        if (metricDefinitions.isEmpty()) {
+
+            return Collections.emptyList();
+        }
+
+        List<MetricDefinition> result = null;
+
+        for(MetricDefinition d: metricDefinitions) {
+
+            if (d.getMetricSourceAddress().equals(a)) {
+
+                if (result == null) {
+
+                    result = new ArrayList<>();
+                }
+
+                result.add(d);
+            }
+        }
+
+        if (result == null) {
+
+            return Collections.emptyList();
+        }
+
+        return result;
+    }
+
     /**
      * @return the underlying storage.
      */
@@ -157,6 +189,12 @@ public abstract class ConfigurationBase implements Configuration {
     public Set<Address> getMetricSourceAddresses() {
 
         return metricSourceAddresses;
+    }
+
+    @Override
+    public int getMetricSourceCount() {
+
+        return metricSourceAddresses.size();
     }
 
     /**
