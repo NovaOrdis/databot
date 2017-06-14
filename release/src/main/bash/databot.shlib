@@ -213,7 +213,7 @@ function get-classpath() {
     #
     # start with the ./lib directory, to catch the log4j.xml file
     #
-    echo -n "${home_dir}/lib/}"
+    echo -n "${home_dir}/lib/"
 
     #local first=true
     for i in ${home_dir}/lib/*.jar; do
