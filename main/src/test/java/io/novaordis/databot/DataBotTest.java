@@ -41,6 +41,7 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -112,6 +113,9 @@ public class DataBotTest {
         ExecutorService se = d.getSourceExecutor();
         assertFalse(se.isShutdown());
         assertFalse(se.isTerminated());
+
+        ThreadPoolExecutor sourceExecutor = (ThreadPoolExecutor)d.getSourceExecutor();
+        assertEquals(DataBot.DEFAULT_SOURCE_EXECUTOR_CORE_POOL_SIZE, sourceExecutor.getCorePoolSize());
     }
 
     @Test
@@ -174,6 +178,9 @@ public class DataBotTest {
         assertFalse(mdc.isStarted());
         assertEquals(mdc2, consumers.get(1));
         assertFalse(mdc2.isStarted());
+
+        ThreadPoolExecutor sourceExecutor = (ThreadPoolExecutor)d.getSourceExecutor();
+        assertEquals(metricSourceAddresses.size(), sourceExecutor.getCorePoolSize());
     }
 
     // lifecycle -------------------------------------------------------------------------------------------------------

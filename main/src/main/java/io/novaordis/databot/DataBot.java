@@ -40,6 +40,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -63,6 +64,13 @@ public class DataBot {
     private static final Logger log = LoggerFactory.getLogger(DataBot.class);
 
     public static final String TIMER_THREAD_NAME = "DataBot Timer Thread";
+
+    //
+    // The source executor cannot be configured with zero initial threads, so we need a non-zero positive minimum value
+    // in case there are no sources in the configuration. If there are sources, the executor will be configured with
+    // as many threads as there are sources.
+    //
+    public static final int DEFAULT_SOURCE_EXECUTOR_CORE_POOL_SIZE = 5;
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -91,7 +99,7 @@ public class DataBot {
     //
     // manages the threads that will be used to query sources
     //
-    private final ExecutorService sourceExecutor;
+    private final ThreadPoolExecutor sourceExecutor;
 
     private final ThreadFactory sourceThreadFactory;
 
@@ -125,10 +133,12 @@ public class DataBot {
 
         this.sourceThreadFactory = new MetricSourceThreadFactory();
 
-        //
-        // we configure the source executor with as many threads as sources
-        //
-        this.sourceExecutor = Executors.newFixedThreadPool(configuration.getMetricSourceCount(), sourceThreadFactory);
+        int sourceExecutorCorePoolSize = configuration.getMetricSourceCount();
+        sourceExecutorCorePoolSize =
+                sourceExecutorCorePoolSize != 0 ? sourceExecutorCorePoolSize : DEFAULT_SOURCE_EXECUTOR_CORE_POOL_SIZE;
+
+        this.sourceExecutor = (ThreadPoolExecutor)Executors.
+                newFixedThreadPool(sourceExecutorCorePoolSize, sourceThreadFactory);
 
         this.consumers = new ArrayList<>();
 
