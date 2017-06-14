@@ -18,7 +18,6 @@ package io.novaordis.databot;
 
 import io.novaordis.events.api.event.Property;
 import io.novaordis.events.api.metric.MetricDefinition;
-import io.novaordis.events.api.metric.MetricException;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceException;
 import io.novaordis.events.api.metric.MockAddress;
@@ -45,9 +44,11 @@ public class MockMetricSource implements MetricSource {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private Map<MetricDefinition, Property> readingsForMetrics;
+    // <metric-id, Property>
+    private Map<String, Property> readingsForMetrics;
 
-    private boolean breakOnCollect;
+    private String breakOnCollectWithMetricSourceExceptionMessage;
+    private String breakOnCollectWithUncheckedExceptionMessage;
 
     private boolean started;
 
@@ -57,7 +58,7 @@ public class MockMetricSource implements MetricSource {
 
     public MockMetricSource() {
 
-        this(new MockAddress(MockMetricSource.class.getSimpleName()));
+        this(new MockAddress());
     }
 
     public MockMetricSource(Address a) {
@@ -81,15 +82,28 @@ public class MockMetricSource implements MetricSource {
     }
 
     @Override
-    public List<Property> collectMetrics(List<MetricDefinition> metricDefinitions) throws MetricException {
+    public List<Property> collectMetrics(List<MetricDefinition> metricDefinitions) throws MetricSourceException {
+
+        log.info(this + " collecting " + metricDefinitions);
+
+        if (breakOnCollectWithUncheckedExceptionMessage != null) {
+
+            throw new SyntheticUncheckedException(breakOnCollectWithUncheckedExceptionMessage);
+        }
+
+        if (breakOnCollectWithMetricSourceExceptionMessage != null) {
+
+            throw new MetricSourceException(breakOnCollectWithMetricSourceExceptionMessage);
+        }
 
         List<Property> result = new ArrayList<>();
 
         for(MetricDefinition d: metricDefinitions) {
 
-            Property p = readingsForMetrics.get(d);
+            Property p = readingsForMetrics.get(d.getId());
 
             if (p != null) {
+
                 result.add(p);
             }
         }
@@ -121,14 +135,19 @@ public class MockMetricSource implements MetricSource {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public void addReadingForMetric(MetricDefinition d, Property p) {
+    public void addReadingForMetric(String metricId, Property p) {
 
-        readingsForMetrics.put(d, p);
+        readingsForMetrics.put(metricId, p);
     }
 
-    public void breakOnCollectMetrics() {
+    public void breakOnCollectWithMetricSourceException(String message) {
 
-        breakOnCollect = true;
+        breakOnCollectWithMetricSourceExceptionMessage = message;
+    }
+
+    public void breakOnCollectWithUncheckedException(String message) {
+
+        breakOnCollectWithUncheckedExceptionMessage = message;
     }
 
     @Override

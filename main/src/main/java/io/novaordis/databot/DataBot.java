@@ -131,7 +131,7 @@ public class DataBot {
 
         this.sources = new MetricSourceRepositoryImpl();
 
-        this.sourceThreadFactory = new MetricSourceThreadFactory();
+        this.sourceThreadFactory = new MetricSourceThreadFactory("DataBot Metric Source Handler Thread");
 
         int sourceExecutorCorePoolSize = configuration.getMetricSourceCount();
         sourceExecutorCorePoolSize =
@@ -169,9 +169,13 @@ public class DataBot {
         return id;
     }
 
-    public Set<MetricSource> getMetricSources() {
+    /**
+     * @return the metric source associated with the given address, if exists, or null if the metric source does
+     * not exist.
+     */
+    public MetricSource getMetricSource(Address a) {
 
-        return sources.getSources();
+        return sources.getSource(a);
     }
 
     /**
@@ -331,6 +335,11 @@ public class DataBot {
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
+
+    Set<MetricSource> getMetricSources() {
+
+        return sources.getSources();
+    }
 
     /**
      * Report the number of events in the queue at the time of the reading.

@@ -20,12 +20,14 @@ import io.novaordis.databot.configuration.MockConfiguration;
 import io.novaordis.databot.consumer.MockActiveDataConsumer;
 import io.novaordis.databot.failure.EventQueueFullException;
 import io.novaordis.events.api.event.Event;
+import io.novaordis.events.api.event.Property;
 import io.novaordis.events.api.event.TimedEvent;
 import io.novaordis.events.api.metric.MockAddress;
 import io.novaordis.utilities.address.Address;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -265,10 +267,10 @@ public class DataBotTimerTaskTest {
     }
 
     @Test
-    public void collectMetrics_OneSource_OneMetricDefinition() throws Exception {
+    public void collectMetrics_OneSource_OneMetricDefinition_CollectionSucceeds() throws Exception {
 
         Address ma = new MockAddress("mock-metric-source");
-        MockMetricDefinition mmd = new MockMetricDefinition(ma);
+        MockMetricDefinition mmd = new MockMetricDefinition(ma, "mock-metric-id");
         MockMetricSourceFactory mmsf = new MockMetricSourceFactory();
 
         MockConfiguration mc = new MockConfiguration();
@@ -277,6 +279,13 @@ public class DataBotTimerTaskTest {
         mc.addMetricDefinition(mmd);
 
         DataBot db = new DataBot(mc);
+
+        //
+        // configure the mock source with "expected" values
+        //
+
+        MockMetricSource mms = (MockMetricSource)db.getMetricSource(ma);
+        mms.addReadingForMetric("mock-metric-id", new MockProperty("mock-name", "mock-value"));
 
         DataBotTimerTask t = db.getTimerTask();
 
@@ -290,9 +299,89 @@ public class DataBotTimerTaskTest {
 
         assertTrue(t0 <= e.getTime());
         assertTrue(e.getTime() <= t1);
-        assertTrue(e.getProperties().isEmpty());
+
+        Set<Property> properties = e.getProperties();
+        assertEquals(1, properties.size());
+        MockProperty p = (MockProperty)properties.iterator().next();
+        assertEquals("mock-name", p.getName());
+        assertEquals("mock-value", p.getValue());
     }
 
+    @Test
+    public void collectMetrics_OneSource_OneMetricDefinition_CollectionFailsWithCheckedException() throws Exception {
+
+        Address ma = new MockAddress("mock-metric-source");
+        MockMetricDefinition mmd = new MockMetricDefinition(ma, "mock-metric-id");
+        MockMetricSourceFactory mmsf = new MockMetricSourceFactory();
+
+        MockConfiguration mc = new MockConfiguration();
+
+        mc.setMetricSourceFactory(mmsf);
+        mc.addMetricDefinition(mmd);
+
+        DataBot db = new DataBot(mc);
+
+        //
+        // configure the mock source to fail with checked exception
+        //
+
+        MockMetricSource mms = (MockMetricSource)db.getMetricSource(ma);
+        mms.breakOnCollectWithMetricSourceException("SYNTHETIC CHECKED");
+
+        DataBotTimerTask t = db.getTimerTask();
+
+        long t0 = System.currentTimeMillis();
+
+        TimedEvent e = t.collectMetrics();
+
+        long t1 = System.currentTimeMillis();
+
+        assertNotNull(e);
+
+        assertTrue(t0 <= e.getTime());
+        assertTrue(e.getTime() <= t1);
+
+        Set<Property> properties = e.getProperties();
+        assertTrue(properties.isEmpty());
+    }
+
+    @Test
+    public void collectMetrics_OneSource_OneMetricDefinition_CollectionFailsWithUncheckedException() throws Exception {
+
+        Address ma = new MockAddress("mock-metric-source");
+        MockMetricDefinition mmd = new MockMetricDefinition(ma, "mock-metric-id");
+        MockMetricSourceFactory mmsf = new MockMetricSourceFactory();
+
+        MockConfiguration mc = new MockConfiguration();
+
+        mc.setMetricSourceFactory(mmsf);
+        mc.addMetricDefinition(mmd);
+
+        DataBot db = new DataBot(mc);
+
+        //
+        // configure the mock source to fail with unchecked exception
+        //
+
+        MockMetricSource mms = (MockMetricSource)db.getMetricSource(ma);
+        mms.breakOnCollectWithUncheckedException("SYNTHETIC UNCHECKED");
+
+        DataBotTimerTask t = db.getTimerTask();
+
+        long t0 = System.currentTimeMillis();
+
+        TimedEvent e = t.collectMetrics();
+
+        long t1 = System.currentTimeMillis();
+
+        assertNotNull(e);
+
+        assertTrue(t0 <= e.getTime());
+        assertTrue(e.getTime() <= t1);
+
+        Set<Property> properties = e.getProperties();
+        assertTrue(properties.isEmpty());
+    }
 
     // toLogMessage() --------------------------------------------------------------------------------------------------
 

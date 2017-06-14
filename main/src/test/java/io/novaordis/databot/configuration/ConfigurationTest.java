@@ -21,6 +21,7 @@ import io.novaordis.databot.consumer.MockDataConsumer;
 import io.novaordis.databot.MockMetricDefinition;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.MockAddress;
 import io.novaordis.events.api.metric.jboss.JBossCliMetricDefinition;
 import io.novaordis.events.api.metric.jmx.JmxMetricDefinition;
 import io.novaordis.events.api.metric.os.mdefs.CpuUserTime;
@@ -232,7 +233,41 @@ public abstract class ConfigurationTest {
     @Test
     public void getMetricDefinitions() throws Exception {
 
-        fail("add tests for getMetricDefinitions() and getMetricDefinitions(Address)");
+        ConfigurationBase c = (ConfigurationBase)getConfigurationToTest(true, null);
+
+        List<MetricDefinition> result = c.getMetricDefinitions();
+        assertTrue(result.isEmpty());
+
+        result = c.getMetricDefinitions(new MockAddress("no-such-address"));
+        assertTrue(result.isEmpty());
+
+        MockAddress ma = new MockAddress("test-address");
+        MetricDefinition md = new MockMetricDefinition(ma);
+
+        c.addMetricDefinition(md);
+
+        result = c.getMetricDefinitions();
+        assertEquals(1, result.size());
+        assertEquals(md, result.get(0));
+
+        List<MetricDefinition> result2 = c.getMetricDefinitions(new MockAddress("test-address"));
+        assertEquals(1, result2.size());
+        assertEquals(md, result2.get(0));
+
+        MockAddress ma2 = new MockAddress("test-address");
+        MetricDefinition md2 = new MockMetricDefinition(ma2);
+
+        c.addMetricDefinition(md2);
+
+        result = c.getMetricDefinitions();
+        assertEquals(2, result.size());
+        assertEquals(md, result.get(0));
+        assertEquals(md2, result.get(1));
+
+        result2 = c.getMetricDefinitions(new MockAddress("test-address"));
+        assertEquals(2, result2.size());
+        assertEquals(md, result2.get(0));
+        assertEquals(md2, result2.get(1));
     }
 
     // addDataConsumer() -----------------------------------------------------------------------------------------------

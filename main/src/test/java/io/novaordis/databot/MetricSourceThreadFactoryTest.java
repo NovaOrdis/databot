@@ -41,14 +41,24 @@ public class MetricSourceThreadFactoryTest {
     @Test
     public void threadName() throws Exception {
 
-        MetricSourceThreadFactory f = new MetricSourceThreadFactory();
+        String threadBaseName = "something";
+
+        MetricSourceThreadFactory f = new MetricSourceThreadFactory(threadBaseName);
 
         Thread t = f.newThread(() -> {
             throw new RuntimeException("run() NOT YET IMPLEMENTED");
         });
 
-        assertEquals("test thread", t.getName());
+        assertEquals("something #0", t.getName());
         assertEquals(Thread.State.NEW, t.getState());
+
+
+        Thread t2 = f.newThread(() -> {
+            throw new RuntimeException("run() NOT YET IMPLEMENTED");
+        });
+
+        assertEquals("something #1", t2.getName());
+        assertEquals(Thread.State.NEW, t2.getState());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

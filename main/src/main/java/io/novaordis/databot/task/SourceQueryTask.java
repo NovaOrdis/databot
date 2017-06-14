@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package io.novaordis.databot;
+package io.novaordis.databot.task;
 
 import io.novaordis.events.api.event.Property;
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceException;
 import io.novaordis.utilities.address.Address;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,27 +38,36 @@ public class SourceQueryTask implements Callable<List<Property>> {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
+    private static final Logger log = LoggerFactory.getLogger(SourceQueryTask.class);
+
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private Address metricSourceAddress;
+    private MetricSource source;
 
     private List<MetricDefinition> metricDefinitions;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
     /**
-     * @param metrics all metrics must be associated with the same source, otherwise the constructor will throw
+     * @param s the metric source to query.
+     *
+     * @param metrics all metrics must be associated with the given sources, otherwise the constructor will throw
      *                IllegalArgumentException
      */
-    public SourceQueryTask(List<MetricDefinition> metrics) {
+    public SourceQueryTask(MetricSource s, List<MetricDefinition> metrics) {
 
-        MetricDefinition previous = null;
+        if (s == null) {
+
+            throw new IllegalArgumentException("null metric source");
+        }
+
+        this.source = s;
 
         //
-        // check to see if all metric definitions are associated with the same source and throw IllegalArgumentException
-        // if we identify at least two definitions associated with different addresses.
+        // check to see if all metric definitions are associated with the source we want to query and throw
+        // IllegalArgumentException if we identify a defintion associated with a different address.
         //
 
         //noinspection Convert2streamapi
@@ -63,13 +75,9 @@ public class SourceQueryTask implements Callable<List<Property>> {
 
             Address a = d.getMetricSourceAddress();
 
-            if (metricSourceAddress == null) {
+            if (!source.getAddress().equals(a)) {
 
-                metricSourceAddress = a;
-            }
-            else if (!metricSourceAddress.equals(a)) {
-
-                throw new IllegalArgumentException("metrics do not belong to the same source: " + previous + ", " + d);
+                throw new IllegalArgumentException(d + " is not associated with source " + source);
             }
 
             if (metricDefinitions == null) {
@@ -78,31 +86,53 @@ public class SourceQueryTask implements Callable<List<Property>> {
             }
 
             metricDefinitions.add(d);
-            previous = d;
         }
     }
 
     // Callable implementation -----------------------------------------------------------------------------------------
 
     /**
+     * This method is invoked on a source-handling thread, independently of other sources.
+     *
      * @throws MetricSourceException if the query failed.
      */
     @Override
     public List<Property> call() throws MetricSourceException {
 
-        throw new RuntimeException("run() NOT YET IMPLEMENTED");
+        try {
+
+            List<Property> result = source.collectMetrics(metricDefinitions);
+
+            log.debug(this + " completed source collection");
+
+            return result;
+        }
+        catch(RuntimeException t) {
+
+            //
+            // we also wrap unexpected exceptions into (expected) MetricSourceException so they cleanly propagate
+            // to the collection task; do not log, we'll only add noise, they'll be logged upstairs.
+            //
+            throw new MetricSourceException(t);
+        }
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
     public Address getSourceAddress() {
 
-        return metricSourceAddress;
+        return source.getAddress();
     }
 
     public List<MetricDefinition>  getMetricDefinitions() {
 
         return metricDefinitions;
+    }
+
+    @Override
+    public String toString() {
+
+        return (source == null ? "UNINITIALIZED" : source.toString()) + " query";
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

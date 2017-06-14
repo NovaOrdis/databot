@@ -19,18 +19,19 @@ package io.novaordis.databot;
 import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.failure.DataBotException;
 import io.novaordis.databot.failure.EventQueueFullException;
+import io.novaordis.databot.task.SourceQueryTask;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.GenericTimedEvent;
 import io.novaordis.events.api.event.Property;
 import io.novaordis.events.api.event.TimedEvent;
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.utilities.address.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -137,7 +138,7 @@ public class DataBotTimerTask extends TimerTask {
 
     public String toString() {
 
-        return dataBot == null ? "uninitialized" : "" + dataBot.getId();
+        return dataBot == null ? "UNINITIALIZED" : "" + dataBot.getId();
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
@@ -203,14 +204,19 @@ public class DataBotTimerTask extends TimerTask {
         }
     }
 
+    /**
+     * Must strive to handle all exceptions internally and not attempt to bubble them up. If exceptions occurr, they
+     * should be properly logged as ERROR.
+     */
     TimedEvent collectMetrics() {
 
         log.debug(this + " collecting metrics ...");
 
-        Configuration configuration = dataBot.getConfiguration();
+        Configuration dataBotConfiguration = dataBot.getConfiguration();
 
-        Set<Address> sourceAddresses = configuration.getMetricSourceAddresses();
+        List<Address> sourceAddresses = new ArrayList<>(dataBotConfiguration.getMetricSourceAddresses());
 
+        // the order in the future list will be the same as the order in the source address list
         List<Future<List<Property>>> futures = new ArrayList<>();
 
         long collectionStartTimestamp = System.currentTimeMillis();
@@ -221,16 +227,23 @@ public class DataBotTimerTask extends TimerTask {
             // dispatch an internal thread per source to collect metrics
             //
 
-            List<MetricDefinition> metricsForSource = configuration.getMetricDefinitions(a);
-            SourceQueryTask q = new SourceQueryTask(metricsForSource);
+            MetricSource ms = dataBot.getMetricSource(a);
+            List<MetricDefinition> metricsForSource = dataBotConfiguration.getMetricDefinitions(a);
+            SourceQueryTask q = new SourceQueryTask(ms, metricsForSource);
+
+            log.debug(this + " submitting data collection task for " + a + " to a source-handling thread");
+
             Future<List<Property>> future = dataBot.getSourceExecutor().submit(q);
+
             futures.add(future);
         }
 
         //
-        // wait for metric values of source failure
+        // wait for metric values or metric source failure
         //
 
+        int index = 0;
+        int countOfSourcesThatFailed = 0;
         List<Property> allProperties = new ArrayList<>();
 
         for(Future<List<Property>> f: futures) {
@@ -242,18 +255,24 @@ public class DataBotTimerTask extends TimerTask {
             }
             catch (InterruptedException e) {
 
-                throw new RuntimeException("NOT YET IMPLEMENTED");
+                log.warn(Thread.currentThread().getName() + " interrupted while waiting for metric collection results");
             }
             catch (ExecutionException e) {
 
+                countOfSourcesThatFailed++;
                 Throwable cause = e.getCause();
-                throw new RuntimeException("NOT YET IMPLEMENTED");
+                log.error("source " + sourceAddresses.get(index) + " collection failed: ", cause);
             }
+
+            index ++;
         }
 
         long collectionEndTimestamp = System.currentTimeMillis();
 
-        log.debug("collection for " + sourceAddresses.size() + " sources done in " + (collectionEndTimestamp - collectionStartTimestamp) + " ms");
+        log.debug("collection for " + sourceAddresses.size() + " source(s) completed in " +
+                (collectionEndTimestamp - collectionStartTimestamp) + " ms" +
+                (countOfSourcesThatFailed == 0 ?
+                        "" : ", " + countOfSourcesThatFailed + " source(s) failed during collection"));
 
         //
         // create the timed event

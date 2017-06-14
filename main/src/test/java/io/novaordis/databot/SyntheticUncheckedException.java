@@ -16,16 +16,11 @@
 
 package io.novaordis.databot;
 
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
- * This class exists mainly to allow us to give custom names to threads handing metric sources.
- *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 6/14/17
  */
-public class MetricSourceThreadFactory implements ThreadFactory {
+public class SyntheticUncheckedException extends RuntimeException {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -33,33 +28,11 @@ public class MetricSourceThreadFactory implements ThreadFactory {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private final String threadBaseName;
-    private final AtomicInteger threadCounter;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    /**
-     * @param threadBaseName the string to use as base for the thread name. A per-unique-thread counter will be
-     *                       appended to the base name, so threads can be uniquely identified by name.
-     */
-    public MetricSourceThreadFactory(String threadBaseName) {
+    public SyntheticUncheckedException(String msg) {
 
-        this.threadBaseName = threadBaseName;
-        this.threadCounter = new AtomicInteger(0);
-    }
-
-    // ThreadFactory implementation ------------------------------------------------------------------------------------
-
-    @Override
-    public Thread newThread(@SuppressWarnings("NullableProblems") Runnable r) {
-
-        if (r == null) {
-
-            throw new IllegalArgumentException("null runnable");
-        }
-
-        String threadName = threadBaseName + " #" + threadCounter.getAndIncrement();
-        return new Thread(r, threadName);
+        super(msg);
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
