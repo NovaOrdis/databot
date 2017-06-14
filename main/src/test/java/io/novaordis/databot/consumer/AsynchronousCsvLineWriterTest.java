@@ -17,7 +17,6 @@
 package io.novaordis.databot.consumer;
 
 import io.novaordis.databot.DataConsumer;
-import io.novaordis.databot.DataConsumerTest;
 import io.novaordis.databot.MockEvent;
 import io.novaordis.databot.MockMetricDefinition;
 import io.novaordis.databot.MockPrintStream;
@@ -506,9 +505,15 @@ public class AsynchronousCsvLineWriterTest extends DataConsumerTest {
     // Protected -------------------------------------------------------------------------------------------------------
 
     @Override
-    protected DataConsumer getDataConsumerToTest() throws Exception {
+    protected DataConsumer getDataConsumerToTest(BlockingQueue<Event> events) throws Exception {
 
-        return new AsynchronousCsvLineWriter(null, null, null);
+        AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(null, null, null);
+
+        if (events != null) {
+
+            w.setEventQueue(events);
+        }
+        return w;
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

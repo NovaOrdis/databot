@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package io.novaordis.databot;
+package io.novaordis.databot.consumer;
 
+import io.novaordis.databot.DataConsumer;
+import io.novaordis.databot.DataConsumerException;
 import io.novaordis.events.api.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +83,15 @@ public class MockDataConsumer implements DataConsumer {
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    /**
+     * Get and remove the event from the head of the queue of received events (not the main event queue), or return null
+     * if no events were not pushed into consumer.
+     */
+    public Event getEvent() {
+
+        return null;
+    }
 
     @Override
     public String toString() {

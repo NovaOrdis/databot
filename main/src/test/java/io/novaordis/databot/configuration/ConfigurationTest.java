@@ -17,7 +17,7 @@
 package io.novaordis.databot.configuration;
 
 import io.novaordis.databot.DataConsumer;
-import io.novaordis.databot.MockDataConsumer;
+import io.novaordis.databot.consumer.MockDataConsumer;
 import io.novaordis.databot.MockMetricDefinition;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;

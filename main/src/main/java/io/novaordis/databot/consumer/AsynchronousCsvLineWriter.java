@@ -16,7 +16,6 @@
 
 package io.novaordis.databot.consumer;
 
-import io.novaordis.databot.DataConsumerBase;
 import io.novaordis.databot.DataConsumerException;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.ShutdownEvent;

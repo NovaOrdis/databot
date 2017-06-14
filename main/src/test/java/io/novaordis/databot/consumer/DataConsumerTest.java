@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-package io.novaordis.databot;
+package io.novaordis.databot.consumer;
 
+import io.novaordis.databot.DataConsumer;
+import io.novaordis.databot.DataConsumerException;
+import io.novaordis.events.api.event.Event;
 import org.junit.Test;
+
+import java.util.concurrent.BlockingQueue;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -43,7 +48,7 @@ public abstract class DataConsumerTest {
     @Test
     public void start_NoEventQueue() throws Exception {
 
-        DataConsumer c = getDataConsumerToTest();
+        DataConsumer c = getDataConsumerToTest(null);
 
         assertNull(c.getEventQueue());
 
@@ -52,7 +57,7 @@ public abstract class DataConsumerTest {
             c.start();
             fail("should have thrown exception");
         }
-        catch(IllegalStateException e) {
+        catch(DataConsumerException e) {
 
             String msg = e.getMessage();
             assertTrue(msg.contains("null event queue"));
@@ -63,7 +68,10 @@ public abstract class DataConsumerTest {
 
     // Protected -------------------------------------------------------------------------------------------------------
 
-    protected abstract DataConsumer getDataConsumerToTest() throws Exception;
+    /**
+     * @param events null is acceptable, will return an instance with a null event queue.
+     */
+    protected abstract DataConsumer getDataConsumerToTest(BlockingQueue<Event> events) throws Exception;
 
     // Private ---------------------------------------------------------------------------------------------------------
 

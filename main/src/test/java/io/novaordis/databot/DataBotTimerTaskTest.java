@@ -17,13 +17,17 @@
 package io.novaordis.databot;
 
 import io.novaordis.databot.configuration.MockConfiguration;
+import io.novaordis.databot.consumer.MockActiveDataConsumer;
 import io.novaordis.databot.failure.EventQueueFullException;
 import io.novaordis.events.api.event.Event;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -36,8 +40,6 @@ import static org.junit.Assert.fail;
 public class DataBotTimerTaskTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
-
-    private static final Logger log = LoggerFactory.getLogger(DataBotTimerTaskTest.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -118,93 +120,101 @@ public class DataBotTimerTaskTest {
     }
 
     @Test
-    public void run_NoMetricsProducesEmptyTimedEvents() throws Exception {
+    public void run_DataCollectionEncountersNoMetricsProducesEmptyTimedEvents() throws Exception {
 
-        fail("RETURN HERE");
+        MockConfiguration mc = new MockConfiguration();
 
+        //
+        // plug in a consumer
+        //
+
+        MockActiveDataConsumer mdc = new MockActiveDataConsumer();
+        mc.setDataConsumers(Collections.singletonList(mdc));
+
+        DataBot db = new DataBot(mc);
+
+        assertFalse(db.isStarted());
+
+        //
+        // because we take the "control" away from the databot and we don't start it, allowing it to start its internal
+        // thread and drive the collection, we need to start the data collector externally
+        //
+
+        mdc.start();
+
+        //
+        // drive the data collection externally, by simulating the internal DataBot thread
+        //
+
+        DataBotTimerTask t = db.getTimerTask();
+
+        assertEquals(0L, t.getExecutionCount());
+        assertEquals(0L, t.getSuccessfulExecutionCount());
+
+        //
+        // this is a data run
+        //
+
+        t.run();
+
+        assertEquals(1L, t.getExecutionCount());
+        assertEquals(1L, t.getSuccessfulExecutionCount());
+        assertNull(t.getCauseOfLastFailure());
+
+        //
+        // the event will eventually reach the consumer
+        //
+
+        Event event;
+        int waitTimeSecs = 5;
+        long t0 = System.currentTimeMillis();
+        while((event = mdc.getEvent()) == null) {
+
+            if (System.currentTimeMillis() - t0 > waitTimeSecs) {
+
+                fail("we waited for more than " + waitTimeSecs + " secs for the event to propagate to consumer");
+
+            }
+
+            Thread.sleep(200L);
+        }
+
+        assertNotNull(event);
+        assertTrue(event.getProperties().isEmpty());
     }
 
     @Test
-    public void theTimerTaskDoesNotThrowUncheckedExceptions() throws Exception {
+    public void dataCollectionRun() throws Exception {
 
-        fail("RETURN HERE");
+        MockConfiguration mc = new MockConfiguration();
+        DataBot db = new DataBot(mc);
 
-//        MockConfiguration mc = new MockConfiguration();
-//        DataBot d = new DataBot(mc);
-//
-//
-//
-//        MockDataCollector mdc = new MockDataCollector();
-//        mdc.setBroken(true);
-//
-//        MockMetricSource mms = new MockMetricSource();
-//        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition(mms, "mock-metric-definition"));
-//
-//
-//        DataBotTimerTask t = new DataBotTimerTask(d);
-//
-//        // this MUST NOT throw any exception
-//        t.run();
-//
-//        log.info("we're good");
+        DataBotTimerTask t = db.getTimerTask();
+
+        t.dataCollectionRun();
+
+        //
+        // no metric, no properties, expecting an empty event on the queue
+        //
+
+        BlockingQueue<Event> eventQueue = db.getEventQueue();
+
+        long waitForEventSeconds = 3L;
+
+        Event event = eventQueue.poll(waitForEventSeconds, TimeUnit.SECONDS);
+
+        if (event == null) {
+
+            fail("failed to receive event on the event queue");
+        }
+
+        assertTrue(event.getProperties().isEmpty());
     }
 
     @Test
-    public void lifecycle() throws Exception {
+    public void dataCollectionRun_QueueFull() throws Exception {
 
         fail("RETURN HERE");
-
-//        MockConfiguration mc = new MockConfiguration();
-//        DataBot d = new DataBot(mc);
-//
-//
-//        MockDataCollector mdc = new MockDataCollector();
-//        BlockingQueue<Event> queue = new ArrayBlockingQueue<>(1);
-//        MockMetricSource mms = new MockMetricSource();
-//        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition(mms, "mock-metric-definition"));
-//
-//        DataBotTimerTask t = new DataBotTimerTask(d);
-//
-//        t.run();
-//
-//        // pick the mock event from the queue
-//
-//        MockTimedEvent mte = (MockTimedEvent)queue.take();
-//
-//        assertNotNull(mte);
-    }
-
-    @Test
-    public void failureToOfferTheEventToTheQueue() throws Exception {
-
-        fail("RETURN HERE");
-
-//        MockConfiguration mc = new MockConfiguration();
-//        DataBot d = new DataBot(mc);
-//
-//
-//        MockDataCollector mdc = new MockDataCollector();
-//
-//        // one element queue, the second will block
-//        BlockingQueue<Event> queue = new ArrayBlockingQueue<>(1);
-//        assertTrue(queue.isEmpty());
-//
-//        MockMetricSource mms = new MockMetricSource();
-//        List<MetricDefinition> metrics = Collections.singletonList(new MockMetricDefinition(mms, "mock-metric-definition"));
-//
-//        DataBotTimerTask t = new DataBotTimerTask(d);
-//
-//        t.run();
-//
-//        assertEquals(1, queue.size());
-//
-//        //
-//        // the queue is full now, run() one more time so the queue won't accept the event
-//        //
-//
-//        t.run();
-//
-//        log.info("we're good");
     }
 
     // toLogMessage() --------------------------------------------------------------------------------------------------

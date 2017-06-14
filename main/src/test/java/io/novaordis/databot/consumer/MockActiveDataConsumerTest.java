@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package io.novaordis.databot;
+package io.novaordis.databot.consumer;
 
 import io.novaordis.events.api.event.Event;
 
 import java.util.concurrent.BlockingQueue;
 
+
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
- * @since 6/11/17
+ * @since 6/13/17
  */
-public abstract class DataConsumerBase implements DataConsumer {
+public class MockActiveDataConsumerTest extends ActiveDataConsumerTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -32,39 +33,24 @@ public abstract class DataConsumerBase implements DataConsumer {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private BlockingQueue<Event> eventQueue;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    // DataConsumer implementation -------------------------------------------------------------------------------------
-
-    @Override
-    public BlockingQueue<Event> getEventQueue() {
-
-        return eventQueue;
-    }
-
-    @Override
-    public void setEventQueue(BlockingQueue<Event> q) {
-
-        this.eventQueue = q;
-    }
-
-    @Override
-    public synchronized void start() throws DataConsumerException {
-
-        if (eventQueue == null) {
-
-            throw new IllegalStateException(
-                    "null event queue, " + this + " was not properly configured before starting");
-        }
-    }
-
     // Public ----------------------------------------------------------------------------------------------------------
+
+    // Tests -----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
+
+    /**
+     * @param events null is acceptable, will return an instance with a null event queue.
+     */
+    @Override
+    protected MockActiveDataConsumer getActiveDataConsumerToTest(BlockingQueue<Event> events) throws Exception {
+
+            return new MockActiveDataConsumer(events);
+    }
 
     // Private ---------------------------------------------------------------------------------------------------------
 

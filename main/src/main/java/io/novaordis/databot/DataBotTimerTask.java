@@ -132,6 +132,11 @@ public class DataBotTimerTask extends TimerTask {
         return causeOfLastFailure;
     }
 
+    public String toString() {
+
+        return dataBot == null ? "uninitialized" : "" + dataBot.getId();
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
@@ -176,9 +181,15 @@ public class DataBotTimerTask extends TimerTask {
 
         BlockingQueue<Event> eventQueue = dataBot.getEventQueue();
 
+        log.debug("placing the event " + event + " on the event queue");
+
         boolean sent = eventQueue.offer(event);
 
-        if (!sent) {
+        if (sent) {
+
+            log.debug("event successfully placed on the queue");
+        }
+        else {
 
             //
             // we will just drop the event and notify the upper layer
@@ -187,8 +198,6 @@ public class DataBotTimerTask extends TimerTask {
             throw new EventQueueFullException();
         }
     }
-
-
 
 //        //
 //        // separate the metric definitions according their sources
@@ -243,7 +252,9 @@ public class DataBotTimerTask extends TimerTask {
 //        TimedEvent te = new GenericTimedEvent(t, properties);
 //
 
-
+//
+//        ......
+//
 
 
 //    List<Property> readMetrics(List<MetricDefinition> metricDefinitions) throws DataCollectionException {
@@ -339,6 +350,7 @@ public class DataBotTimerTask extends TimerTask {
             List<Property> properties = collectMetricsForSource(s);
         }
 
+        //noinspection UnnecessaryLocalVariable
         GenericTimedEvent event = new GenericTimedEvent();
 
         return event;
@@ -353,7 +365,6 @@ public class DataBotTimerTask extends TimerTask {
 
         return Collections.emptyList();
     }
-
 
     // Private ---------------------------------------------------------------------------------------------------------
 

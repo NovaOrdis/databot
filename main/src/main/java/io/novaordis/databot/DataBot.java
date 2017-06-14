@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.Timer;
+import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -63,6 +64,8 @@ public class DataBot {
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
+
+    private String id;
 
     private final Configuration configuration;
 
@@ -94,6 +97,8 @@ public class DataBot {
 
             throw new IllegalArgumentException("null configuration");
         }
+
+        this.id = UUID.randomUUID().toString();
 
         this.configuration = configuration;
 
@@ -132,6 +137,11 @@ public class DataBot {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
+    public String getId() {
+
+        return id;
+    }
+
     public Set<MetricSource> getMetricSources() {
 
         return sources.getSources();
@@ -148,6 +158,12 @@ public class DataBot {
     public Configuration getConfiguration() {
 
         return configuration;
+    }
+
+    @Override
+    public String toString() {
+
+        return "" + getId();
     }
 
     // Lifecycle -------------------------------------------------------------------------------------------------------
@@ -312,6 +328,11 @@ public class DataBot {
         return timerTask.getExecutionCount();
     }
 
+    DataBotTimerTask getTimerTask() {
+
+        return timerTask;
+    }
+
     // Protected -------------------------------------------------------------------------------------------------------
 
     /**
@@ -343,13 +364,15 @@ public class DataBot {
         }
 
         //
-        // initialize data consumers
+        // initialize data consumers, but not start them yet
         //
 
         for(DataConsumer c: configuration.getDataConsumers()) {
 
             c.setEventQueue(eventQueue);
+
             consumers.add(c);
+            log.debug(this + " installed data consumer " + c);
 
         }
     }
