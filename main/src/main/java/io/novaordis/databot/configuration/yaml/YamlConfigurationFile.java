@@ -70,7 +70,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
     @Override
     protected void load(InputStream is) throws UserErrorException {
 
-        log.debug("loading configuration");
+        log.debug("loading configuration from " + getFileName());
 
         Yaml yaml = new Yaml();
 

@@ -50,6 +50,9 @@ public abstract class ConfigurationBase implements Configuration {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    // may be null if the configuration was not loaded from a file
+    private String fileName;
+
     private boolean foreground;
 
     private int samplingInterval;
@@ -213,6 +216,14 @@ public abstract class ConfigurationBase implements Configuration {
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    /**
+     * May be null if the configuration was not loaded from a file.
+     */
+    public String getFileName() {
+
+        return fileName;
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

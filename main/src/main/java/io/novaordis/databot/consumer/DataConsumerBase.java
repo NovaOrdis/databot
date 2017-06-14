@@ -57,8 +57,19 @@ public abstract class DataConsumerBase implements DataConsumer {
     @Override
     public final void setEventQueue(BlockingQueue<Event> q) {
 
+        if (q == null) {
+
+            if (this.eventQueue != null) {
+
+                log.debug(this + " disconnected from the event queue");
+            }
+        }
+        else {
+
+            log.debug(this + " connected to event queue" + q);
+        }
+
         this.eventQueue = q;
-        log.debug(this + (this.eventQueue == null ? " disconnected from the event queue" : " connected to event queue " + this.eventQueue));
     }
 
     @Override

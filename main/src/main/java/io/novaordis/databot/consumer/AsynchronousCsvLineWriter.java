@@ -270,10 +270,11 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
     @Override
     public String toString() {
 
-        return "AsynchronousCsvLineWriter:header " +
-                (isHeaderOn() ? "on" : "off") + ":" +
+        return "AsynchronousCsvLineWriter(header " +
+                (isHeaderOn() ? "on" : "off") + ", " +
                 (printStream == null ? "null" :
-                        (printStream.equals(System.out) ? "/dev/stdout" : outputFileName));
+                        (printStream.equals(System.out) ? "/dev/stdout" : outputFileName)) +
+                ")";
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

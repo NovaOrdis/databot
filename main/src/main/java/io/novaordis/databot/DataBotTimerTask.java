@@ -272,7 +272,8 @@ public class DataBotTimerTask extends TimerTask {
         log.debug("collection for " + sourceAddresses.size() + " source(s) completed in " +
                 (collectionEndTimestamp - collectionStartTimestamp) + " ms" +
                 (countOfSourcesThatFailed == 0 ?
-                        "" : ", " + countOfSourcesThatFailed + " source(s) failed during collection"));
+                        "" : ", " + countOfSourcesThatFailed + " source(s) failed during collection") +
+                ", " + allProperties.size() + " properties collected");
 
         //
         // create the timed event
