@@ -37,6 +37,14 @@ public class MockMetricDefinition extends MockMetricDefinitionBase {
     /**
      * @param sourceAddress must always have a non-null source.
      */
+    public MockMetricDefinition(Address sourceAddress) {
+
+        this(sourceAddress, MockMetricDefinition.class.getSimpleName());
+    }
+
+    /**
+     * @param sourceAddress must always have a non-null source.
+     */
     public MockMetricDefinition(Address sourceAddress, String id) {
 
         super(sourceAddress);
@@ -59,6 +67,12 @@ public class MockMetricDefinition extends MockMetricDefinitionBase {
 
     public void setId(String s) {
         this.id = s;
+    }
+
+    @Override
+    public String toString() {
+
+        return "" + getMetricSourceAddress() + "/" + getId();
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

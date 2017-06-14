@@ -253,7 +253,7 @@ public class DataBotTimerTask extends TimerTask {
 
         long collectionEndTimestamp = System.currentTimeMillis();
 
-        log.debug("collection done in " + (collectionEndTimestamp - collectionStartTimestamp) + " ms");
+        log.debug("collection for " + sourceAddresses.size() + " sources done in " + (collectionEndTimestamp - collectionStartTimestamp) + " ms");
 
         //
         // create the timed event

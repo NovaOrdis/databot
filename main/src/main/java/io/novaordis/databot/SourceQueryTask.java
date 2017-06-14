@@ -21,6 +21,7 @@ import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSourceException;
 import io.novaordis.utilities.address.Address;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -38,6 +39,10 @@ public class SourceQueryTask implements Callable<List<Property>> {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    private Address metricSourceAddress;
+
+    private List<MetricDefinition> metricDefinitions;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     /**
@@ -46,12 +51,35 @@ public class SourceQueryTask implements Callable<List<Property>> {
      */
     public SourceQueryTask(List<MetricDefinition> metrics) {
 
+        MetricDefinition previous = null;
 
         //
-        // check to see if all metrics are associated with the same source and throw IllegalArgumentException if they
-        // don't
+        // check to see if all metric definitions are associated with the same source and throw IllegalArgumentException
+        // if we identify at least two definitions associated with different addresses.
         //
 
+        //noinspection Convert2streamapi
+        for(MetricDefinition d: metrics) {
+
+            Address a = d.getMetricSourceAddress();
+
+            if (metricSourceAddress == null) {
+
+                metricSourceAddress = a;
+            }
+            else if (!metricSourceAddress.equals(a)) {
+
+                throw new IllegalArgumentException("metrics do not belong to the same source: " + previous + ", " + d);
+            }
+
+            if (metricDefinitions == null) {
+
+                metricDefinitions = new ArrayList<>();
+            }
+
+            metricDefinitions.add(d);
+            previous = d;
+        }
     }
 
     // Callable implementation -----------------------------------------------------------------------------------------
@@ -69,7 +97,12 @@ public class SourceQueryTask implements Callable<List<Property>> {
 
     public Address getSourceAddress() {
 
-        throw new RuntimeException("run() NOT YET IMPLEMENTED");
+        return metricSourceAddress;
+    }
+
+    public List<MetricDefinition>  getMetricDefinitions() {
+
+        return metricDefinitions;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

@@ -20,6 +20,9 @@ import io.novaordis.databot.configuration.MockConfiguration;
 import io.novaordis.databot.consumer.MockActiveDataConsumer;
 import io.novaordis.databot.failure.EventQueueFullException;
 import io.novaordis.events.api.event.Event;
+import io.novaordis.events.api.event.TimedEvent;
+import io.novaordis.events.api.metric.MockAddress;
+import io.novaordis.utilities.address.Address;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -242,14 +245,54 @@ public class DataBotTimerTaskTest {
     // collectMetrics() ------------------------------------------------------------------------------------------------
 
     @Test
-    public void collectMetrics() throws Exception {
+    public void collectMetrics_NoSources() throws Exception {
 
         MockConfiguration mc = new MockConfiguration();
         DataBot db = new DataBot(mc);
         DataBotTimerTask t = db.getTimerTask();
 
-        t.collectMetrics();
+        long t0 = System.currentTimeMillis();
+
+        TimedEvent e = t.collectMetrics();
+
+        long t1 = System.currentTimeMillis();
+
+        assertNotNull(e);
+
+        assertTrue(t0 <= e.getTime());
+        assertTrue(e.getTime() <= t1);
+        assertTrue(e.getProperties().isEmpty());
     }
+
+    @Test
+    public void collectMetrics_OneSource_OneMetricDefinition() throws Exception {
+
+        Address ma = new MockAddress("mock-metric-source");
+        MockMetricDefinition mmd = new MockMetricDefinition(ma);
+        MockMetricSourceFactory mmsf = new MockMetricSourceFactory();
+
+        MockConfiguration mc = new MockConfiguration();
+
+        mc.setMetricSourceFactory(mmsf);
+        mc.addMetricDefinition(mmd);
+
+        DataBot db = new DataBot(mc);
+
+        DataBotTimerTask t = db.getTimerTask();
+
+        long t0 = System.currentTimeMillis();
+
+        TimedEvent e = t.collectMetrics();
+
+        long t1 = System.currentTimeMillis();
+
+        assertNotNull(e);
+
+        assertTrue(t0 <= e.getTime());
+        assertTrue(e.getTime() <= t1);
+        assertTrue(e.getProperties().isEmpty());
+    }
+
 
     // toLogMessage() --------------------------------------------------------------------------------------------------
 

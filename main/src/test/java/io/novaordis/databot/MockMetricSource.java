@@ -21,6 +21,7 @@ import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricException;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceException;
+import io.novaordis.events.api.metric.MockAddress;
 import io.novaordis.utilities.address.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class MockMetricSource implements MetricSource {
 
     public MockMetricSource() {
 
-        this(null);
+        this(new MockAddress(MockMetricSource.class.getSimpleName()));
     }
 
     public MockMetricSource(Address a) {
@@ -133,7 +134,7 @@ public class MockMetricSource implements MetricSource {
     @Override
     public String toString() {
 
-        return "Mock Metric Source";
+        return address == null ? "UNINITIALIZED" : address.toString();
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

@@ -17,7 +17,7 @@
 package io.novaordis.databot;
 
 import io.novaordis.events.api.metric.MetricDefinition;
-import io.novaordis.utilities.address.Address;
+import io.novaordis.events.api.metric.MockAddress;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -46,27 +46,13 @@ public class SourceQueryTaskTest {
     // Tests -----------------------------------------------------------------------------------------------------------
 
     @Test
-    public void constructor() throws Exception {
-
-        MockMetricSource ms = new MockMetricSource();
-        MockMetricDefinition md = new MockMetricDefinition(ms.getAddress(), "md");
-        MockMetricDefinition md2 = new MockMetricDefinition(ms.getAddress(), "md2");
-
-        SourceQueryTask q = new SourceQueryTask(Arrays.asList(md, md2));
-
-        Address a = ms.getAddress();
-
-        assertEquals(a, q.getSourceAddress());
-    }
-
-    @Test
     public void constructor_NotAllMetricsBelongToTheSameSource() throws Exception {
 
-        MockMetricSource ms = new MockMetricSource();
-        MockMetricDefinition md = new MockMetricDefinition(ms.getAddress(), "md");
+        MockAddress ma = new MockAddress("A");
+        MockMetricDefinition md = new MockMetricDefinition(ma, "md");
 
-        MockMetricSource ms2 = new MockMetricSource();
-        MockMetricDefinition md2 = new MockMetricDefinition(ms2.getAddress(), "md2");
+        MockAddress ma2 = new MockAddress("B");
+        MockMetricDefinition md2 = new MockMetricDefinition(ma2, "md2");
 
         List<MetricDefinition> mds = Arrays.asList(md, md2);
 
@@ -79,6 +65,23 @@ public class SourceQueryTaskTest {
             String msg = e.getMessage();
             assertTrue(msg.contains("metrics do not belong to the same source"));
         }
+    }
+
+    @Test
+    public void constructor() throws Exception {
+
+        MockAddress ma = new MockAddress();
+        MockMetricDefinition md = new MockMetricDefinition(ma, "md");
+        MockMetricDefinition md2 = new MockMetricDefinition(ma, "md2");
+
+        SourceQueryTask q = new SourceQueryTask(Arrays.asList(md, md2));
+
+        assertEquals(ma, q.getSourceAddress());
+
+        List<MetricDefinition> metricDefinitions = q.getMetricDefinitions();
+        assertEquals(2, metricDefinitions.size());
+        assertEquals(md, metricDefinitions.get(0));
+        assertEquals(md2, metricDefinitions.get(1));
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
