@@ -39,7 +39,7 @@ import java.util.concurrent.Future;
 
 /**
  * A timer task that insure the sources are started, starts them if they're not, collects the required metrics, wraps
- * them into a TimedEvent instance and puts the event on the event queue.
+ * them into a TimedEvent instance and puts the event in the event queue.
  *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/29/16
@@ -186,15 +186,11 @@ public class DataBotTimerTask extends TimerTask {
 
         BlockingQueue<Event> eventQueue = dataBot.getEventQueue();
 
-        log.debug("placing the event " + event + " on the event queue");
+        log.debug("placing the event " + event + " in the event queue");
 
         boolean sent = eventQueue.offer(event);
 
-        if (sent) {
-
-            log.debug("event successfully placed on the queue");
-        }
-        else {
+        if (!sent) {
 
             //
             // we will just drop the event and notify the upper layer
