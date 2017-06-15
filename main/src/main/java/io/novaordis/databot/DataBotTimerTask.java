@@ -26,12 +26,15 @@ import io.novaordis.events.api.event.Property;
 import io.novaordis.events.api.event.TimedEvent;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSource;
+import io.novaordis.events.api.metric.MetricSourceDefinition;
 import io.novaordis.utilities.address.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -201,18 +204,31 @@ public class DataBotTimerTask extends TimerTask {
     }
 
     /**
-     * Must strive to handle all exceptions internally and not attempt to bubble them up. If exceptions occurr, they
-     * should be properly logged as ERROR.
+     * Must strive to handle all exceptions internally and not attempt to bubble them up. If exceptions occur, they
+     * should be properly logged as ERROR, at this level. The calling layer will handle runaway exceptions, though.
      */
     TimedEvent collectMetrics() {
 
         log.debug(this + " collecting metrics ...");
 
-        Configuration dataBotConfiguration = dataBot.getConfiguration();
+        Configuration configuration = dataBot.getConfiguration();
 
-        List<Address> sourceAddresses = new ArrayList<>(dataBotConfiguration.getMetricSourceAddresses());
+        Set<Address> sourceAddressSet = new HashSet<>();
 
-        // the order in the future list will be the same as the order in the source address list
+        //noinspection Convert2streamapi
+        for(MetricSourceDefinition sd: configuration.getMetricSourceDefinitions()) {
+
+            sourceAddressSet.add(sd.getAddress());
+        }
+
+        //
+        // The order is important to be maintained, as we will associate the futures with it
+        //
+        List<Address> sourceAddresses = new ArrayList<>(sourceAddressSet);
+
+        //
+        // The order in the future list will be the same as the order in the source address list
+        //
         List<Future<List<Property>>> futures = new ArrayList<>();
 
         long collectionStartTimestamp = System.currentTimeMillis();
@@ -224,7 +240,7 @@ public class DataBotTimerTask extends TimerTask {
             //
 
             MetricSource ms = dataBot.getMetricSource(a);
-            List<MetricDefinition> metricsForSource = dataBotConfiguration.getMetricDefinitions(a);
+            List<MetricDefinition> metricsForSource = configuration.getMetricDefinitions(a);
             SourceQueryTask q = new SourceQueryTask(ms, metricsForSource);
 
             log.debug(this + " submitting data collection task for " + a + " to a source-handling thread");

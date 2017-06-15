@@ -21,27 +21,30 @@ import io.novaordis.databot.consumer.MockDataConsumer;
 import io.novaordis.databot.MockMetricDefinition;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.MetricSourceDefinition;
 import io.novaordis.events.api.metric.MockAddress;
+import io.novaordis.events.api.metric.jboss.JBossController;
 import io.novaordis.events.api.metric.jboss.JBossDmrMetricDefinition;
+import io.novaordis.events.api.metric.jmx.JmxBus;
 import io.novaordis.events.api.metric.jmx.JmxMetricDefinition;
+import io.novaordis.events.api.metric.os.LocalOS;
 import io.novaordis.events.api.metric.os.mdefs.CpuUserTime;
 import io.novaordis.events.api.metric.os.mdefs.LoadAverageLastMinute;
 import io.novaordis.events.api.metric.os.mdefs.PhysicalMemoryTotal;
 import io.novaordis.jboss.cli.model.JBossControllerAddress;
 import io.novaordis.utilities.UserErrorException;
-import io.novaordis.utilities.address.Address;
 import io.novaordis.utilities.address.AddressImpl;
 import io.novaordis.utilities.address.LocalOSAddress;
 import org.junit.Test;
 
 import java.io.File;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -116,6 +119,34 @@ public abstract class ConfigurationTest {
         // metric sources
         //
 
+        List<MetricSourceDefinition> sourceDefinitions = c.getMetricSourceDefinitions();
+
+        assertEquals(4, sourceDefinitions.size());
+
+        MetricSourceDefinition d = sourceDefinitions.get(0);
+
+        assertEquals(new JBossControllerAddress("jbosscli://admin@localhost:9999"), d.getAddress());
+        assertEquals("local-jboss-instance", d.getName());
+        assertEquals(JBossController.METRIC_SOURCE_TYPE, d.getType());
+
+        MetricSourceDefinition d2 = sourceDefinitions.get(1);
+
+        assertEquals(new JBossControllerAddress("jbosscli://admin@other-host:10101"), d2.getAddress());
+        assertEquals("remote-jboss-instance", d2.getName());
+        assertEquals(JBossController.METRIC_SOURCE_TYPE, d2.getType());
+
+        MetricSourceDefinition d3 = sourceDefinitions.get(2);
+
+        assertEquals(new LocalOSAddress(), d3.getAddress());
+        assertNull(d3.getName());
+        assertEquals(LocalOS.METRIC_SOURCE_TYPE, d3.getType());
+
+        MetricSourceDefinition d4 = sourceDefinitions.get(3);
+
+        assertEquals(new AddressImpl("jmx://admin:admin123@localhost:9999"), d4.getAddress());
+        assertNull(d4.getName());
+        assertEquals(JmxBus.METRIC_SOURCE_TYPE, d4.getType());
+
         //
         // metric definitions
         //
@@ -148,15 +179,6 @@ public abstract class ConfigurationTest {
 
         assertEquals(3, c.getMetricSourceCount());
 
-        Set<Address> addresses = c.getMetricSourceAddresses();
-        assertNotNull(addresses);
-
-        assertEquals(3, addresses.size());
-
-        assertTrue(addresses.contains(new LocalOSAddress()));
-        assertTrue(addresses.contains(new AddressImpl("jmx", "admin", null, "localhost", 9999)));
-        assertTrue(addresses.contains(new JBossControllerAddress("admin", null, "localhost", 9999)));
-
         //
         // data consumers
         //
@@ -184,7 +206,7 @@ public abstract class ConfigurationTest {
         assertEquals(Configuration.DEFAULT_SAMPLING_INTERVAL_SEC, c.getSamplingIntervalSec());
         assertEquals(Configuration.DEFAULT_EVENT_QUEUE_SIZE, c.getEventQueueSize());
         assertEquals(0, c.getMetricSourceCount());
-        assertTrue(c.getMetricSourceAddresses().isEmpty());
+        assertTrue(c.getMetricSourceDefinitions().isEmpty());
         assertTrue(c.getMetricDefinitions().isEmpty());
         assertTrue(c.getDataConsumers().isEmpty());
     }
@@ -198,7 +220,7 @@ public abstract class ConfigurationTest {
 
         assertEquals(0, c.getMetricSourceCount());
         assertTrue(c.getMetricDefinitions().isEmpty());
-        assertTrue(c.getMetricSourceAddresses().isEmpty());
+        assertTrue(c.getMetricSourceDefinitions().isEmpty());
 
         AddressImpl a = new AddressImpl("mock-host");
 
@@ -210,9 +232,9 @@ public abstract class ConfigurationTest {
         assertEquals(1, mds.size());
         assertTrue(mds.contains(md));
 
-        Set<Address> mss = c.getMetricSourceAddresses();
-        assertEquals(1, mss.size());
-        assertTrue(mss.contains(md.getMetricSourceAddress()));
+        List<MetricSourceDefinition> sds = c.getMetricSourceDefinitions();
+        assertEquals(1, sds.size());
+        assertTrue(sds.get(0).getAddress().equals(md.getMetricSourceAddress()));
 
         MockMetricDefinition md2 = new MockMetricDefinition(a, "mock-2");
 
@@ -223,9 +245,9 @@ public abstract class ConfigurationTest {
         assertEquals(mds.get(0), md);
         assertEquals(mds.get(1), md2);
 
-        mss = c.getMetricSourceAddresses();
-        assertEquals(1, mss.size());
-        assertTrue(mss.contains(a));
+        sds = c.getMetricSourceDefinitions();
+        assertEquals(1, sds.size());
+        assertTrue(sds.get(0).getAddress().equals(a));
     }
 
     // getMetricDefinitions() ------------------------------------------------------------------------------------------
@@ -298,6 +320,32 @@ public abstract class ConfigurationTest {
         assertEquals(2, dcs.size());
         assertEquals(mdc, dcs.get(0));
         assertEquals(mdc2, dcs.get(1));
+    }
+
+    // addMetricSource() -----------------------------------------------------------------------------------------------
+
+    @Test
+    public void addMetricSource() throws Exception {
+
+        ConfigurationBase cb = (ConfigurationBase)getConfigurationToTest(true, null);
+
+        assertEquals(0, cb.getMetricSourceCount());
+
+        AddressImpl a = new AddressImpl("mock");
+
+        cb.addMetricSource(a);
+
+        assertEquals(1, cb.getMetricSourceCount());
+
+        //
+        // add the "same" address
+        //
+
+        AddressImpl a2 = new AddressImpl("mock");
+
+        cb.addMetricSource(a2);
+
+        assertEquals(1, cb.getMetricSourceCount());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

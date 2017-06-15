@@ -21,8 +21,8 @@ import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.configuration.ConfigurationTest;
+import io.novaordis.events.api.metric.MetricSourceDefinition;
 import io.novaordis.utilities.UserErrorException;
-import io.novaordis.utilities.address.Address;
 import io.novaordis.utilities.address.LocalOSAddress;
 import org.junit.Test;
 
@@ -30,7 +30,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -147,8 +146,8 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
 
         YamlConfigurationFile c = new YamlConfigurationFile(true, null);
 
-        Set<Address> addresses = c.getMetricSourceAddresses();
-        assertTrue(addresses.isEmpty());
+        List<MetricSourceDefinition> sourceDefinitions = c.getMetricSourceDefinitions();
+        assertTrue(sourceDefinitions.isEmpty());
 
         String s = "output:\n" +
                 "  file: something\n" +
@@ -195,8 +194,8 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
 
         YamlConfigurationFile c = new YamlConfigurationFile(true, null);
 
-        Set<Address> addresses = c.getMetricSourceAddresses();
-        assertTrue(addresses.isEmpty());
+        List<MetricSourceDefinition> sourceDefintions = c.getMetricSourceDefinitions();
+        assertTrue(sourceDefintions.isEmpty());
 
         String s =
                 "output:\n" +
@@ -220,9 +219,9 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
         MetricDefinition md3 = mds.get(2);
         assertEquals("LoadAverageLastMinute", md3.getId());
 
-        addresses = c.getMetricSourceAddresses();
-        assertEquals(1, addresses.size());
-        assertTrue(addresses.contains(new LocalOSAddress()));
+        sourceDefintions = c.getMetricSourceDefinitions();
+        assertEquals(1, sourceDefintions.size());
+        assertTrue(sourceDefintions.get(0).getAddress().equals(new LocalOSAddress()));
     }
 
     // toMetricDefinition() --------------------------------------------------------------------------------------------

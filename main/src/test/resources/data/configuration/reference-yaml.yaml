@@ -4,6 +4,25 @@
 
 sampling.interval: 20
 
+sources:
+  local-jboss-instance:
+    type: jboss-controller
+    host: localhost
+    port: 9999
+    username: admin
+    classpath:
+      - $JBOSS_HOME/bin/client/jboss-cli-client.jar
+      - /some/other/file.jar
+  remote-jboss-instance:
+    type: jboss-controller
+    host: other-host
+    port: 10101
+    username: admin
+    classpath:
+      - $JBOSS_HOME/bin/client/jboss-cli-client.jar
+      - /some/other/file.jar
+
+
 output:
   file: /tmp/test.csv
   append: false

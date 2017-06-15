@@ -21,6 +21,7 @@ import io.novaordis.databot.failure.DataBotException;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.ShutdownEvent;
 import io.novaordis.events.api.metric.MetricSource;
+import io.novaordis.events.api.metric.MetricSourceDefinition;
 import io.novaordis.events.api.metric.MetricSourceException;
 import io.novaordis.events.api.metric.MetricSourceFactory;
 import io.novaordis.events.api.metric.MetricSourceFactoryImpl;
@@ -400,9 +401,11 @@ public class DataBot {
         // not start them yet.
         //
 
-        Set<Address> addresses = configuration.getMetricSourceAddresses();
+        List<MetricSourceDefinition> sourceDefinitions = configuration.getMetricSourceDefinitions();
 
-        for(Address a: addresses) {
+        for(MetricSourceDefinition d: sourceDefinitions) {
+
+            Address a = d.getAddress();
 
             //
             // create the metric source; this is where we may enforce a specific order, if we wanted it

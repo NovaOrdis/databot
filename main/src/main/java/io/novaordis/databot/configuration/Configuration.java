@@ -18,12 +18,11 @@ package io.novaordis.databot.configuration;
 
 import io.novaordis.databot.DataConsumer;
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.MetricSourceDefinition;
 import io.novaordis.events.api.metric.MetricSourceFactory;
-import io.novaordis.events.api.metric.MetricSourceRepository;
 import io.novaordis.utilities.address.Address;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * The command line/configuration file configuration.
@@ -43,6 +42,10 @@ public interface Configuration {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
+    //
+    // Global Options --------------------------------------------------------------------------------------------------
+    //
+
     /**
      * @return true if the process runs in foreground, and thus getOutputFileName() value is ignored.
      */
@@ -61,6 +64,44 @@ public interface Configuration {
      */
     int getEventQueueSize();
 
+    //
+    // Metric Sources --------------------------------------------------------------------------------------------------
+    //
+
+    /**
+     * May return null, which means that no special metric source factory is configured, and the DataBot instance will
+     * use the default, internal factory.
+     */
+    MetricSourceFactory getMetricSourceFactory();
+
+    /**
+     * @return the metric source definition in the order in which they were declared in the external configuration,
+     * either explicitely in a "sources" section or equivalent, or implicitly, in-line in the metric definitions. The
+     * implementations must guarantee that the returned MetricSourceDefinition represent <b>distinct</b> metric sources,
+     * meaning they have distinct addresses.
+     */
+    List<MetricSourceDefinition> getMetricSourceDefinitions();
+
+    /**
+     * @return the number of distinct metric sources declared in the external configuration, either explicitely in a
+     * "sources" section or equivalent, or implicitly, in-line in the metric definitions.
+     */
+    int getMetricSourceCount();
+
+    //
+    // Data Consumers --------------------------------------------------------------------------------------------------
+    //
+
+    /**
+     * @return the data consumers to consume the events. Order is important, the data consumers should be returned in
+     * the order in which they were declared in the external configuration.
+     */
+    List<DataConsumer> getDataConsumers();
+
+    //
+    // Metrics ---------------------------------------------------------------------------------------------------------
+    //
+
     /**
      * @return the list of metric definitions to collect and log. Order is important, the metric definitions should be
      * returned in the order in which they were declared in the external configuration.
@@ -71,21 +112,5 @@ public interface Configuration {
      * @return all definitions associated with the given address, or an empty list if no such definitions exist.
      */
     List<MetricDefinition> getMetricDefinitions(Address a);
-
-    Set<Address> getMetricSourceAddresses();
-
-    int getMetricSourceCount();
-
-    /**
-     * @return the data consumers to consume the events. Order is important, the data consumers should be returned in
-     * the order in which they were declared in the external configuration.
-     */
-    List<DataConsumer> getDataConsumers();
-
-    /**
-     * May return null, which means that no special metric source factory is configured, and the DataBot instance will
-     * use the default, internal factory.
-     */
-    MetricSourceFactory getMetricSourceFactory();
 
 }

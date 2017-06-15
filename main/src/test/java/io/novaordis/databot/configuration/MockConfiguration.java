@@ -87,7 +87,7 @@ public class MockConfiguration extends ConfigurationBase {
         //noinspection Convert2streamapi
         for(Address a : addresses) {
 
-            addMetricSourceAddress(a);
+            addMetricSource(a);
         }
     }
 

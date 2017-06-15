@@ -19,6 +19,8 @@ package io.novaordis.databot.configuration;
 import io.novaordis.databot.DataConsumer;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.MetricSourceDefinition;
+import io.novaordis.events.api.metric.MetricSourceDefinitionImpl;
 import io.novaordis.events.api.metric.MetricSourceFactory;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.address.Address;
@@ -31,9 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -57,7 +57,7 @@ public abstract class ConfigurationBase implements Configuration {
 
     private int samplingInterval;
 
-    private Set<Address> metricSourceAddresses;
+    private List<MetricSourceDefinition> sourceDefinitions;
 
     private List<MetricDefinition> metricDefinitions;
 
@@ -82,7 +82,7 @@ public abstract class ConfigurationBase implements Configuration {
 
         setEventQueueSize(DEFAULT_EVENT_QUEUE_SIZE);
 
-        this.metricSourceAddresses = new HashSet<>();
+        this.sourceDefinitions = new ArrayList<>();
         this.metricDefinitions = new ArrayList<>();
         this.dataConsumers = new ArrayList<>();
 
@@ -191,15 +191,15 @@ public abstract class ConfigurationBase implements Configuration {
      * @return the underlying storage.
      */
     @Override
-    public Set<Address> getMetricSourceAddresses() {
+    public List<MetricSourceDefinition> getMetricSourceDefinitions() {
 
-        return metricSourceAddresses;
+        return sourceDefinitions;
     }
 
     @Override
     public int getMetricSourceCount() {
 
-        return metricSourceAddresses.size();
+        return sourceDefinitions.size();
     }
 
     /**
@@ -243,16 +243,29 @@ public abstract class ConfigurationBase implements Configuration {
         metricDefinitions.add(md);
 
         //
-        // also, "collect" its metric source in the repository; if it is already there, adding it will be a noop
+        // also, "collect" its metric source; if it is already there, adding it will be a noop
         //
 
         Address a = md.getMetricSourceAddress();
-        addMetricSourceAddress(a);
+        addMetricSource(a);
     }
 
-    protected void addMetricSourceAddress(Address a) {
+    /**
+     * Insures that a MetricSourceDefinition corresponding to the given address already exists. If it exists, the
+     * method is a noop. If it doesn't, a MetricSourceDefinition will be created and added.
+     */
+    protected void addMetricSource(Address a) {
 
-        metricSourceAddresses.add(a);
+        for(MetricSourceDefinition d: sourceDefinitions) {
+
+            if (d.getAddress().equals(a)) {
+
+                return;
+            }
+        }
+
+        MetricSourceDefinition d = new MetricSourceDefinitionImpl(a);
+        sourceDefinitions.add(d);
     }
 
     protected void addDataConsumer(DataConsumer dc) {
@@ -312,11 +325,11 @@ public abstract class ConfigurationBase implements Configuration {
                         " event queue size:      " + getEventQueueSize() + "\n" +
                         " metric sources:\n";
 
-        Set<Address> as = getMetricSourceAddresses();
+        List<MetricSourceDefinition> sds = getMetricSourceDefinitions();
 
-        for(Address a : as) {
+        for(MetricSourceDefinition d : sds) {
 
-            s += "    - " + a + "\n";
+            s += "    - " + d.getAddress() + "\n";
         }
 
         s += " metrics:\n";
