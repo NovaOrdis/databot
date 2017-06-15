@@ -18,6 +18,7 @@ package io.novaordis.databot.task;
 
 import io.novaordis.events.api.event.Property;
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.api.metric.MetricException;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceException;
 import io.novaordis.utilities.address.Address;
@@ -97,7 +98,7 @@ public class SourceQueryTask implements Callable<List<Property>> {
      * @throws MetricSourceException if the query failed.
      */
     @Override
-    public List<Property> call() throws MetricSourceException {
+    public List<Property> call() throws MetricException {
 
         try {
 

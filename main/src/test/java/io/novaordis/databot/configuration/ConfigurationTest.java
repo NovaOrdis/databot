@@ -22,7 +22,7 @@ import io.novaordis.databot.MockMetricDefinition;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MockAddress;
-import io.novaordis.events.api.metric.jboss.JBossCliMetricDefinition;
+import io.novaordis.events.api.metric.jboss.JBossDmrMetricDefinition;
 import io.novaordis.events.api.metric.jmx.JmxMetricDefinition;
 import io.novaordis.events.api.metric.os.mdefs.CpuUserTime;
 import io.novaordis.events.api.metric.os.mdefs.LoadAverageLastMinute;
@@ -141,7 +141,7 @@ public abstract class ConfigurationTest {
         assertEquals("jboss.as:subsystem=messaging,hornetq-server=default,jms-queue=DLQ/messageCount", m4.getLabel());
         assertEquals(new AddressImpl("jmx", "admin", null, "localhost", 9999), m4.getMetricSourceAddress());
 
-        JBossCliMetricDefinition m5 = (JBossCliMetricDefinition)metrics.get(4);
+        JBossDmrMetricDefinition m5 = (JBossDmrMetricDefinition)metrics.get(4);
         assertNotNull(m5);
         assertEquals("/subsystem=messaging/hornetq-server=default/jms-queue=DLQ/message-count", m5.getLabel());
         assertTrue(new JBossControllerAddress("admin", null, "localhost", 9999).equals(m5.getMetricSourceAddress()));
