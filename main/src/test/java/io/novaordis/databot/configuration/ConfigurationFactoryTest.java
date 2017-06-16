@@ -100,7 +100,7 @@ public class ConfigurationFactoryTest {
 
         File resourceDir = new File(System.getProperty("basedir"), "src/test/resources/data/configuration");
         assertTrue(resourceDir.isDirectory());
-        File configFile = new File(resourceDir, "reference-props.conf");
+        File configFile = new File(resourceDir, "reference-yaml.yaml");
         assertTrue(configFile.isFile());
 
         Configuration c = ConfigurationFactory.buildInstance(new String[] {
@@ -115,7 +115,7 @@ public class ConfigurationFactoryTest {
 
         File resourceDir = new File(System.getProperty("basedir"), "src/test/resources/data/configuration");
         assertTrue(resourceDir.isDirectory());
-        File configFile = new File(resourceDir, "reference-props.conf");
+        File configFile = new File(resourceDir, "reference-yaml.yaml");
         assertTrue(configFile.isFile());
 
         String[] args = new String[] {"--configuration="+configFile.getAbsolutePath()};
@@ -132,7 +132,7 @@ public class ConfigurationFactoryTest {
         File resourceDir = new File(System.getProperty("basedir"), "src/test/resources/data/configuration");
         assertTrue(resourceDir.isDirectory());
 
-        File configFile = new File(resourceDir, "reference-props.conf");
+        File configFile = new File(resourceDir, "reference-yaml.yaml");
         assertTrue(configFile.isFile());
 
         Configuration c;
@@ -173,7 +173,7 @@ public class ConfigurationFactoryTest {
 
         File resourceDir = new File(System.getProperty("basedir"), "src/test/resources/data/configuration");
         assertTrue(resourceDir.isDirectory());
-        File configFile = new File(resourceDir, "reference-props.conf");
+        File configFile = new File(resourceDir, "reference-yaml.yaml");
         assertTrue(configFile.isFile());
 
         Configuration c = ConfigurationFactory.buildInstance(configFile.getAbsolutePath(), false);

@@ -16,7 +16,6 @@
 
 package io.novaordis.databot.configuration;
 
-import io.novaordis.databot.configuration.props.PropertiesConfigurationFile;
 import io.novaordis.databot.configuration.yaml.YamlConfigurationFile;
 import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
@@ -161,15 +160,7 @@ public class ConfigurationFactory {
         // heuristics to choose the right subclass implementation
         //
 
-        if (fileName.endsWith(".conf")) {
-
-            //
-            // property-based configuration file
-            //
-
-            return new PropertiesConfigurationFile(foreground, fileName);
-        }
-        else if (fileName.endsWith(".yaml") || fileName.endsWith(".yml")) {
+        if (fileName.endsWith(".yaml") || fileName.endsWith(".yml")) {
 
             return new YamlConfigurationFile(foreground, fileName);
         }
