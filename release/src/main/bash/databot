@@ -128,8 +128,6 @@ function main() {
     fi
 }
 
-get-sources-classpath-fragment $@
-
-#main $@
+main $@
 
 
