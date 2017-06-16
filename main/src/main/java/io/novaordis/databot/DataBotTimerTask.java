@@ -146,34 +146,6 @@ public class DataBotTimerTask extends TimerTask {
 
     // Package protected -----------------------------------------------------------------------------------------------
 
-    // Protected -------------------------------------------------------------------------------------------------------
-
-    /**
-     * @return the number of times the data collection run was executed since this instance was created. Not all
-     *  runs are necessarily successful. To get the number of successful runs, use getSuccessfulExecutionCount()
-     *
-     *  @see DataBotTimerTask#getSuccessfulExecutionCount()
-     */
-    long getExecutionCount() {
-
-        return executionCount;
-    }
-
-    /**
-     * @return the number of successful data collection runs since this instance was created.
-     *
-     *  @see DataBotTimerTask#getExecutionCount()
-     */
-    long getSuccessfulExecutionCount() {
-
-        return successfulExecutionCount;
-    }
-
-    void setDataBot(DataBot dataBot) {
-
-        this.dataBot = dataBot;
-    }
-
     /**
      * The method collects all declared metrics, consolidates them in a TimeEvent and places the event on the internal
      * event queue. Even if the method throws unchecked exceptions, the calling layer will correctly handle those.
@@ -306,6 +278,34 @@ public class DataBotTimerTask extends TimerTask {
 
         return te;
     }
+
+    /**
+     * @return the number of times the data collection run was executed since this instance was created. Not all
+     *  runs are necessarily successful. To get the number of successful runs, use getSuccessfulExecutionCount()
+     *
+     *  @see DataBotTimerTask#getSuccessfulExecutionCount()
+     */
+    long getExecutionCount() {
+
+        return executionCount;
+    }
+
+    /**
+     * @return the number of successful data collection runs since this instance was created.
+     *
+     *  @see DataBotTimerTask#getExecutionCount()
+     */
+    long getSuccessfulExecutionCount() {
+
+        return successfulExecutionCount;
+    }
+
+    void setDataBot(DataBot dataBot) {
+
+        this.dataBot = dataBot;
+    }
+
+    // Protected -------------------------------------------------------------------------------------------------------
 
     // Private ---------------------------------------------------------------------------------------------------------
 
