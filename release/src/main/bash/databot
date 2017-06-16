@@ -106,13 +106,9 @@ function main() {
     configuration_file=$(get-configuration-file "${command_line_configuration_file}") || exit 1
     debug "configuration_file: ${configuration_file}"
 
-    #
-    # if jboss metrics are encountered in the configuration file, append the CLI classpath to the regular classpath
-    #
-    if configuration-file-contains-jboss-metric ${configuration_file}; then
-        classpath=$(append-jboss-classpath-fragment ${classpath}) || \
-        fail "databot configuration file ${configuration_file} contains jboss CLI metrics, but the required classpath cannot be built (see above)"
-    fi
+    classpath=${classpath}:$(extract-classpath-from-sources-definitions ${configuration_file}) || \
+        fail "failed to extract classpaths from the configuration file"
+    debug "classpath after adding configuration file extensions: ${classpath}"
 
     local java_bin="java"
     [ "${java_home}" != "" ] && java_bin="${java_home}/bin/java"
@@ -132,6 +128,8 @@ function main() {
     fi
 }
 
-main $@
+get-sources-classpath-fragment $@
+
+#main $@
 
 

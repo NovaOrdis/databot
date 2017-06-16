@@ -224,40 +224,45 @@ function get-classpath() {
 }
 
 #
-# return 0 if the configuration file contain jboss: metrics or 1 if not
+# the function gets the YAML configuration file, extracts the JARs declared under "classpath:" source configuration
+# and returns at stdout classpath fragment that contains those JARs in order in which they appear.
 #
-function configuration-file-contains-jboss-metric() {
+function extract-classpath-from-sources-definitions() {
 
-    local config_file=$1
+    local yaml_config_file=$1
+    [ -z "${yaml_config_file}" ] && fail "no yaml configuration file provided"
+    [ -f "${yaml_config_file}" ] || fail "yaml configuration file ${yaml_config_file} does not exist or cannot be read"
 
-    [ -z "${config_file}" ] && fail "'config_file' not provided"
-    grep -q "^metrics=.*jboss:.*" ${config_file}
-}
+    first=true
+    process_classpath_entries=false
 
-#
-# appends the classpath fragment required by JBoss CLI at the end of the given classpath. Attempt to get 'jboss_home' from the configuration file and build
-# the required classpath
-#
-function append-jboss-classpath-fragment() {
+    IFS="$(printf '\n\r')"
 
-    local classpath=$1
-    [ -z "${classpath}" ] && fail "no 'classpath' provided"
+    for line in $(cat ${yaml_config_file}); do
+        #
+        # look for " classpath:" entries
+        #
+        if echo ${line} | grep -q "^ *classpath:" >/dev/null; then
 
-    #
-    # get jboss.home from configuration
-    #
-    local jboss_home
-    jboss_home=$(get-configuration-property jboss.home) || exit 1
+            process_classpath_entries=true
 
-    [ -z "${jboss_home}" ] && \
-        fail "no 'jboss.home' configuration element found in $(get-configuration-file)"
-    [ -d "${jboss_home}" ] || \
-        fail "the 'jboss.home' configuration element found in $(get-configuration-file) is not a valid directory: ${jboss_home}"
+        elif ${process_classpath_entries}; then
+            #
 
-    local jboss_cli_classpath
-    jboss_cli_classpath=$(get-jboss-cli-classpath ${jboss_home}) || \
-        fail "failed to build jboss CLI classpath from jboss home ${jboss_home}"
-    echo "${classpath}:${jboss_cli_classpath}"
+            # append the content of lines that start with " - " to the classpath and switch out of "process" mode
+            # as soon as a non-empty, non-classpath entry is seen
+            #
+            if echo ${line} | grep -q "^ *- " >/dev/null; then
+
+                if ${first}; then first=false; else echo -n ":"; fi
+                echo -n ${line} | sed -e 's/^ *- *//'
+
+            else
+                process_classpath_entries=false
+            fi
+        fi
+    done
+    IFS="$(printf ' \t\n')"
 }
 
 # may return empty string or more than one PID (in a space separated list)
