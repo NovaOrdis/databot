@@ -22,12 +22,10 @@ import io.novaordis.databot.MockMetricDefinition;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSourceDefinition;
+import io.novaordis.events.api.metric.MetricSourceType;
 import io.novaordis.events.api.metric.MockAddress;
-import io.novaordis.events.api.metric.jboss.JBossController;
 import io.novaordis.events.api.metric.jboss.JBossDmrMetricDefinition;
-import io.novaordis.events.api.metric.jmx.JmxBus;
 import io.novaordis.events.api.metric.jmx.JmxMetricDefinition;
-import io.novaordis.events.api.metric.os.LocalOS;
 import io.novaordis.events.api.metric.os.mdefs.CpuUserTime;
 import io.novaordis.events.api.metric.os.mdefs.LoadAverageLastMinute;
 import io.novaordis.events.api.metric.os.mdefs.PhysicalMemoryTotal;
@@ -119,6 +117,8 @@ public abstract class ConfigurationTest {
         // metric sources
         //
 
+        assertEquals(4, c.getMetricSourceCount());
+
         List<MetricSourceDefinition> sourceDefinitions = c.getMetricSourceDefinitions();
 
         assertEquals(4, sourceDefinitions.size());
@@ -127,25 +127,25 @@ public abstract class ConfigurationTest {
 
         assertEquals(new JBossControllerAddress("jbosscli://admin@localhost:9999"), d.getAddress());
         assertEquals("local-jboss-instance", d.getName());
-        assertEquals(JBossController.METRIC_SOURCE_TYPE, d.getType());
+        assertEquals(MetricSourceType.JBOSS_CONTROLLER, d.getType());
 
         MetricSourceDefinition d2 = sourceDefinitions.get(1);
 
         assertEquals(new JBossControllerAddress("jbosscli://admin@other-host:10101"), d2.getAddress());
         assertEquals("remote-jboss-instance", d2.getName());
-        assertEquals(JBossController.METRIC_SOURCE_TYPE, d2.getType());
+        assertEquals(MetricSourceType.JBOSS_CONTROLLER, d2.getType());
 
         MetricSourceDefinition d3 = sourceDefinitions.get(2);
 
         assertEquals(new LocalOSAddress(), d3.getAddress());
         assertNull(d3.getName());
-        assertEquals(LocalOS.METRIC_SOURCE_TYPE, d3.getType());
+        assertEquals(MetricSourceType.LOCAL_OS, d3.getType());
 
         MetricSourceDefinition d4 = sourceDefinitions.get(3);
 
         assertEquals(new AddressImpl("jmx://admin:admin123@localhost:9999"), d4.getAddress());
         assertNull(d4.getName());
-        assertEquals(JmxBus.METRIC_SOURCE_TYPE, d4.getType());
+        assertEquals(MetricSourceType.JMX, d4.getType());
 
         //
         // metric definitions
@@ -177,7 +177,6 @@ public abstract class ConfigurationTest {
         assertEquals("/subsystem=messaging/hornetq-server=default/jms-queue=DLQ/message-count", m5.getLabel());
         assertTrue(new JBossControllerAddress("admin", null, "localhost", 9999).equals(m5.getMetricSourceAddress()));
 
-        assertEquals(3, c.getMetricSourceCount());
 
         //
         // data consumers

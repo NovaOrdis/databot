@@ -21,12 +21,16 @@ import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.databot.configuration.ConfigurationBase;
 import io.novaordis.events.api.metric.MetricDefinitionParser;
+import io.novaordis.events.api.metric.MetricSourceDefinition;
+import io.novaordis.events.api.metric.MetricSourceDefinitionImpl;
+import io.novaordis.events.api.metric.MetricSourceException;
 import io.novaordis.utilities.UserErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -44,13 +48,23 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
     public static final String SAMPLING_INTERVAL_KEY = "sampling.interval";
 
+    public static final String SOURCES_KEY = "sources";
+
+
     public static final String OUTPUT_KEY = "output";
+
     public static final String OUTPUT_FILE_KEY = "file";
     public static final String OUTPUT_APPEND_KEY = "append";
 
     public static final String METRICS_KEY = "metrics";
 
     // Static ----------------------------------------------------------------------------------------------------------
+
+    public static Object fromYaml(InputStream is) {
+
+        Yaml yaml = new Yaml();
+        return yaml.load(is);
+    }
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
@@ -67,25 +81,34 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
     // Package protected -----------------------------------------------------------------------------------------------
 
+
+    // Protected -------------------------------------------------------------------------------------------------------
+
     @Override
     protected void load(InputStream is) throws UserErrorException {
 
         log.debug("loading configuration from " + getFileName());
 
-        Yaml yaml = new Yaml();
+        Object o = fromYaml(is);
 
-        Map m = (Map)yaml.load(is);
 
         //
         // we get null on empty files
         //
 
-        if (m == null) {
+        if (o == null) {
 
             throw new UserErrorException("empty configuration file");
         }
 
-        Object o = m.get(SAMPLING_INTERVAL_KEY);
+        if (!(o instanceof Map)) {
+
+            throw new UserErrorException("invalid configuration file content, expecting a map");
+        }
+
+        Map m = (Map)o;
+
+        o = m.get(SAMPLING_INTERVAL_KEY);
 
         if (o != null) {
 
@@ -99,6 +122,14 @@ public class YamlConfigurationFile extends ConfigurationBase {
             }
 
             setSamplingIntervalSec((Integer)o);
+        }
+
+        o = m.get(SOURCES_KEY);
+
+        if (o != null) {
+
+            List<MetricSourceDefinition> definitions = parseSources(o);
+            setMetricSourceDefinitions(definitions);
         }
 
         o = m.get(OUTPUT_KEY);
@@ -178,9 +209,9 @@ public class YamlConfigurationFile extends ConfigurationBase {
         captureMetricOrder();
     }
 
-    // Protected -------------------------------------------------------------------------------------------------------
+    // Package protected static ----------------------------------------------------------------------------------------
 
-    protected static MetricDefinition toMetricDefinition(Object o) throws UserErrorException {
+    static MetricDefinition toMetricDefinition(Object o) throws UserErrorException {
 
         if (o == null) {
 
@@ -206,6 +237,45 @@ public class YamlConfigurationFile extends ConfigurationBase {
         }
 
         return md;
+    }
+
+    static List<MetricSourceDefinition> parseSources(Object o) throws UserErrorException {
+
+        if (!(o instanceof Map)) {
+
+            throw new UserErrorException("invalid '" +  SOURCES_KEY + "' value: \"" + o + "\"");
+        }
+
+        Map sources = (Map)o;
+
+        //
+        // the keys are supposed to be metric source names
+        //
+
+        List<MetricSourceDefinition> sourceDefinitions = new ArrayList<>();
+
+        for(Object sourceName: sources.keySet()) {
+
+            if (!(sourceName instanceof String)) {
+
+                throw new UserErrorException(
+                        "expecting source name as String and got \"" + sourceName + "\" (" + sourceName.getClass().getSimpleName() + ")");
+            }
+
+            String sn = (String)sourceName;
+
+            try {
+
+                MetricSourceDefinitionImpl sd = new MetricSourceDefinitionImpl(sn, sources.get(sn));
+                sourceDefinitions.add(sd);
+            }
+            catch(MetricSourceException e) {
+
+                throw new UserErrorException(e);
+            }
+        }
+
+        return sourceDefinitions;
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

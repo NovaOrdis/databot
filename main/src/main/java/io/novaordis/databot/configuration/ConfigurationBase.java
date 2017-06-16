@@ -264,8 +264,13 @@ public abstract class ConfigurationBase implements Configuration {
             }
         }
 
-        MetricSourceDefinition d = new MetricSourceDefinitionImpl(a);
+        MetricSourceDefinition d = new MetricSourceDefinitionImpl(null, a);
         sourceDefinitions.add(d);
+    }
+
+    protected void setMetricSourceDefinitions(List<MetricSourceDefinition> definitions) {
+
+        this.sourceDefinitions = definitions;
     }
 
     protected void addDataConsumer(DataConsumer dc) {

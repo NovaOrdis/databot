@@ -22,6 +22,8 @@ import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.configuration.ConfigurationTest;
 import io.novaordis.events.api.metric.MetricSourceDefinition;
+import io.novaordis.events.api.metric.MetricSourceType;
+import io.novaordis.jboss.cli.model.JBossControllerAddress;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.address.LocalOSAddress;
 import org.junit.Test;
@@ -30,6 +32,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -222,6 +225,73 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
         sourceDefintions = c.getMetricSourceDefinitions();
         assertEquals(1, sourceDefintions.size());
         assertTrue(sourceDefintions.get(0).getAddress().equals(new LocalOSAddress()));
+    }
+
+    // parseSources() --------------------------------------------------------------------------------------------------
+
+    @Test
+    public void parseSources_InvalidSourcesContent() throws Exception {
+
+        String s = "sources: 10\n";
+
+        Object o = ((Map)YamlConfigurationFile.fromYaml(
+                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.SOURCES_KEY);
+
+        try {
+
+            YamlConfigurationFile.parseSources(o);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("invalid"));
+            assertTrue(msg.contains(YamlConfigurationFile.SOURCES_KEY));
+        }
+    }
+
+    @Test
+    public void parseSources() throws Exception {
+
+        String s =
+                "sources:\n" +
+                "  some-source:\n" +
+                "    type: jboss-controller\n" +
+                "    host: localhost\n" +
+                "    port: 9999\n" +
+                "    classpath:\n" +
+                "      - $JBOSS_HOME/bin/client/jboss-cli-client.jar\n" +
+                "      - /some/other/file.jar\n" +
+                "  some-other-source:\n" +
+                "    type: jboss-controller\n" +
+                "    host: other-host\n" +
+                "    port: 10101\n" +
+                "    username: admin\n" +
+                "    password: blah\n" +
+                "    classpath:\n" +
+                "      - $JBOSS_HOME/bin/client/jboss-cli-client.jar\n" +
+                "      - /some/other/file.jar\n";
+
+
+        Object o = ((Map)YamlConfigurationFile.fromYaml(
+                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.SOURCES_KEY);
+
+        List<MetricSourceDefinition> sourceDefinitions = YamlConfigurationFile.parseSources(o);
+        assertEquals(2, sourceDefinitions.size());
+
+        MetricSourceDefinition d = sourceDefinitions.get(0);
+
+        assertEquals("some-source", d.getName());
+        assertEquals(MetricSourceType.JBOSS_CONTROLLER, d.getType());
+        assertEquals(new JBossControllerAddress("jbosscli://localhost:9999/"), d.getAddress());
+
+        MetricSourceDefinition d2 = sourceDefinitions.get(1);
+
+        assertEquals("some-other-source", d2.getName());
+        assertEquals(MetricSourceType.JBOSS_CONTROLLER, d2.getType());
+        assertEquals(new JBossControllerAddress("admin", null, "other-host", 10101), d2.getAddress());
+        char[] password = d2.getAddress().getPassword();
+        assertEquals("blah", new String(password));
     }
 
     // toMetricDefinition() --------------------------------------------------------------------------------------------
