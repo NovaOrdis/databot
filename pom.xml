@@ -8,7 +8,7 @@
 
     <groupId>io.novaordis.databot</groupId>
     <artifactId>databot-root</artifactId>
-    <version>1.0.0-SNAPSHOT-21</version>
+    <version>1.0.0-SNAPSHOT-22</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -18,7 +18,7 @@
         -->
 
         <novaordis.utilities.version>4.7.5</novaordis.utilities.version>
-        <events.api.version>1.1.5-SNAPSHOT-36</events.api.version>
+        <events.api.version>1.1.5-SNAPSHOT-37</events.api.version>
         <events.core.version>1.0.0-SNAPSHOT-6</events.core.version>
         <snakeyaml.version>1.17</snakeyaml.version>
         <slf4j.version>1.7.12</slf4j.version>
