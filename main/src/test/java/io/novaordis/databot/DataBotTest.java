@@ -28,6 +28,7 @@ import io.novaordis.events.api.metric.jmx.JmxBus;
 import io.novaordis.events.api.metric.os.LocalOS;
 import io.novaordis.events.api.metric.os.RemoteOS;
 import io.novaordis.jboss.cli.model.JBossControllerAddress;
+import io.novaordis.jmx.JmxAddress;
 import io.novaordis.utilities.address.Address;
 import io.novaordis.utilities.address.AddressImpl;
 import io.novaordis.utilities.address.LocalOSAddress;
@@ -129,7 +130,7 @@ public class DataBotTest {
 
         metricSourceAddresses.add(new LocalOSAddress());
         metricSourceAddresses.add(new OSAddressImpl("ssh://mock-remote-ssh-server/"));
-        metricSourceAddresses.add(new AddressImpl("jmx://mock-remote-jmx-bus/"));
+        metricSourceAddresses.add(new JmxAddress("jmx://mock-remote-jmx-bus:1000/"));
         metricSourceAddresses.add(new JBossControllerAddress("jbosscli://mock-remote-jboss-controller/"));
 
         MockDataConsumer mdc = new MockDataConsumer();
@@ -166,7 +167,7 @@ public class DataBotTest {
         expected = new RemoteOS("ssh://mock-remote-ssh-server/");
         assertTrue(sources.contains(expected));
 
-        expected = new JmxBus("jmx://mock-remote-jmx-bus/");
+        expected = new JmxBus("jmx://mock-remote-jmx-bus:1000/");
         assertTrue(sources.contains(expected));
 
         expected = new JBossController("jbosscli://mock-remote-jboss-controller/");
