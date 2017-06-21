@@ -415,6 +415,78 @@ public class AsynchronousCsvLineWriterTest extends DataConsumerTest {
         assertNotEquals("test", line);
     }
 
+    @Test
+    public void lifecycle_AsynchronousStop() throws Exception {
+
+        MockPrintStream pseudoOut = new MockPrintStream();
+        System.setOut(pseudoOut);
+
+        BlockingQueue<Event> queue = new ArrayBlockingQueue<>(10);
+
+        AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(null, null, false);
+        w.setEventQueue(queue);
+
+        assertFalse(w.isStarted());
+        assertFalse(w.isHeaderOn());
+
+        w.start();
+
+        assertTrue(w.isStarted());
+
+        //
+        // send a timed event to the queue, this will make the writer to eventually write a line containing a timestamp
+        //
+
+        long time = 1L;
+
+        GenericTimedEvent te = new GenericTimedEvent(time);
+
+        queue.put(te);
+
+        //
+        // busy wait until the event gets processed
+        //
+        String line = null;
+        long timeout = 5000L;
+        long t0 = System.currentTimeMillis();
+
+        while(line == null && System.currentTimeMillis() - t0 < timeout) {
+
+            Thread.sleep(100L);
+            line = pseudoOut.getLine();
+        }
+
+        if (line == null) {
+
+            fail("the asynchronous writer failed to process the event and send it to 'stdout' in " + timeout + " ms");
+        }
+
+        String expected = CSVFormatter.DEFAULT_TIMESTAMP_FORMAT.format(time);
+        assertEquals(expected, line);
+
+        //
+        // stop the writer asynchronously
+        //
+
+        w.stop();
+
+        //
+        // busy wait until the event gets processed
+        //
+        timeout = 2000L;
+        t0 = System.currentTimeMillis();
+
+        while(w.isStarted() && System.currentTimeMillis() - t0 < timeout) {
+
+            Thread.sleep(100L);
+        }
+
+        if (w.isStarted()) {
+
+            fail("the asynchronous writer failed to shutdown in " + timeout + " ms");
+        }
+    }
+
     // run() -----------------------------------------------------------------------------------------------------------
 
     @Test

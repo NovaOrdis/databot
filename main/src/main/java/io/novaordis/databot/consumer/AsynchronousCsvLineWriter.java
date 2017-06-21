@@ -145,9 +145,31 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
     }
 
     @Override
-    public void stop() {
+    public synchronized void stop() {
 
-        throw new RuntimeException("stop() NOT YET IMPLEMENTED");
+        if (!isStarted()) {
+
+            log.debug(this + " already stopped");
+        }
+
+        //
+        // put a ShutdownEvent in the queue
+        //
+
+        BlockingQueue<Event> eventQueue = getEventQueue();
+
+        ShutdownEvent se = new ShutdownEvent();
+
+        try {
+
+            eventQueue.put(se);
+        }
+        catch(InterruptedException e) {
+
+            throw new IllegalStateException(e);
+        }
+
+        log.debug(this + " stop initiated");
     }
 
     // Runnable implementation -----------------------------------------------------------------------------------------
@@ -191,6 +213,9 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
 
                     thread = null;
                     cleanup();
+
+                    log.debug(this + " shut down");
+
                     return;
                 }
 
