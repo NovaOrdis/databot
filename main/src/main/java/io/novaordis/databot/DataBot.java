@@ -257,6 +257,13 @@ public class DataBot {
 
             log.info("scheduling just one metric collection run, the agent will exit when the task is completed");
             dataCollectionTaskMaxExecutions = 1L;
+
+            //
+            // we need to set this to something that is non-zero, otherwise the timer will complain. It does
+            // not matter anyway, because the task will exit after the first execution.
+            //
+
+            samplingIntervalMSecs = 1000L * Configuration.DEFAULT_SAMPLING_INTERVAL_SEC;
         }
         else {
 
