@@ -21,13 +21,13 @@ import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.ShutdownEvent;
 import io.novaordis.events.api.event.TimedEvent;
 import io.novaordis.events.api.metric.MetricDefinition;
+import io.novaordis.events.csv.CSVFormat;
 import io.novaordis.events.csv.CSVFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
@@ -80,8 +80,8 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
      *
      * @see AsynchronousCsvLineWriter#DEFAULT_PRINT_HEADER
      */
-    public AsynchronousCsvLineWriter(String outputFileName, Boolean append, Boolean printHeader)
-            throws DataConsumerException {
+    public AsynchronousCsvLineWriter(
+            String outputFileName, Boolean append, Boolean printHeader) throws DataConsumerException {
 
         this.outputFileName = outputFileName;
         this.append = append == null ? DEFAULT_APPEND : append;
@@ -250,20 +250,17 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
             return;
         }
 
-        String outputFormat = "timestamp, ";
+        CSVFormat format = new CSVFormat();
 
-        for(Iterator<MetricDefinition> i = metricsAsDeclaredInConfigurationFile.iterator(); i.hasNext(); ) {
+        format.addTimestampField();
 
-            MetricDefinition md = i.next();
-            outputFormat += md.getId();
+        //noinspection Convert2streamapi
+        for (MetricDefinition md : metricsAsDeclaredInConfigurationFile) {
 
-            if (i.hasNext()) {
-
-                outputFormat += ", ";
-            }
-
+            format.addField(md);
         }
-        csvFormatter.setOutputFormat(outputFormat);
+
+        csvFormatter.setFormat(format);
     }
 
     @Override
