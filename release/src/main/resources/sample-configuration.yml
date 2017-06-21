@@ -1,0 +1,23 @@
+
+sampling.interval: 0
+
+sources:
+  local-jboss-as-jmx:
+    type: jmx
+    host: localhost
+    port: 9999
+    classpath:
+      - /Users/ovidiu/runtime/jboss-eap-6.4.15/bin/client/jboss-cli-client.jar
+
+output:
+  file: ./test.csv
+  append: false
+
+metrics:
+  - PhysicalMemoryTotal
+  - jmx://localhost:9999/jboss.as:subsystem=messaging,hornetq-server=default,jms-queue=DLQ/messageCount
+  - PhysicalMemoryFree
+
+
+
+
