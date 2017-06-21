@@ -314,7 +314,9 @@ public class DataBotTest {
         //
         long timeoutSecs = 5;
 
-        boolean notified = exitLatch.await(timeoutSecs, TimeUnit.SECONDS);
+        CountDownLatch exitLatch2 = d.getExitLatch();
+
+        boolean notified = exitLatch2.await(timeoutSecs, TimeUnit.SECONDS);
 
         if (!notified) {
 
