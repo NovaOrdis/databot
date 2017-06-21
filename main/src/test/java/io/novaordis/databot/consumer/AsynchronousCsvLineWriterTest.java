@@ -25,7 +25,7 @@ import io.novaordis.databot.MockTimedEvent;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.GenericTimedEvent;
 import io.novaordis.events.api.event.ShutdownEvent;
-import io.novaordis.events.core.CsvOutputFormatter;
+import io.novaordis.events.csv.CSVFormatter;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.address.AddressImpl;
 import org.junit.After;
@@ -189,7 +189,7 @@ public class AsynchronousCsvLineWriterTest extends DataConsumerTest {
             fail("the asynchronous writer failed to process the event and send it to 'stdout' in " + timeout + " ms");
         }
 
-        String expected = CsvOutputFormatter.DEFAULT_TIMESTAMP_FORMAT.format(time);
+        String expected = CSVFormatter.DEFAULT_TIMESTAMP_FORMAT.format(time);
         assertEquals(expected, line);
 
         //
@@ -335,7 +335,7 @@ public class AsynchronousCsvLineWriterTest extends DataConsumerTest {
         assertFalse(line.trim().isEmpty());
 
         // must be a valid timestamp
-        Date date = CsvOutputFormatter.DEFAULT_TIMESTAMP_FORMAT.parse(line);
+        Date date = CSVFormatter.DEFAULT_TIMESTAMP_FORMAT.parse(line);
         long time = date.getTime();
 
         assertTrue(time > 0);

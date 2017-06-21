@@ -21,8 +21,7 @@ import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.ShutdownEvent;
 import io.novaordis.events.api.event.TimedEvent;
 import io.novaordis.events.api.metric.MetricDefinition;
-import io.novaordis.events.core.ClosedException;
-import io.novaordis.events.core.CsvOutputFormatter;
+import io.novaordis.events.csv.CSVFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +65,7 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
 
     private boolean append;
 
-    private CsvOutputFormatter csvFormatter;
+    private CSVFormatter csvFormatter;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -108,7 +107,7 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
             printStream = new PrintStream(fos);
         }
 
-        csvFormatter = new CsvOutputFormatter();
+        csvFormatter = new CSVFormatter();
 
         if (doPrintHeader) {
 
@@ -233,7 +232,7 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
     /**
      * @return whether the line writer will generate a header on the first event or not.
      *
-     * @see CsvOutputFormatter#isHeaderOn()
+     * @see CSVFormatter#isHeaderOn()
      */
     public boolean isHeaderOn() {
 
@@ -283,23 +282,14 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
 
         if (debug) { log.debug("writing " + e); }
 
-        try {
+        String csvLine = csvFormatter.format(e);
 
-            if (csvFormatter.process(e)) {
+        if (csvLine != null) {
 
-                String content = new String(csvFormatter.getBytes());
-
-                //
-                // the formatter already appends a new line to the content, so there's no need we do
-                //
-                printStream.print(content);
-            }
-        }
-        catch (ClosedException ce) {
             //
-            // ignore
+            // the formatter already appends a new line to the content, so there's no need we do
             //
-            log.warn(csvFormatter + " closed");
+            printStream.print(csvLine);
         }
     }
 
