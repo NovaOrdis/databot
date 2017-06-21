@@ -489,7 +489,7 @@ public class AsynchronousCsvLineWriterTest extends DataConsumerTest {
 
         String header = mps.getLine();
 
-        assertEquals("# timestamp, Z, A", header);
+        assertEquals("# timestamp, Mock Metric Z, Mock Metric A", header);
 
         String line = mps.getLine();
 

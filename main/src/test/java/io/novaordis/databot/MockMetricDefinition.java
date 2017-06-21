@@ -32,6 +32,8 @@ public class MockMetricDefinition extends MockMetricDefinitionBase {
 
     private String id;
 
+    private String simpleLabel;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     /**
@@ -49,6 +51,7 @@ public class MockMetricDefinition extends MockMetricDefinitionBase {
 
         super(sourceAddress);
         setId(id);
+        setSimpleLabel("Mock Metric " + id);
     }
 
     // MetricDefinition implementation ---------------------------------------------------------------------------------
@@ -60,13 +63,19 @@ public class MockMetricDefinition extends MockMetricDefinitionBase {
 
     @Override
     public String getSimpleLabel() {
-        throw new RuntimeException("getSimpleLabel() NOT YET IMPLEMENTED");
+
+        return simpleLabel;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
     public void setId(String s) {
         this.id = s;
+    }
+
+    public void setSimpleLabel(String s) {
+
+        this.simpleLabel = s;
     }
 
     @Override
