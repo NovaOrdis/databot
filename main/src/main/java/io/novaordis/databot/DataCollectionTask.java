@@ -47,17 +47,22 @@ import java.util.concurrent.Future;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/29/16
  */
-public class DataBotTimerTask extends TimerTask {
+public class DataCollectionTask extends TimerTask {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
-    private static final Logger log = LoggerFactory.getLogger(DataBotTimerTask.class);
+    private static final Logger log = LoggerFactory.getLogger(DataCollectionTask.class);
 
     //
     // counts how many executions were triggered since this task was created
     //
     private volatile long executionCount;
     private volatile long successfulExecutionCount;
+
+    //
+    // the number of executions after which this timer task exits. null means unlimited number of executions.
+    //
+    private volatile Long maxExecutions;
 
     //
     // we collect the last cause of data run failure
@@ -90,7 +95,7 @@ public class DataBotTimerTask extends TimerTask {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public DataBotTimerTask(DataBot dataBot) {
+    public DataCollectionTask(DataBot dataBot) {
 
         setDataBot(dataBot);
     }
@@ -121,6 +126,17 @@ public class DataBotTimerTask extends TimerTask {
 
             log.error("data collection run failed: " + toLogMessage(t), t);
         }
+
+        if (maxExecutions != null && executionCount == maxExecutions) {
+
+            //
+            // we're done, notify the DataBot instance that we won't run anymore
+            //
+
+            log.debug(this + " completed " + executionCount + " executions, exiting ...");
+
+            dataBot.collectionTaskDone();
+        }
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
@@ -142,6 +158,22 @@ public class DataBotTimerTask extends TimerTask {
     public String toString() {
 
         return dataBot == null ? "UNINITIALIZED" : "" + dataBot.getId();
+    }
+
+    /**
+     * @return the number of executions after which this timer task exits. May return null, which means the task will
+     * be executed an unlimited number of times.
+     */
+    public Long getMaxExecutions() {
+
+        return maxExecutions;
+    }
+
+    public void setMaxExecutions(Long l) {
+
+        log.debug(this + " setting max executions to " + l);
+
+        this.maxExecutions = l;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
@@ -283,7 +315,7 @@ public class DataBotTimerTask extends TimerTask {
      * @return the number of times the data collection run was executed since this instance was created. Not all
      *  runs are necessarily successful. To get the number of successful runs, use getSuccessfulExecutionCount()
      *
-     *  @see DataBotTimerTask#getSuccessfulExecutionCount()
+     *  @see DataCollectionTask#getSuccessfulExecutionCount()
      */
     long getExecutionCount() {
 
@@ -293,7 +325,7 @@ public class DataBotTimerTask extends TimerTask {
     /**
      * @return the number of successful data collection runs since this instance was created.
      *
-     *  @see DataBotTimerTask#getExecutionCount()
+     *  @see DataCollectionTask#getExecutionCount()
      */
     long getSuccessfulExecutionCount() {
 

@@ -41,9 +41,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -279,6 +281,54 @@ public class DataBotTest {
         ExecutorService sourceExecutor = d.getSourceExecutor();
         assertTrue(sourceExecutor.isShutdown());
         assertTrue(sourceExecutor.isTerminated());
+    }
+
+    // lifecycle -------------------------------------------------------------------------------------------------------
+
+    @Test
+    public void maximumNumberOfDataCollectionsSet() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+
+        //
+        // set the sampling interval to the smallest possible
+        //
+        mc.setSamplingIntervalSec(1);
+
+        CountDownLatch exitLatch = new CountDownLatch(1);
+
+        DataBot d = new DataBot(mc);
+
+        d.setExitLatch(exitLatch);
+
+        //
+        // configure precisely 3 executions
+        //
+
+        d.setMaxExecutions(3L);
+
+        d.start();
+
+        //
+        // we should be waiting a little bit more than 2 seconds if everything goes well
+        //
+        long timeoutSecs = 5;
+
+        boolean notified = exitLatch.await(timeoutSecs, TimeUnit.SECONDS);
+
+        if (!notified) {
+
+            fail("the exit latch has not been notified within " + timeoutSecs + " seconds");
+        }
+
+        //
+        // check databot state
+        //
+
+        assertFalse(d.isStarted());
+
+        assertEquals(3, d.getExecutionCount());
+        assertEquals(3, d.getSuccessfulExecutionCount());
     }
 
     // getMetricSource() -----------------------------------------------------------------------------------------------

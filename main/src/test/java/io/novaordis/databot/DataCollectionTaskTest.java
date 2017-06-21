@@ -42,7 +42,7 @@ import static org.junit.Assert.fail;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/29/16
  */
-public class DataBotTimerTaskTest {
+public class DataCollectionTaskTest {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -54,6 +54,20 @@ public class DataBotTimerTaskTest {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
+    // identity --------------------------------------------------------------------------------------------------------
+
+    @Test
+    public void identity() throws Exception {
+
+        MockConfiguration mc = new MockConfiguration();
+
+        DataBot db = new DataBot(mc);
+
+        DataCollectionTask t = new DataCollectionTask(db);
+
+        assertNull(t.getMaxExecutions());
+    }
+
     // run() -----------------------------------------------------------------------------------------------------------
 
     @Test
@@ -63,7 +77,7 @@ public class DataBotTimerTaskTest {
 
         DataBot db = new DataBot(mc);
 
-        DataBotTimerTask t = new DataBotTimerTask(db);
+        DataCollectionTask t = new DataCollectionTask(db);
 
         assertEquals(0L, t.getExecutionCount());
         assertEquals(0L, t.getSuccessfulExecutionCount());
@@ -97,7 +111,7 @@ public class DataBotTimerTaskTest {
 
         DataBot db = new DataBot(mc);
 
-        DataBotTimerTask t = new DataBotTimerTask(db);
+        DataCollectionTask t = new DataCollectionTask(db);
 
         assertEquals(0L, t.getExecutionCount());
         assertEquals(0L, t.getSuccessfulExecutionCount());
@@ -151,7 +165,7 @@ public class DataBotTimerTaskTest {
         // drive the data collection externally, by simulating the internal DataBot thread
         //
 
-        DataBotTimerTask t = db.getTimerTask();
+        DataCollectionTask t = db.getDataCollectionTimerTask();
 
         assertEquals(0L, t.getExecutionCount());
         assertEquals(0L, t.getSuccessfulExecutionCount());
@@ -195,7 +209,7 @@ public class DataBotTimerTaskTest {
 
         MockConfiguration mc = new MockConfiguration();
         DataBot db = new DataBot(mc);
-        DataBotTimerTask t = db.getTimerTask();
+        DataCollectionTask t = db.getDataCollectionTimerTask();
 
         t.dataCollectionRun();
 
@@ -224,7 +238,7 @@ public class DataBotTimerTaskTest {
         mc.setEventQueueSize(1);
 
         DataBot db = new DataBot(mc);
-        DataBotTimerTask t = db.getTimerTask();
+        DataCollectionTask t = db.getDataCollectionTimerTask();
 
         //
         // pre-fill the queue
@@ -251,7 +265,7 @@ public class DataBotTimerTaskTest {
 
         MockConfiguration mc = new MockConfiguration();
         DataBot db = new DataBot(mc);
-        DataBotTimerTask t = db.getTimerTask();
+        DataCollectionTask t = db.getDataCollectionTimerTask();
 
         long t0 = System.currentTimeMillis();
 
@@ -287,7 +301,7 @@ public class DataBotTimerTaskTest {
         MockMetricSource mms = (MockMetricSource)db.getMetricSource(ma);
         mms.addReadingForMetric("mock-metric-id", new MockProperty("mock-name", "mock-value"));
 
-        DataBotTimerTask t = db.getTimerTask();
+        DataCollectionTask t = db.getDataCollectionTimerTask();
 
         long t0 = System.currentTimeMillis();
 
@@ -328,7 +342,7 @@ public class DataBotTimerTaskTest {
         MockMetricSource mms = (MockMetricSource)db.getMetricSource(ma);
         mms.breakOnCollectWithMetricSourceException("SYNTHETIC CHECKED");
 
-        DataBotTimerTask t = db.getTimerTask();
+        DataCollectionTask t = db.getDataCollectionTimerTask();
 
         long t0 = System.currentTimeMillis();
 
@@ -366,7 +380,7 @@ public class DataBotTimerTaskTest {
         MockMetricSource mms = (MockMetricSource)db.getMetricSource(ma);
         mms.breakOnCollectWithUncheckedException("SYNTHETIC UNCHECKED");
 
-        DataBotTimerTask t = db.getTimerTask();
+        DataCollectionTask t = db.getDataCollectionTimerTask();
 
         long t0 = System.currentTimeMillis();
 
@@ -388,7 +402,7 @@ public class DataBotTimerTaskTest {
     @Test
     public void toLogMessage_null() throws Exception {
 
-        assertNull(DataBotTimerTask.toLogMessage(null));
+        assertNull(DataCollectionTask.toLogMessage(null));
     }
 
     @Test
@@ -397,7 +411,7 @@ public class DataBotTimerTaskTest {
         RuntimeException e = new RuntimeException();
         assertEquals(null, e.getMessage());
 
-        String s = DataBotTimerTask.toLogMessage(e);
+        String s = DataCollectionTask.toLogMessage(e);
         assertEquals("RuntimeException with no message, see stack trace below for more details", s);
     }
 
@@ -407,7 +421,7 @@ public class DataBotTimerTaskTest {
         RuntimeException e = new RuntimeException("some thing");
         assertEquals("some thing", e.getMessage());
 
-        String s = DataBotTimerTask.toLogMessage(e);
+        String s = DataCollectionTask.toLogMessage(e);
         assertEquals("some thing (RuntimeException)", s);
     }
 

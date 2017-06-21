@@ -38,6 +38,7 @@ import java.util.Timer;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -106,7 +107,16 @@ public class DataBot {
 
     private final Timer timer;
 
-    private final DataBotTimerTask timerTask;
+    private final DataCollectionTask dataCollectionTimerTask;
+
+    //
+    // the external exit latch that is being waited on by the upper layer. When the exit latch is counted down by
+    // this instance, the upper layer knows it can exit; may be null if the upper layer does not install it.
+    //
+    private volatile CountDownLatch exitLatch;
+
+    // The maximum number of executions of the data collection task. Null means unlimited executions.
+    private Long dataCollectionTaskMaxExecutions;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -145,7 +155,7 @@ public class DataBot {
 
         this.timer = new Timer(TIMER_THREAD_NAME);
 
-        this.timerTask = new DataBotTimerTask(this);
+        this.dataCollectionTimerTask = new DataCollectionTask(this);
 
         this.started = false;
 
@@ -192,6 +202,22 @@ public class DataBot {
         return configuration;
     }
 
+    /**
+     * @see DataBot#exitLatch
+     */
+    public void setExitLatch(CountDownLatch exitLatch) {
+
+        this.exitLatch = exitLatch;
+    }
+
+    /**
+     * May return null if no exit latch has been previously installed.
+     */
+    public CountDownLatch getExitLatch() {
+
+        return exitLatch;
+    }
+
     @Override
     public String toString() {
 
@@ -221,10 +247,25 @@ public class DataBot {
         }
 
         //
-        // start the timer that performs periodic data collections
+        // schedule the task that performs periodic data collections, unless the sampling interval is 0, in which
+        // case run once and exit
         //
 
-        timer.scheduleAtFixedRate(timerTask, 0, configuration.getSamplingIntervalSec() * 1000L);
+        long samplingIntervalMSecs =  1000L * configuration.getSamplingIntervalSec();
+
+        if (samplingIntervalMSecs == 0) {
+
+            log.info("scheduling just one metric collection run, the agent will exit when the task is completed");
+            dataCollectionTaskMaxExecutions = 1L;
+        }
+        else {
+
+            log.debug("scheduling metric collection tasks with a periodicity of " + samplingIntervalMSecs + " ms ");
+        }
+
+        dataCollectionTimerTask.setMaxExecutions(dataCollectionTaskMaxExecutions);
+
+        timer.scheduleAtFixedRate(dataCollectionTimerTask, 0, samplingIntervalMSecs);
 
         started = true;
 
@@ -332,6 +373,16 @@ public class DataBot {
             }
         }
 
+        //
+        // notify the exit latch that we're done
+        //
+
+        if (exitLatch != null) {
+
+            log.debug("counting down the exit latch ...");
+            exitLatch.countDown();
+        }
+
         log.info(this + " stopped " + (clean ? "successfully" : "with errors"));
     }
 
@@ -368,12 +419,12 @@ public class DataBot {
 
     long getTimerTaskExecutionCount() {
 
-        return timerTask.getExecutionCount();
+        return dataCollectionTimerTask.getExecutionCount();
     }
 
-    DataBotTimerTask getTimerTask() {
+    DataCollectionTask getDataCollectionTimerTask() {
 
-        return timerTask;
+        return dataCollectionTimerTask;
     }
 
     ExecutorService getSourceExecutor() {
@@ -433,6 +484,53 @@ public class DataBot {
             consumers.add(c);
             log.debug(this + " installed data consumer " + c);
         }
+    }
+
+    /**
+     * Sets the maximum number of executions of the data collection task. Null means unlimited executions.
+     *
+     * Package-exposed for testing.
+     */
+    void setMaxExecutions(Long l) {
+
+        this.dataCollectionTaskMaxExecutions = l;
+    }
+
+    /**
+     * Method invoked by the data collection task to notify the DataBot instance that it will stop running for whatever
+     * reasons (number of executions expired, for example). Upon the invocation of this method, the DataBot may initiate
+     * the shutdown procedure.
+     */
+    synchronized void collectionTaskDone() {
+
+        log.debug(this + " has been notified that the data collection task is done");
+
+        //
+        // the data collection is done, stop this instance
+        //
+
+        stop();
+    }
+
+    /**
+     * @return the number of times the data collection task was executed since this instance was created. Not all
+     *  runs are necessarily successful. To get the number of successful runs, use getSuccessfulExecutionCount()
+     *
+     *  @see DataCollectionTask#getSuccessfulExecutionCount()
+     */
+    long getExecutionCount() {
+
+        return dataCollectionTimerTask.getExecutionCount();
+    }
+
+    /**
+     * @return the number of successful data collection runs since this instance was created.
+     *
+     *  @see DataCollectionTask#getExecutionCount()
+     */
+    long getSuccessfulExecutionCount() {
+
+        return dataCollectionTimerTask.getSuccessfulExecutionCount();
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

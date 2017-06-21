@@ -45,9 +45,11 @@ public class Main {
 
             Configuration conf = ConfigurationFactory.buildInstance(args);
 
+            CountDownLatch exitLatch = new CountDownLatch(1);
+
             DataBot d = new DataBot(conf);
 
-            CountDownLatch exitLatch = new CountDownLatch(1);
+            d.setExitLatch(exitLatch);
 
             d.start();
 
