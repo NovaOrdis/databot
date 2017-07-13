@@ -224,6 +224,31 @@ function get-classpath() {
 }
 
 #
+# the function gets the YAML configuration file and scans it, returning the value associated with the first encountered
+# given key. The key is passed as the second argument.
+#
+function extract-value-from-yaml-file() {
+
+    local yaml_config_file=$1
+    [ -z "${yaml_config_file}" ] && fail "extract-value-from-yaml-file(): no yaml configuration file provided"
+    [ -f "${yaml_config_file}" ] || fail "extract-value-from-yaml-file(): yaml configuration file ${yaml_config_file} does not exist or cannot be read"
+
+    local key=$2
+    [ -z "${key}" ] && fail "extract-value-from-yaml-file(): no key provided"
+
+    IFS="$(printf '\n\r')"
+
+    for line in $(cat ${yaml_config_file}); do
+
+        if echo ${line} | grep -q "^ *"${key}":" >/dev/null; then
+
+            echo ${line} | sed -e 's/^.*: *//'
+        fi
+    done
+    IFS="$(printf ' \t\n')"
+}
+
+#
 # the function gets the YAML configuration file, extracts the JARs declared under "classpath:" source configuration
 # and returns at stdout classpath fragment that contains those JARs in order in which they appear.
 #
