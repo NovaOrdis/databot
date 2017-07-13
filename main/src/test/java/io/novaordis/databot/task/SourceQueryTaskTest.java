@@ -126,6 +126,19 @@ public class SourceQueryTaskTest {
     }
 
     @Test
+    public void constructor_EmptyMetricDefinitionList() throws Exception {
+
+        MockAddress ma = new MockAddress();
+
+        MockMetricSource ms = new MockMetricSource(ma);
+
+        SourceQueryTask q = new SourceQueryTask(ms, Collections.emptyList());
+
+        List<MetricDefinition> metricDefinitions = q.getMetricDefinitions();
+        assertTrue(metricDefinitions.isEmpty());
+    }
+
+    @Test
     public void constructor() throws Exception {
 
         MockAddress ma = new MockAddress();

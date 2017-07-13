@@ -64,11 +64,18 @@ public class SourceQueryTask implements Callable<List<Property>> {
             throw new IllegalArgumentException("null metric source");
         }
 
+        if (metrics == null) {
+
+            throw new IllegalArgumentException("null metric definition list");
+        }
+
         this.source = s;
+
+        this.metricDefinitions = new ArrayList<>();
 
         //
         // check to see if all metric definitions are associated with the source we want to query and throw
-        // IllegalArgumentException if we identify a defintion associated with a different address.
+        // IllegalArgumentException if we identify a definition associated with a different address.
         //
 
         //noinspection Convert2streamapi
@@ -79,11 +86,6 @@ public class SourceQueryTask implements Callable<List<Property>> {
             if (!source.getAddress().equals(a)) {
 
                 throw new IllegalArgumentException(d + " is not associated with source " + source);
-            }
-
-            if (metricDefinitions == null) {
-
-                metricDefinitions = new ArrayList<>();
             }
 
             metricDefinitions.add(d);
