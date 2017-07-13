@@ -49,6 +49,10 @@ function main() {
 
             foreground=true
 
+        elif [ "$1" = "start" ]; then
+
+            foreground=false
+
         elif [ "$1" = "stop" ]; then
 
             stop && exit 0 || fail "failed to stop background databot"
@@ -65,7 +69,7 @@ function main() {
 
         elif [[ "$1" =~ ^--configuration= ]]; then
 
-            echo "blah"
+            echo "NOT YET IMPLEMENTED"
 
         else
 
@@ -122,9 +126,14 @@ function main() {
     ${verbose} && echo "${command}" 1>&2;
 
     if ${foreground}; then
+
         ${command}
+
     else
+
         ${command} &
+        exit 0
+
     fi
 }
 
