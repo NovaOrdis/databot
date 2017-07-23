@@ -21,6 +21,7 @@ import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSourceDefinition;
 import io.novaordis.events.api.metric.MetricSourceFactory;
 import io.novaordis.utilities.address.Address;
+import io.novaordis.utilities.logging.LoggingConfiguration;
 
 import java.util.List;
 
@@ -30,7 +31,7 @@ import java.util.List;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/27/16
  */
-public interface Configuration {
+public interface Configuration extends LoggingConfiguration {
 
     // Constants -------------------------------------------------------------------------------------------------------
 

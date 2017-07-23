@@ -17,6 +17,7 @@
             Dependencies
         -->
 
+        <novaordis.utilities.version>4.7.8-SNAPSHOT-2</novaordis.utilities.version>
         <events.core.version>1.0.3-SNAPSHOT-2</events.core.version>
 
         <snakeyaml.version>1.17</snakeyaml.version>
@@ -43,6 +44,11 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>io.novaordis.utilities</groupId>
+            <artifactId>novaordis-utilities</artifactId>
+            <version>${novaordis.utilities.version}</version>
+        </dependency>
         <dependency>
             <groupId>io.novaordis.events</groupId>
             <artifactId>events-core</artifactId>

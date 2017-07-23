@@ -17,8 +17,12 @@
 package io.novaordis.databot.configuration;
 
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.logging.LoggerConfiguration;
 
+import java.io.File;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Used for testing.
@@ -49,6 +53,18 @@ public class DefaultConfiguration extends ConfigurationBase {
         //
         // noop, we preserve the defaults
         //
+    }
+
+    @Override
+    public Set<LoggerConfiguration> getConfiguration() {
+
+        return Collections.emptySet();
+    }
+
+    @Override
+    public File getFile() {
+
+        return null;
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

@@ -21,7 +21,9 @@ import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSourceFactory;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.address.Address;
+import io.novaordis.utilities.logging.LoggerConfiguration;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
@@ -108,6 +110,16 @@ public class MockConfiguration extends ConfigurationBase {
     public void setMetricSourceFactory(MetricSourceFactory f) {
 
         super.setMetricSourceFactory(f);
+    }
+
+    @Override
+    public Set<LoggerConfiguration> getConfiguration() {
+        throw new RuntimeException("getConfiguration() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public File getFile() {
+        throw new RuntimeException("getFile() NOT YET IMPLEMENTED");
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

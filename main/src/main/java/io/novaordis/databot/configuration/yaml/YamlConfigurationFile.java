@@ -25,14 +25,19 @@ import io.novaordis.events.api.metric.MetricSourceDefinition;
 import io.novaordis.events.api.metric.MetricSourceDefinitionImpl;
 import io.novaordis.events.api.metric.MetricSourceException;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.logging.LoggerConfiguration;
+import io.novaordis.utilities.logging.YamlLoggingConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A configuration instance backed by a property file.
@@ -50,10 +55,10 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
     public static final String SOURCES_KEY = "sources";
 
-
     public static final String OUTPUT_KEY = "output";
 
     public static final String OUTPUT_FILE_KEY = "file";
+
     public static final String OUTPUT_APPEND_KEY = "append";
 
     public static final String METRICS_KEY = "metrics";
@@ -67,6 +72,8 @@ public class YamlConfigurationFile extends ConfigurationBase {
     }
 
     // Attributes ------------------------------------------------------------------------------------------------------
+
+    private YamlLoggingConfiguration delegate;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -276,6 +283,28 @@ public class YamlConfigurationFile extends ConfigurationBase {
         }
 
         return sourceDefinitions;
+    }
+
+    @Override
+    public Set<LoggerConfiguration> getConfiguration() {
+
+        if (delegate == null) {
+
+            return Collections.emptySet();
+        }
+
+        return delegate.getConfiguration();
+    }
+
+    @Override
+    public File getFile() {
+
+        if (delegate == null) {
+
+            return null;
+        }
+
+        return delegate.getFile();
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

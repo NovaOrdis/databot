@@ -19,6 +19,7 @@ package io.novaordis.databot;
 import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.configuration.ConfigurationFactory;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.logging.AlternativeLoggingConfiguration;
 import io.novaordis.utilities.logging.StderrVerboseLogging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +42,19 @@ public class Main {
 
         try {
 
+            //
+            // apply -v|--verbose, if specified, until the alternative logging configuration kicks in
+            //
+
             StderrVerboseLogging.init();
 
             Configuration conf = ConfigurationFactory.buildInstance(args);
+
+            //
+            // apply alternative logging configuration - if any
+            //
+
+            AlternativeLoggingConfiguration.configureLogging(conf);
 
             CountDownLatch exitLatch = new CountDownLatch(1);
 
