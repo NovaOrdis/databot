@@ -120,8 +120,10 @@ function main() {
     #
     # get the location of the output file from the configuration file, and use the same directory for gc logging
     #
-    local output_file=$(extract-value-from-yaml-file ${configuration_file} "file") || \
+    local output_file=$(extract-value-from-yaml-file ${configuration_file} "file" "output") || \
         fail "failed to extract 'file' from the configuration file"
+
+    debug "output file: ${output_file}"
 
     local gc_log_file
     

@@ -224,8 +224,10 @@ function get-classpath() {
 }
 
 #
-# the function gets the YAML configuration file and scans it, returning the value associated with the first encountered
-# given key. The key is passed as the second argument.
+# the function scans the provided YAML configuration file, returning the value associated with the first encountered
+# given key. The key is passed as the second argument. If a third argument is provided (precondition key), the value
+# identified is only returned if the line preceding the one that contains the key specified as the second argument
+# contains the key specified as the third argument.
 #
 function extract-value-from-yaml-file() {
 
@@ -236,14 +238,33 @@ function extract-value-from-yaml-file() {
     local key=$2
     [ -z "${key}" ] && fail "extract-value-from-yaml-file(): no key provided"
 
-    IFS="$(printf '\n\r')"
+    local precondition_key=$3 # may be empty
 
+    debug "extract-value-from-yaml-file(): extracting '${key}' from ${yaml_config_file} with pre-condition key '${precondition_key}'"
+
+    local previous_line
+    IFS="$(printf '\n\r')"
     for line in $(cat ${yaml_config_file}); do
 
         if echo ${line} | grep -q "^ *"${key}":" >/dev/null; then
 
+            #
+            # check precondition
+            #
+            if [ -n "${precondition_key}" ]; then
+                if ! echo ${previous_line} | grep -q "^ *"${precondition_key}":" >/dev/null; then
+
+                    # preserve non-empty lines
+                    [ -n "${line// /}" ] && previous_line="${line}"
+                    continue;
+                fi
+            fi
+
             echo ${line} | sed -e 's/^.*: *//'
+            break;
         fi
+        # preserve non-empty lines
+        [ -n "${line// /}" ] && previous_line="${line}"
     done
     IFS="$(printf ' \t\n')"
 }
@@ -292,6 +313,7 @@ function extract-classpath-from-sources-definitions() {
 
 # may return empty string or more than one PID (in a space separated list)
 function get-pids() {
+
     local pids=$(ps -ef | grep java | grep ${main_class} | awk '{print $2}')
     echo ${pids}
 }
