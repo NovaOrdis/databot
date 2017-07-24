@@ -10,7 +10,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="databot" />
-    <orderEntry type="library" name="Maven: io.novaordis.utilities:novaordis-utilities:4.7.8-SNAPSHOT-7" level="project" />
+    <orderEntry type="library" name="Maven: io.novaordis.utilities:novaordis-utilities:4.7.8-SNAPSHOT-8" level="project" />
     <orderEntry type="library" name="Maven: io.novaordis.events:events-core:1.0.3-SNAPSHOT-4" level="project" />
     <orderEntry type="library" name="Maven: io.novaordis.clad:novaordis-clad:3.5.1" level="project" />
     <orderEntry type="library" name="Maven: io.novaordis.events.api:events-api:1.1.9-SNAPSHOT-3" level="project" />
