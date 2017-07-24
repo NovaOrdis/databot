@@ -4,6 +4,11 @@
 
 sampling.interval: 20
 
+logging:
+  file: /tmp/test.log
+  loggers:
+    - io.novaordis.databot: TRACE
+
 sources:
   local-jboss-instance:
     type: jboss-controller

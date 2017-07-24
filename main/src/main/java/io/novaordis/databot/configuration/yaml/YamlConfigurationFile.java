@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * A configuration instance backed by a property file.
@@ -88,7 +87,6 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
     // Package protected -----------------------------------------------------------------------------------------------
 
-
     // Protected -------------------------------------------------------------------------------------------------------
 
     @Override
@@ -113,9 +111,9 @@ public class YamlConfigurationFile extends ConfigurationBase {
             throw new UserErrorException("invalid configuration file content, expecting a map");
         }
 
-        Map m = (Map)o;
+        Map topLevelMap = (Map)o;
 
-        o = m.get(SAMPLING_INTERVAL_KEY);
+        o = topLevelMap.get(SAMPLING_INTERVAL_KEY);
 
         if (o != null) {
 
@@ -131,7 +129,32 @@ public class YamlConfigurationFile extends ConfigurationBase {
             setSamplingIntervalSec((Integer)o);
         }
 
-        o = m.get(SOURCES_KEY);
+        //
+        // logging overrides
+        //
+
+        o = topLevelMap.get(YamlLoggingConfiguration.LOGGING_KEY);
+
+        if (o != null) {
+
+            if (!(o instanceof Map)) {
+
+                throw new UserErrorException(
+                        "'" + YamlLoggingConfiguration.LOGGING_KEY + "' must contain a Map, but it contains " +
+                                o.getClass().getSimpleName());
+            }
+
+            try {
+
+                this.delegate = new YamlLoggingConfiguration((Map)o);
+            }
+            catch(Exception e) {
+
+                throw new UserErrorException(e);
+            }
+        }
+
+        o = topLevelMap.get(SOURCES_KEY);
 
         if (o != null) {
 
@@ -139,7 +162,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
             setMetricSourceDefinitions(definitions);
         }
 
-        o = m.get(OUTPUT_KEY);
+        o = topLevelMap.get(OUTPUT_KEY);
 
         if (o == null) {
 
@@ -191,7 +214,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
             }
         }
 
-        o = m.get(METRICS_KEY);
+        o = topLevelMap.get(METRICS_KEY);
 
         if (o != null) {
 
@@ -286,14 +309,14 @@ public class YamlConfigurationFile extends ConfigurationBase {
     }
 
     @Override
-    public Set<LoggerConfiguration> getConfiguration() {
+    public List<LoggerConfiguration> getLoggerConfiguration() {
 
         if (delegate == null) {
 
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
 
-        return delegate.getConfiguration();
+        return delegate.getLoggerConfiguration();
     }
 
     @Override

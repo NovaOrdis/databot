@@ -113,8 +113,8 @@ public class MockConfiguration extends ConfigurationBase {
     }
 
     @Override
-    public Set<LoggerConfiguration> getConfiguration() {
-        throw new RuntimeException("getConfiguration() NOT YET IMPLEMENTED");
+    public List<LoggerConfiguration> getLoggerConfiguration() {
+        throw new RuntimeException("getLoggerConfiguration() NOT YET IMPLEMENTED");
     }
 
     @Override

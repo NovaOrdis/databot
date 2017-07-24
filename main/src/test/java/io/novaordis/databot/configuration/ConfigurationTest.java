@@ -33,6 +33,8 @@ import io.novaordis.jboss.cli.model.JBossControllerAddress;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.address.AddressImpl;
 import io.novaordis.utilities.address.LocalOSAddress;
+import io.novaordis.utilities.logging.LoggerConfiguration;
+import io.novaordis.utilities.logging.log4j.Log4jLevel;
 import org.junit.Test;
 
 import java.io.File;
@@ -112,6 +114,19 @@ public abstract class ConfigurationTest {
 
         assertEquals(20, c.getSamplingIntervalSec());
         assertNotEquals(20, Configuration.DEFAULT_SAMPLING_INTERVAL_SEC);
+
+        //
+        // logging
+        //
+
+        File file = c.getFile();
+        assertEquals(new File("/tmp/test.log"), file);
+
+        List<LoggerConfiguration> lcs = c.getLoggerConfiguration();
+        assertEquals(1, lcs.size());
+        LoggerConfiguration lc = lcs.get(0);
+        assertEquals("io.novaordis.databot", lc.getName());
+        assertEquals(Log4jLevel.TRACE, lc.getLevel());
 
         //
         // metric sources

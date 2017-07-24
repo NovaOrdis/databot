@@ -1,6 +1,11 @@
 
 sampling.interval: 0
 
+logging:
+  file: ./databot.log
+  loggers:
+    - io.novaordis.databot: INFO
+
 sources:
   local-jboss-as-jmx:
     type: jmx
@@ -10,7 +15,7 @@ sources:
       - /Users/ovidiu/runtime/jboss-eap-6.4.15/bin/client/jboss-cli-client.jar
 
 output:
-  file: ./test.csv
+  file: ./databot.csv
   append: false
 
 metrics:

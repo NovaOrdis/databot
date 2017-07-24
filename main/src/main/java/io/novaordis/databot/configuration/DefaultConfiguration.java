@@ -22,7 +22,7 @@ import io.novaordis.utilities.logging.LoggerConfiguration;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Used for testing.
@@ -56,9 +56,9 @@ public class DefaultConfiguration extends ConfigurationBase {
     }
 
     @Override
-    public Set<LoggerConfiguration> getConfiguration() {
+    public List<LoggerConfiguration> getLoggerConfiguration() {
 
-        return Collections.emptySet();
+        return Collections.emptyList();
     }
 
     @Override
