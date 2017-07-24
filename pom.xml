@@ -17,7 +17,7 @@
             Dependencies
         -->
 
-        <novaordis.utilities.version>4.7.8-SNAPSHOT-10</novaordis.utilities.version>
+        <novaordis.utilities.version>4.7.8</novaordis.utilities.version>
         <events.core.version>1.0.3-SNAPSHOT-4</events.core.version>
 
         <snakeyaml.version>1.17</snakeyaml.version>
