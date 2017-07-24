@@ -54,7 +54,7 @@ public class Main {
             // apply alternative logging configuration - if any
             //
 
-            AlternativeLoggingConfiguration.apply(conf);
+            AlternativeLoggingConfiguration.apply(conf, true);
 
             CountDownLatch exitLatch = new CountDownLatch(1);
 
