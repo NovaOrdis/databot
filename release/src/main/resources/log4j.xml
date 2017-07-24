@@ -15,9 +15,11 @@
         A File appender can be added via the databot configuration file.
     -->
 
+    <!--
     <category name="io.novaordis.utilities.os.StreamConsumer">
         <priority value="INFO"/>
     </category>
+    -->
 
     <root>
         <appender-ref ref="CONSOLE"/>
