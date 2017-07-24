@@ -103,7 +103,7 @@ public class SourceQueryTask implements Callable<List<Property>> {
     @Override
     public List<Property> call() throws MetricException {
 
-        if (trace) { log.trace(this + " executing call()"); }
+        if (trace) { log.trace(this + " execution"); }
 
         try {
 
