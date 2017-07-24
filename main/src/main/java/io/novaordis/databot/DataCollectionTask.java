@@ -105,16 +105,26 @@ public class DataCollectionTask extends TimerTask {
     @Override
     public void run() {
 
+        long t0 = System.currentTimeMillis();
+
         executionCount ++;
 
         try {
 
+            log.info(this + " beginning data collection run");
+
             dataCollectionRun();
+
+            long t1 = System.currentTimeMillis();
+
+            log.info(this + " completed data collection in " + (t1 - t0) + " ms");
 
             successfulExecutionCount ++;
 
         }
         catch (Throwable t) {
+
+            long t1 = System.currentTimeMillis();
 
             causeOfLastFailure = t;
 
@@ -124,7 +134,7 @@ public class DataCollectionTask extends TimerTask {
             // cancels the timer.
             //
 
-            log.error("data collection run failed: " + toLogMessage(t), t);
+            log.error("data collection run (" + (t1 - t0) + " ms) failed: " + toLogMessage(t), t);
         }
 
         if (maxExecutions != null && executionCount == maxExecutions) {
