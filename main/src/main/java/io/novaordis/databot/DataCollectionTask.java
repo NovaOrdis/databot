@@ -31,10 +31,9 @@ import io.novaordis.utilities.address.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -227,57 +226,52 @@ public class DataCollectionTask extends TimerTask {
 
         Configuration configuration = dataBot.getConfiguration();
 
-        Set<Address> sourceAddressSet = new HashSet<>();
+        Map<Address, Future<List<Property>>> addressToFuture = new HashMap<>();
 
         //noinspection Convert2streamapi
         for(MetricSourceDefinition sd: configuration.getMetricSourceDefinitions()) {
 
-            sourceAddressSet.add(sd.getAddress());
+            Address sourceAddress = sd.getAddress();
+            addressToFuture.put(sourceAddress, null);
         }
-
-        //
-        // The order is important to be maintained, as we will associate the futures with it
-        //
-        List<Address> sourceAddresses = new ArrayList<>(sourceAddressSet);
-
-        //
-        // The order in the future list will be the same as the order in the source address list
-        //
-        List<Future<List<Property>>> futures = new ArrayList<>();
 
         long collectionStartTimestamp = System.currentTimeMillis();
 
-        for(Address a: sourceAddresses) {
+        for(Address a: addressToFuture.keySet()) {
 
             //
             // dispatch an internal thread per source to collect metrics
             //
 
             MetricSource ms = dataBot.getMetricSource(a);
+
             List<MetricDefinition> metricsForSource = configuration.getMetricDefinitions(a);
+
             SourceQueryTask q = new SourceQueryTask(ms, metricsForSource);
 
             log.debug(this + " submitting data collection task for " + a + " to a source-handling thread");
 
             Future<List<Property>> future = dataBot.getSourceExecutor().submit(q);
 
-            futures.add(future);
+            addressToFuture.put(a, future);
         }
 
         //
         // wait for metric values or metric source failure
         //
 
-        int index = 0;
-        int countOfSourcesThatFailed = 0;
-        List<Property> allProperties = new ArrayList<>();
+        PropertyCollector pc = new PropertyCollector(addressToFuture.keySet());
 
-        for(Future<List<Property>> f: futures) {
+        int countOfSourcesThatFailed = 0;
+
+        for(Address a: addressToFuture.keySet()) {
+
+            Future<List<Property>> future = addressToFuture.get(a);
 
             try {
 
-                List<Property> properties = f.get();
-                allProperties.addAll(properties);
+                List<Property> properties = future.get();
+                pc.add(a, properties);
             }
             catch (InterruptedException e) {
 
@@ -287,19 +281,17 @@ public class DataCollectionTask extends TimerTask {
 
                 countOfSourcesThatFailed++;
                 Throwable cause = e.getCause();
-                log.error("source " + sourceAddresses.get(index) + " collection failed: ", cause);
+                log.error("source " + a + " collection failed: ", cause);
             }
-
-            index ++;
         }
 
         long collectionEndTimestamp = System.currentTimeMillis();
 
-        log.debug("collection for " + sourceAddresses.size() + " source(s) completed in " +
+        log.debug("collection for " + addressToFuture.size() + " source(s) completed in " +
                 (collectionEndTimestamp - collectionStartTimestamp) + " ms" +
                 (countOfSourcesThatFailed == 0 ?
                         "" : ", " + countOfSourcesThatFailed + " source(s) failed during collection") +
-                ", " + allProperties.size() + " properties collected");
+                ", " + pc.size() + " properties collected");
 
         //
         // create the timed event
@@ -315,10 +307,7 @@ public class DataCollectionTask extends TimerTask {
         // reading. The underlying layer warned already, so we just generate an empty event, it'll show up in the
         // data set.
 
-        //noinspection UnnecessaryLocalVariable
-        TimedEvent te = new GenericTimedEvent(t, allProperties);
-
-        return te;
+        return new GenericTimedEvent(t, pc.getProperties());
     }
 
     /**

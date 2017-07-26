@@ -20,6 +20,7 @@ import io.novaordis.databot.MockMetricDefinition;
 import io.novaordis.databot.MockMetricSource;
 import io.novaordis.databot.MockProperty;
 import io.novaordis.events.api.event.Property;
+import io.novaordis.events.api.event.StringProperty;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSourceException;
 import io.novaordis.events.api.metric.MockAddress;
@@ -172,8 +173,8 @@ public class SourceQueryTaskTest {
         //
         // populate the metric source with "expected" values
         //
-        ms.addReadingForMetric("mock-definition-1", new MockProperty("mock-property-1", "mock-value-1"));
-        ms.addReadingForMetric("mock-definition-2", new MockProperty("mock-property-2", "mock-value-2"));
+        ms.addReadingForMetric("mock-definition-1", "mock-value-1");
+        ms.addReadingForMetric("mock-definition-2", "mock-value-2");
 
         SourceQueryTask q = new SourceQueryTask(ms, Arrays.asList(md, md2));
 
@@ -181,12 +182,12 @@ public class SourceQueryTaskTest {
 
         assertEquals(2, result.size());
 
-        MockProperty mp = (MockProperty)result.get(0);
-        assertEquals("mock-property-1", mp.getName());
-        assertEquals("mock-value-1", mp.getValue());
-        MockProperty mp2 = (MockProperty)result.get(1);
-        assertEquals("mock-property-2", mp2.getName());
-        assertEquals("mock-value-2", mp2.getValue());
+        StringProperty sp = (StringProperty)result.get(0);
+        assertEquals("mock-definition-1", sp.getName());
+        assertEquals("mock-value-1", sp.getValue());
+        StringProperty sp2 = (StringProperty)result.get(1);
+        assertEquals("mock-definition-2", sp2.getName());
+        assertEquals("mock-value-2", sp2.getValue());
     }
 
     @Test

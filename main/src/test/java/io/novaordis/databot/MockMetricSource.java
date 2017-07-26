@@ -17,6 +17,7 @@
 package io.novaordis.databot;
 
 import io.novaordis.events.api.event.Property;
+import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceException;
@@ -44,8 +45,8 @@ public class MockMetricSource implements MetricSource {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    // <metric-id, Property>
-    private Map<String, Property> readingsForMetrics;
+    // <metric-id, value>
+    private Map<String, Object> readingsForMetrics;
 
     private String breakOnCollectWithMetricSourceExceptionMessage;
     private String breakOnCollectWithUncheckedExceptionMessage;
@@ -100,10 +101,16 @@ public class MockMetricSource implements MetricSource {
 
         for(MetricDefinition d: metricDefinitions) {
 
-            Property p = readingsForMetrics.get(d.getId());
+            String metricId = d.getId();
 
-            if (p != null) {
+            Object o = readingsForMetrics.get(metricId);
 
+            if (o != null) {
+
+                //
+                // the property's name must be the metric definition ID
+                //
+                Property p = PropertyFactory.createInstance(metricId, o.getClass(), o, null);
                 result.add(p);
             }
         }
@@ -135,9 +142,9 @@ public class MockMetricSource implements MetricSource {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    public void addReadingForMetric(String metricId, Property p) {
+    public void addReadingForMetric(String metricId, Object o) {
 
-        readingsForMetrics.put(metricId, p);
+        readingsForMetrics.put(metricId, o);
     }
 
     public void breakOnCollectWithMetricSourceException(String message) {

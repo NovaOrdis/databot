@@ -47,6 +47,7 @@ public class MockProperty implements Property {
     }
 
     public MockProperty(String name, String value) {
+
         this.name = name;
         this.value = value;
     }

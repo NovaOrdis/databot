@@ -17,7 +17,6 @@
 package io.novaordis.databot;
 
 import io.novaordis.events.api.measure.MeasureUnit;
-import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricDefinitionBase;
 import io.novaordis.utilities.address.Address;
 
@@ -25,7 +24,7 @@ import io.novaordis.utilities.address.Address;
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 8/4/16
  */
-abstract class MockMetricDefinitionBase extends MetricDefinitionBase implements MetricDefinition {
+abstract class MockMetricDefinitionBase extends MetricDefinitionBase {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
