@@ -46,7 +46,6 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
     public static final boolean DEFAULT_PRINT_HEADER = true;
 
     private static final Logger log = LoggerFactory.getLogger(AsynchronousCsvLineWriter.class);
-    private static final boolean trace = log.isTraceEnabled();
 
     private static final String DEFAULT_THREAD_NAME = "DataBot Data Writer";
 
@@ -304,7 +303,7 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
 
     void write(TimedEvent e) {
 
-        if (trace) { log.trace("writing " + e); }
+        if (log.isTraceEnabled()) { log.trace("writing " + e); }
 
         String csvLine = csvFormatter.format(e);
 
@@ -314,7 +313,9 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
             // the formatter already appends a new line to the content, so there's no need we do
             //
 
-            if (trace) { log.trace("writing to print stream: " + csvLine); }
+            if (log.isTraceEnabled()) {
+
+                log.trace("writing to print stream:\n" + csvLine); }
 
             printStream.print(csvLine);
         }

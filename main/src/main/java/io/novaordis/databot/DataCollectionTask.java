@@ -53,7 +53,6 @@ public class DataCollectionTask extends TimerTask {
 
     private static final Logger log = LoggerFactory.getLogger(DataCollectionTask.class);
     private static final boolean debug = log.isDebugEnabled();
-    private static final boolean trace = log.isTraceEnabled();
 
     //
     // counts how many executions were triggered since this task was created
@@ -299,7 +298,7 @@ public class DataCollectionTask extends TimerTask {
                     ", " + pc.size() + " properties collected");
         }
 
-        if (trace) {
+        if (log.isTraceEnabled()) {
 
             log.trace("collected properties:\n" + displayProperties(pc));
         }
