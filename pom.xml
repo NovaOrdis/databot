@@ -8,7 +8,7 @@
 
     <groupId>io.novaordis.databot</groupId>
     <artifactId>databot-root</artifactId>
-    <version>1.0.6-SNAPSHOT-18</version>
+    <version>1.0.6-SNAPSHOT-19</version>
     <packaging>pom</packaging>
 
     <properties>
