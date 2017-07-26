@@ -43,10 +43,8 @@ public class Main {
         try {
 
             //
-            // apply -v|--verbose, if specified, until the alternative logging configuration kicks in
+            // -v|--verbose do not apply here, alternative log4j logging configuration is used
             //
-
-            StderrVerboseLogging.init();
 
             Configuration conf = ConfigurationFactory.buildInstance(args);
 

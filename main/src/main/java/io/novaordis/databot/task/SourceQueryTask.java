@@ -109,7 +109,7 @@ public class SourceQueryTask implements Callable<List<Property>> {
 
             List<Property> result = source.collectMetrics(metricDefinitions);
 
-            log.debug(this + " completed source collection");
+            log.debug(this + " completed source query");
 
             return result;
         }

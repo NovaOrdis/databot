@@ -129,13 +129,13 @@ function main() {
     
     [ -z "${output_file}" ] && gc_log_file=/tmp/databot-gc.log || gc_log_file=$(dirname ${output_file})/databot-gc.log
 
-    ${verbose} && D_verbose="-Dverbose=true"
-
     ${foreground} && D_foreground="-Dforeground=true"
 
-    command="${java_bin} -Xms${memory} -Xmx${memory} -verbose:gc -Xloggc:${gc_log_file} -XX:+PrintGCDetails -XX:+PrintGCDateStamps -cp ${classpath} ${debug_args} ${D_verbose} ${D_foreground} ${main_class} -c ${configuration_file} ${args}"
+    command="${java_bin} -Xms${memory} -Xmx${memory} -verbose:gc -Xloggc:${gc_log_file} -XX:+PrintGCDetails -XX:+PrintGCDateStamps -cp ${classpath} ${debug_args} ${D_foreground} ${main_class} -c ${configuration_file} ${args}"
 
     ${verbose} && echo "${command}" 1>&2;
+
+    ${verbose} && echo "-v|--verbose does not work with the databot runtime, configure alternative DEBUG/TRACE logging in the databot configuration file" 1>&2;
 
     if ${foreground}; then
 

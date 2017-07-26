@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
@@ -51,6 +52,8 @@ public class DataCollectionTask extends TimerTask {
     // Constants -------------------------------------------------------------------------------------------------------
 
     private static final Logger log = LoggerFactory.getLogger(DataCollectionTask.class);
+    private static final boolean debug = log.isDebugEnabled();
+    private static final boolean trace = log.isTraceEnabled();
 
     //
     // counts how many executions were triggered since this task was created
@@ -287,11 +290,19 @@ public class DataCollectionTask extends TimerTask {
 
         long collectionEndTimestamp = System.currentTimeMillis();
 
-        log.debug("collection for " + addressToFuture.size() + " source(s) completed in " +
-                (collectionEndTimestamp - collectionStartTimestamp) + " ms" +
-                (countOfSourcesThatFailed == 0 ?
-                        "" : ", " + countOfSourcesThatFailed + " source(s) failed during collection") +
-                ", " + pc.size() + " properties collected");
+        if (debug) {
+
+            log.debug("collection for " + addressToFuture.size() + " source(s) completed in " +
+                    (collectionEndTimestamp - collectionStartTimestamp) + " ms" +
+                    (countOfSourcesThatFailed == 0 ?
+                            "" : ", " + countOfSourcesThatFailed + " source(s) failed during collection") +
+                    ", " + pc.size() + " properties collected");
+        }
+
+        if (trace) {
+
+            log.trace("collected properties:\n" + displayProperties(pc));
+        }
 
         //
         // create the timed event
@@ -339,6 +350,27 @@ public class DataCollectionTask extends TimerTask {
     // Protected -------------------------------------------------------------------------------------------------------
 
     // Private ---------------------------------------------------------------------------------------------------------
+
+    private String displayProperties(PropertyCollector pc) {
+
+        List<Property> props = pc.getProperties();
+
+        String s = "";
+        int index = 0;
+
+        for(Iterator<Property> i = props.iterator() ; i.hasNext(); index ++) {
+
+            Property p = i.next();
+            s += "  " + index + ": " + p.getName() + "(" + p.getType() + "): " + p.getValue();
+
+            if (i.hasNext()) {
+
+                s += "\n";
+            }
+        }
+
+        return s;
+    }
 
     // Inner classes ---------------------------------------------------------------------------------------------------
 
