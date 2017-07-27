@@ -113,7 +113,7 @@ public class DataCollectionTask extends TimerTask {
 
         try {
 
-            log.info(this + " beginning data collection run");
+            log.info(this + " executing data collection run");
 
             dataCollectionRun();
 
@@ -183,7 +183,7 @@ public class DataCollectionTask extends TimerTask {
 
     public void setMaxExecutions(Long l) {
 
-        log.debug(this + " setting max executions to " + l);
+        log.debug(this + " setting max executions to " + l + (l == null ? " (unlimited)" : ""));
 
         this.maxExecutions = l;
     }
@@ -198,8 +198,6 @@ public class DataCollectionTask extends TimerTask {
      *  handle appropriately.
      */
     void dataCollectionRun() throws DataBotException {
-
-        log.debug(this + " executing data run ...");
 
         TimedEvent event = collectMetrics();
 
@@ -225,7 +223,10 @@ public class DataCollectionTask extends TimerTask {
      */
     TimedEvent collectMetrics() {
 
-        log.debug(this + " collecting metrics ...");
+        if (log.isTraceEnabled()) {
+
+            log.trace(this + " collecting metrics ...");
+        }
 
         Configuration configuration = dataBot.getConfiguration();
 
