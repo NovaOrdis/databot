@@ -359,7 +359,10 @@ public class DataCollectionTask extends TimerTask {
 
                 Property p = pi.next();
 
-                s += "  " + index + ": " + a.getLiteral() + ":" +
+                String addressLiteral = a.getLiteral();
+
+
+                s += "  " + index + ": " + addressLiteral + (addressLiteral.endsWith("/") ? "" : "/") +
                         p.getName() + "(" + p.getType() + "): " + p.getValue();
 
                 if (pi.hasNext()) {
