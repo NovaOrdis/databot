@@ -171,50 +171,50 @@ public class MultiSourceReadingEvent extends GenericTimedEvent {
     @Override
     public Property getProperty(String name) {
 
-        log.warn("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed");
+        log.warn("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, getProperty(" + name + ")");
         return null;
     }
 
     @Override
     public StringProperty getStringProperty(String stringPropertyName) {
 
-        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed");
+        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, getStringProperty(" + stringPropertyName + ")");
     }
 
     @Override
     public LongProperty getLongProperty(String longPropertyName) {
 
-        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed");
+        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, getLongProperty(" + longPropertyName + ")");
     }
 
     @Override
     public IntegerProperty getIntegerProperty(String integerPropertyName) {
 
-        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed");
+        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, getIntegerProperty(" + integerPropertyName + ")");
     }
 
     @Override
     public BooleanProperty getBooleanProperty(String booleanPropertyName){
 
-        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed");
+        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, getBooleanProperty(" + booleanPropertyName + ")");
     }
 
     @Override
     public MapProperty getMapProperty(String mapPropertyName){
 
-        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed");
+        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, getMapProperty(" + mapPropertyName + ")");
     }
 
     @Override
     public ListProperty getListProperty(String listPropertyName){
 
-        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed");
+        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, getListProperty(" + listPropertyName + ")");
     }
 
     @Override
     public Property setProperty(Property property){
 
-        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed");
+        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, setProperty(" + property + ")");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
