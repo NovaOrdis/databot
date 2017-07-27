@@ -17,11 +17,11 @@
 package io.novaordis.databot;
 
 import io.novaordis.databot.configuration.Configuration;
+import io.novaordis.databot.event.MultiSourceReadingEvent;
 import io.novaordis.databot.failure.DataBotException;
 import io.novaordis.databot.failure.EventQueueFullException;
 import io.novaordis.databot.task.SourceQueryTask;
 import io.novaordis.events.api.event.Event;
-import io.novaordis.events.api.event.GenericTimedEvent;
 import io.novaordis.events.api.event.Property;
 import io.novaordis.events.api.event.TimedEvent;
 import io.novaordis.events.api.metric.MetricDefinition;
@@ -31,6 +31,7 @@ import io.novaordis.utilities.address.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -237,7 +238,7 @@ public class DataCollectionTask extends TimerTask {
             addressToFuture.put(sourceAddress, null);
         }
 
-        long collectionStartTimestamp = System.currentTimeMillis();
+        MultiSourceReadingEvent msre = new MultiSourceReadingEvent();
 
         for(Address a: addressToFuture.keySet()) {
 
@@ -262,18 +263,16 @@ public class DataCollectionTask extends TimerTask {
         // wait for metric values or metric source failure
         //
 
-        PropertyCollector pc = new PropertyCollector(addressToFuture.keySet());
-
         int countOfSourcesThatFailed = 0;
 
         for(Address a: addressToFuture.keySet()) {
 
+            List<Property> properties = null;
             Future<List<Property>> future = addressToFuture.get(a);
 
             try {
 
-                List<Property> properties = future.get();
-                pc.add(a, properties);
+                properties = future.get();
             }
             catch (InterruptedException e) {
 
@@ -285,39 +284,32 @@ public class DataCollectionTask extends TimerTask {
                 Throwable cause = e.getCause();
                 log.error("source " + a + " collection failed: ", cause);
             }
-        }
+            finally {
 
-        long collectionEndTimestamp = System.currentTimeMillis();
+                //
+                // add the properties, even if it is an empty list, on failure, to update the source list and
+                // collection timestamps
+                //
+                properties = properties == null ? Collections.emptyList() : properties;
+                msre.addSourceReading(a, properties);
+            }
+        }
 
         if (debug) {
 
             log.debug("collection for " + addressToFuture.size() + " source(s) completed in " +
-                    (collectionEndTimestamp - collectionStartTimestamp) + " ms" +
+                    (msre.getCollectionEndTimestamp() - msre.getCollectionStartTimestamp()) + " ms" +
                     (countOfSourcesThatFailed == 0 ?
                             "" : ", " + countOfSourcesThatFailed + " source(s) failed during collection") +
-                    ", " + pc.size() + " properties collected");
+                    ", " + msre.getPropertyCount() + " properties collected");
         }
 
-        if (log.isTraceEnabled()) {
+        if (log.isTraceEnabled() && msre.getPropertyCount() > 0) {
 
-            log.trace("collected properties:\n" + displayProperties(pc));
+            log.trace("collected properties:\n" + displayProperties(msre));
         }
 
-        //
-        // create the timed event
-        //
-
-        //
-        // TODO: come up with more precise timing
-        //
-
-        long t = collectionStartTimestamp + (collectionEndTimestamp - collectionStartTimestamp) / 2;
-
-        // It is possible to get an empty property list. This happens when the underlying layer fails to take a
-        // reading. The underlying layer warned already, so we just generate an empty event, it'll show up in the
-        // data set.
-
-        return new GenericTimedEvent(t, pc.getProperties());
+        return msre;
     }
 
     /**
@@ -350,21 +342,27 @@ public class DataCollectionTask extends TimerTask {
 
     // Private ---------------------------------------------------------------------------------------------------------
 
-    private String displayProperties(PropertyCollector pc) {
+    private String displayProperties(MultiSourceReadingEvent msre) {
 
-        List<Property> props = pc.getProperties();
+        List<Address> addresses = msre.getSourceAddresses();
 
         String s = "";
         int index = 0;
 
-        for(Iterator<Property> i = props.iterator() ; i.hasNext(); index ++) {
+        for(Address a: addresses) {
 
-            Property p = i.next();
-            s += "  " + index + ": " + p.getName() + "(" + p.getType() + "): " + p.getValue();
+            List<Property> props = msre.getProperties(a);
 
-            if (i.hasNext()) {
+            for (Iterator<Property> i = props.iterator(); i.hasNext(); index++) {
 
-                s += "\n";
+                Property p = i.next();
+
+                s += "  " + index + ": " + a + ":" + p.getName() + "(" + p.getType() + "): " + p.getValue();
+
+                if (i.hasNext()) {
+
+                    s += "\n";
+                }
             }
         }
 

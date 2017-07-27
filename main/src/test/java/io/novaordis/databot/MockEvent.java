@@ -55,6 +55,11 @@ public class MockEvent implements Event {
     }
 
     @Override
+    public Property getPropertyByKey(Object propertyKey) {
+        throw new RuntimeException("getPropertyByKey() NOT YET IMPLEMENTED");
+    }
+
+    @Override
     public StringProperty getStringProperty(String s) {
         throw new RuntimeException("getStringProperty() NOT YET IMPLEMENTED");
     }

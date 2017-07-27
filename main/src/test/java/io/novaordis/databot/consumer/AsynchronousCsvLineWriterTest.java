@@ -22,6 +22,7 @@ import io.novaordis.databot.MockMetricDefinition;
 import io.novaordis.databot.MockPrintStream;
 import io.novaordis.databot.MockProperty;
 import io.novaordis.databot.MockTimedEvent;
+import io.novaordis.databot.event.MultiSourceReadingEvent;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.GenericTimedEvent;
 import io.novaordis.events.api.event.ShutdownEvent;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.StringTokenizer;
@@ -552,10 +554,9 @@ public class AsynchronousCsvLineWriterTest extends DataConsumerTest {
         MockProperty mp = new MockProperty(metricDefinitionId, "some value");
         MockProperty mp2 = new MockProperty(metricDefinitionId2, "some other value");
 
-        MockTimedEvent e = new MockTimedEvent();
+        MultiSourceReadingEvent e = new MultiSourceReadingEvent();
 
-        e.setProperty(mp);
-        e.setProperty(mp2);
+        e.addSourceReading(sourceAddress, Arrays.asList(mp, mp2));
 
         w.write(e);
 

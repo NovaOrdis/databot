@@ -18,6 +18,7 @@ package io.novaordis.databot;
 
 import io.novaordis.databot.configuration.MockConfiguration;
 import io.novaordis.databot.consumer.MockActiveDataConsumer;
+import io.novaordis.databot.event.MultiSourceReadingEvent;
 import io.novaordis.databot.failure.EventQueueFullException;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.Property;
@@ -28,7 +29,8 @@ import io.novaordis.utilities.address.Address;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -399,6 +401,14 @@ public class DataCollectionTaskTest {
 
         Set<Property> properties = e.getProperties();
         assertTrue(properties.isEmpty());
+
+        //
+        // make sure the address was recorded, though
+        //
+
+        List<Address> addresses = ((MultiSourceReadingEvent)e).getSourceAddresses();
+        assertEquals(1, addresses.size());
+        assertEquals(ma, addresses.get(0));
     }
 
     @Test
@@ -443,31 +453,20 @@ public class DataCollectionTaskTest {
         Set<Property> properties = e.getProperties();
         assertEquals(2, properties.size());
 
-        Iterator<Property> i = properties.iterator();
+        Set<String> expectedValues = new HashSet<>();
+        expectedValues.add("mock-value-for-source-1");
+        expectedValues.add("mock-value-for-source-2");
 
-        StringProperty sp = (StringProperty)i.next();
-        StringProperty sp2 = (StringProperty)i.next();
-        assertFalse(i.hasNext());
+        for(Property p: properties) {
 
-        if ((ma.getLiteral() + ":shared-mock-metric-id").equals(sp.getName())) {
+            StringProperty sp = (StringProperty)p;
+            String value = sp.getString();
 
-            assertEquals((ma.getLiteral() + ":shared-mock-metric-id"), sp.getName());
-            assertEquals("mock-value-for-source-1", sp.getValue());
-            assertEquals((ma2.getLiteral() + ":shared-mock-metric-id"), sp2.getName());
-            assertEquals("", sp2.getValue());
+            assertTrue(expectedValues.contains(value));
+            expectedValues.remove(value);
         }
-        else if ((ma2.getLiteral() + ":shared-mock-metric-id").equals(sp.getName())) {
 
-            assertEquals((ma2.getLiteral() + ":shared-mock-metric-id"), sp.getName());
-            assertEquals("mock-value-for-source-2", sp.getValue());
-            assertEquals((ma.getLiteral() + ":shared-mock-metric-id"), sp2.getName());
-            assertEquals("mock-value-for-source-1", sp2.getValue());
-        }
-        else {
-
-            fail("the name of the property is neither " + (ma.getLiteral() +
-                    ":shared-mock-metric-id") + " nor " + (ma2.getLiteral() + ":shared-mock-metric-id"));
-        }
+        assertTrue(expectedValues.isEmpty());
     }
 
     // toLogMessage() --------------------------------------------------------------------------------------------------
