@@ -205,7 +205,7 @@ public class DataCollectionTask extends TimerTask {
 
         BlockingQueue<Event> eventQueue = dataBot.getEventQueue();
 
-        log.debug("placing the event " + event + " in the event queue");
+        log.debug("placing event '" + event + "' in the event queue");
 
         boolean sent = eventQueue.offer(event);
 
@@ -239,6 +239,7 @@ public class DataCollectionTask extends TimerTask {
         }
 
         MultiSourceReadingEvent msre = new MultiSourceReadingEvent();
+        long t0 = System.currentTimeMillis();
 
         for(Address a: addressToFuture.keySet()) {
 
@@ -298,7 +299,7 @@ public class DataCollectionTask extends TimerTask {
         if (debug) {
 
             log.debug("collection for " + addressToFuture.size() + " source(s) completed in " +
-                    (msre.getCollectionEndTimestamp() - msre.getCollectionStartTimestamp()) + " ms" +
+                    (msre.getCollectionEndTimestamp() - t0) + " ms" +
                     (countOfSourcesThatFailed == 0 ?
                             "" : ", " + countOfSourcesThatFailed + " source(s) failed during collection") +
                     ", " + msre.getPropertyCount() + " properties collected");
@@ -349,20 +350,27 @@ public class DataCollectionTask extends TimerTask {
         String s = "";
         int index = 0;
 
-        for(Address a: addresses) {
+        for(Iterator<Address> ai = addresses.iterator(); ai.hasNext(); ) {
 
+            Address a = ai.next();
             List<Property> props = msre.getProperties(a);
 
-            for (Iterator<Property> i = props.iterator(); i.hasNext(); index++) {
+            for (Iterator<Property> pi = props.iterator(); pi.hasNext(); index++) {
 
-                Property p = i.next();
+                Property p = pi.next();
 
-                s += "  " + index + ": " + a + ":" + p.getName() + "(" + p.getType() + "): " + p.getValue();
+                s += "  " + index + ": " + a.getLiteral() + ":" +
+                        p.getName() + "(" + p.getType() + "): " + p.getValue();
 
-                if (i.hasNext()) {
+                if (pi.hasNext()) {
 
                     s += "\n";
                 }
+            }
+
+            if (ai.hasNext()) {
+
+                s += "\n";
             }
         }
 

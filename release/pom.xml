@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.novaordis.databot</groupId>
         <artifactId>databot-root</artifactId>
-        <version>1.0.6-SNAPSHOT-22</version>
+        <version>1.0.6-SNAPSHOT-23</version>
     </parent>
 
     <artifactId>databot-release</artifactId>

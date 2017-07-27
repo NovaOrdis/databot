@@ -319,6 +319,21 @@ public class MultiSourceReadingEventTest {
         }
     }
 
+    // toString() ------------------------------------------------------------------------------------------------------
+
+    @Test
+    public void testToString() throws Exception {
+
+        MultiSourceReadingEvent e = new MultiSourceReadingEvent();
+
+        e.addSourceReading(new MockAddress("something"), Collections.singletonList(new IntegerProperty("A", 1)));
+        e.addSourceReading(new MockAddress("something else"), Collections.singletonList(new IntegerProperty("B", 2)));
+
+        String s = e.toString();
+
+        assertTrue(s.contains("multi-source collection from 2 source(s), 2 properties"));
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------

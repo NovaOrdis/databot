@@ -31,6 +31,7 @@ import io.novaordis.utilities.time.TimestampImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,6 +51,8 @@ public class MultiSourceReadingEvent extends GenericTimedEvent {
     // Constants -------------------------------------------------------------------------------------------------------
 
     private static final Logger log = LoggerFactory.getLogger(MultiSourceReadingEvent.class);
+
+    public static final SimpleDateFormat TO_STRING_TIMESTAMP_FORMAT = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -282,6 +285,11 @@ public class MultiSourceReadingEvent extends GenericTimedEvent {
         return addresses;
     }
 
+    public int getSourceCount() {
+
+        return addresses.size();
+    }
+
     /**
      * @return the properties for the given source, in the order they were added. May return an empty list, but never
      * null.
@@ -296,6 +304,14 @@ public class MultiSourceReadingEvent extends GenericTimedEvent {
         }
 
         return ps;
+    }
+
+    @Override
+    public String toString() {
+
+        String s = TO_STRING_TIMESTAMP_FORMAT.format(getTime());
+        s += " multi-source collection from " + getSourceCount() + " source(s), " + getPropertyCount() + " properties";
+        return s;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
