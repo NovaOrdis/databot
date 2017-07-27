@@ -171,7 +171,8 @@ public class MultiSourceReadingEvent extends GenericTimedEvent {
     @Override
     public Property getProperty(String name) {
 
-        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed");
+        log.warn("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed");
+        return null;
     }
 
     @Override
