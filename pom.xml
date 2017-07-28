@@ -18,7 +18,7 @@
         -->
 
         <novaordis.utilities.version>4.7.8</novaordis.utilities.version>
-        <events.core.version>1.0.3-SNAPSHOT-14</events.core.version>
+        <events.api.version>1.2.0</events.api.version>
 
         <snakeyaml.version>1.17</snakeyaml.version>
         <slf4j.version>1.7.12</slf4j.version>
@@ -50,11 +50,10 @@
             <version>${novaordis.utilities.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.novaordis.events</groupId>
-            <artifactId>events-core</artifactId>
-            <version>${events.core.version}</version>
+            <groupId>io.novaordis.events.api</groupId>
+            <artifactId>events-api</artifactId>
+            <version>${events.api.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
