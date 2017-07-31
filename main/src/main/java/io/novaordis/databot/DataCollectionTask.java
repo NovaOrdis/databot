@@ -31,11 +31,13 @@ import io.novaordis.utilities.address.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -107,9 +109,9 @@ public class DataCollectionTask extends TimerTask {
     @Override
     public void run() {
 
-        long t0 = System.currentTimeMillis();
-
         executionCount ++;
+
+        long t0 = System.currentTimeMillis();
 
         try {
 
@@ -117,9 +119,10 @@ public class DataCollectionTask extends TimerTask {
 
             dataCollectionRun();
 
-            long t1 = System.currentTimeMillis();
-
-            log.info(this + " completed data collection in " + (t1 - t0) + " ms");
+            //
+            // the completion of the data collection run is logged by the underlying layers, where we have un-cached
+            // information about the metric sources that were queried
+            //
 
             successfulExecutionCount ++;
 
@@ -240,6 +243,7 @@ public class DataCollectionTask extends TimerTask {
         }
 
         MultiSourceReadingEvent msre = new MultiSourceReadingEvent();
+
         long t0 = System.currentTimeMillis();
 
         for(Address a: addressToFuture.keySet()) {
@@ -311,6 +315,10 @@ public class DataCollectionTask extends TimerTask {
             log.trace("collected properties:\n" + displayProperties(msre));
         }
 
+        log.info(this + " completed data collection from " +
+                displayMetricSourceAddressesInOrder(addressToFuture.keySet()) + " in " +
+                (System.currentTimeMillis() - t0) + " ms");
+
         return msre;
     }
 
@@ -378,6 +386,37 @@ public class DataCollectionTask extends TimerTask {
             }
         }
 
+        return s;
+    }
+
+    private String displayMetricSourceAddressesInOrder(Set<Address> addresses) {
+
+        String s = "";
+
+        List<String> sortedAddresses = new ArrayList<>();
+
+        //noinspection Convert2streamapi
+        for(Address a: addresses) {
+
+            sortedAddresses.add(a.getLiteral());
+        }
+
+        Collections.sort(sortedAddresses);
+
+        if (sortedAddresses.isEmpty()) {
+
+            return "zero sources";
+        }
+
+        for(Iterator i = sortedAddresses.iterator(); i.hasNext(); ) {
+
+            s += i.next();
+
+            if (i.hasNext()) {
+
+                s += ", ";
+            }
+        }
         return s;
     }
 
