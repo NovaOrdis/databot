@@ -25,6 +25,7 @@ import io.novaordis.events.api.metric.MetricSourceDefinition;
 import io.novaordis.events.api.metric.MetricSourceDefinitionImpl;
 import io.novaordis.events.api.metric.MetricSourceException;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.logging.AlternativeLoggingConfiguration;
 import io.novaordis.utilities.logging.LoggerConfiguration;
 import io.novaordis.utilities.logging.YamlLoggingConfiguration;
 import org.slf4j.Logger;
@@ -96,7 +97,6 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
         Object o = fromYaml(is);
 
-
         //
         // we get null on empty files
         //
@@ -113,24 +113,9 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
         Map topLevelMap = (Map)o;
 
-        o = topLevelMap.get(SAMPLING_INTERVAL_KEY);
-
-        if (o != null) {
-
-            //
-            // if null, we rely on the built-in values, set in the constructor
-            //
-
-            if (!(o instanceof Integer)) {
-
-                throw new UserErrorException("invalid sampling interval value: \"" + o + "\"");
-            }
-
-            setSamplingIntervalSec((Integer)o);
-        }
-
         //
-        // logging overrides
+        // attempt to process logging overrides as early as possible, so we can turn on more verbose logging as soon
+        // as possible, if needed
         //
 
         o = topLevelMap.get(YamlLoggingConfiguration.LOGGING_KEY);
@@ -152,6 +137,35 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
                 throw new UserErrorException(e);
             }
+
+            //
+            // apply new logging configuration as soon as we can
+            //
+
+            try {
+
+                AlternativeLoggingConfiguration.apply(this.delegate, true);
+            }
+            catch(Exception e) {
+
+                throw new UserErrorException(e);
+            }
+        }
+
+        o = topLevelMap.get(SAMPLING_INTERVAL_KEY);
+
+        if (o != null) {
+
+            //
+            // if null, we rely on the built-in values, set in the constructor
+            //
+
+            if (!(o instanceof Integer)) {
+
+                throw new UserErrorException("invalid sampling interval value: \"" + o + "\"");
+            }
+
+            setSamplingIntervalSec((Integer)o);
         }
 
         o = topLevelMap.get(SOURCES_KEY);

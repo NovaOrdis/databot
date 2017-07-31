@@ -49,10 +49,10 @@ public class Main {
             Configuration conf = ConfigurationFactory.buildInstance(args);
 
             //
-            // apply alternative logging configuration - if any
+            // the alternative logging configuration, if configured, must be already applied by the Configuration
+            // instance. We do this to take advantage of more verbose logging, if specified, to be able to troubleshoot
+            // the configuration process itself
             //
-
-            AlternativeLoggingConfiguration.apply(conf, true);
 
             CountDownLatch exitLatch = new CountDownLatch(1);
 
