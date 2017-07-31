@@ -104,6 +104,11 @@ public class MockEvent implements Event {
         throw new RuntimeException("setLineNumber() NOT YET IMPLEMENTED");
     }
 
+    @Override
+    public String getRawRepresentation() {
+        throw new RuntimeException("getRawRepresentation() NOT YET IMPLEMENTED");
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
 
     // Package protected -----------------------------------------------------------------------------------------------
