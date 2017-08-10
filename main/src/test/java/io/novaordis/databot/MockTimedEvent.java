@@ -144,6 +144,16 @@ public class MockTimedEvent implements TimedEvent {
     }
 
     @Override
+    public String getPreferredRepresentation(String fieldSeparator) {
+        throw new RuntimeException("getPreferredRepresentation() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public String getPreferredRepresentationHeader(String fieldSeparator) {
+        throw new RuntimeException("getPreferredRepresentationHeader() NOT YET IMPLEMENTED");
+    }
+
+    @Override
     public String getRawRepresentation() {
         throw new RuntimeException("getRawRepresentation() NOT YET IMPLEMENTED");
     }
