@@ -35,10 +35,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The encapsulations of all metrics from different sources during concurrent runs.
@@ -149,9 +147,9 @@ public class MultiSourceReadingEvent extends GenericTimedEvent {
     }
 
     @Override
-    public Set<Property> getProperties() {
+    public List<Property> getProperties() {
 
-        Set<Property> result = new HashSet<>();
+        List<Property> result = new ArrayList<>();
 
         //noinspection Convert2streamapi
         for(List<Property> ps: properties.values()) {

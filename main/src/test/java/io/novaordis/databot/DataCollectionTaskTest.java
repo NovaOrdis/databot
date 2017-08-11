@@ -318,7 +318,7 @@ public class DataCollectionTaskTest {
         assertTrue(t0 <= e.getTime());
         assertTrue(e.getTime() <= t1);
 
-        Set<Property> properties = e.getProperties();
+        List<Property> properties = e.getProperties();
         assertEquals(1, properties.size());
         StringProperty p = (StringProperty)properties.iterator().next();
 
@@ -361,7 +361,7 @@ public class DataCollectionTaskTest {
         assertTrue(t0 <= e.getTime());
         assertTrue(e.getTime() <= t1);
 
-        Set<Property> properties = e.getProperties();
+        List<Property> properties = e.getProperties();
         assertTrue(properties.isEmpty());
     }
 
@@ -399,7 +399,7 @@ public class DataCollectionTaskTest {
         assertTrue(t0 <= e.getTime());
         assertTrue(e.getTime() <= t1);
 
-        Set<Property> properties = e.getProperties();
+        List<Property> properties = e.getProperties();
         assertTrue(properties.isEmpty());
 
         //
@@ -450,7 +450,7 @@ public class DataCollectionTaskTest {
 
         assertNotNull(e);
 
-        Set<Property> properties = e.getProperties();
+        List<Property> properties = e.getProperties();
         assertEquals(2, properties.size());
 
         Set<String> expectedValues = new HashSet<>();

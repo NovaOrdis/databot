@@ -18,8 +18,8 @@
         -->
 
         <novaordis.utilities.version>4.7.8</novaordis.utilities.version>
-        <events.api.version>1.2.2-SNAPSHOT-12</events.api.version>
-        <events.csv.version>1.0.0-SNAPSHOT-10</events.csv.version>
+        <events.api.version>1.2.2-SNAPSHOT-13</events.api.version>
+        <events.csv.version>1.0.0-SNAPSHOT-11</events.csv.version>
 
         <snakeyaml.version>1.17</snakeyaml.version>
         <slf4j.version>1.7.12</slf4j.version>

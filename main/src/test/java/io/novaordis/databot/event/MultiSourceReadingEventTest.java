@@ -28,7 +28,6 @@ import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -257,7 +256,7 @@ public class MultiSourceReadingEventTest {
         e.addSourceReading(new MockAddress("something"), Collections.singletonList(new IntegerProperty("A", 1)));
         e.addSourceReading(new MockAddress("something else"), Collections.singletonList(new IntegerProperty("A", 1)));
 
-        Set<Property> properties = e.getProperties();
+        List<Property> properties = e.getProperties();
         assertEquals(2, properties.size());
 
         for(Property p: properties) {

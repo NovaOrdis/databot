@@ -75,8 +75,8 @@ public class MockTimedEvent implements TimedEvent {
     }
 
     @Override
-    public Set<Property> getProperties() {
-        return new HashSet<>(properties);
+    public List<Property> getProperties() {
+        return new ArrayList<>(properties);
     }
 
     @Override
@@ -94,6 +94,11 @@ public class MockTimedEvent implements TimedEvent {
     @Override
     public Property getPropertyByKey(Object propertyKey) {
         throw new RuntimeException("getPropertyByKey() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public StringProperty setStringProperty(String name, String value) {
+        throw new RuntimeException("setStringProperty() NOT YET IMPLEMENTED");
     }
 
     @Override

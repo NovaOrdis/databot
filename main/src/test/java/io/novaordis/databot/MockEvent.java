@@ -26,7 +26,7 @@ import io.novaordis.events.api.event.MapProperty;
 import io.novaordis.events.api.event.Property;
 import io.novaordis.events.api.event.StringProperty;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -45,7 +45,7 @@ public class MockEvent implements Event {
     // Event implementation --------------------------------------------------------------------------------------------
 
     @Override
-    public Set<Property> getProperties() {
+    public List<Property> getProperties() {
         throw new RuntimeException("getProperties() NOT YET IMPLEMENTED");
     }
 
@@ -57,6 +57,11 @@ public class MockEvent implements Event {
     @Override
     public Property getPropertyByKey(Object propertyKey) {
         throw new RuntimeException("getPropertyByKey() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public StringProperty setStringProperty(String name, String value) {
+        throw new RuntimeException("setStringProperty() NOT YET IMPLEMENTED");
     }
 
     @Override
