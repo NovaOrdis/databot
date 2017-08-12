@@ -17,6 +17,8 @@
 package io.novaordis.databot;
 
 import io.novaordis.events.api.event.BooleanProperty;
+import io.novaordis.events.api.event.Event;
+import io.novaordis.events.api.event.EventProperty;
 import io.novaordis.events.api.event.IntegerProperty;
 import io.novaordis.events.api.event.ListProperty;
 import io.novaordis.events.api.event.LongProperty;
@@ -80,6 +82,16 @@ public class MockTimedEvent implements TimedEvent {
     }
 
     @Override
+    public List<Property> getProperties(Class type) {
+        throw new RuntimeException("getProperties() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public void clearProperties() {
+        throw new RuntimeException("clearProperties() NOT YET IMPLEMENTED");
+    }
+
+    @Override
     public Property getProperty(String s) {
 
         for(Property p: properties) {
@@ -92,11 +104,6 @@ public class MockTimedEvent implements TimedEvent {
     }
 
     @Override
-    public Property getPropertyByKey(Object propertyKey) {
-        throw new RuntimeException("getPropertyByKey() NOT YET IMPLEMENTED");
-    }
-
-    @Override
     public StringProperty setStringProperty(String name, String value) {
         throw new RuntimeException("setStringProperty() NOT YET IMPLEMENTED");
     }
@@ -104,6 +111,26 @@ public class MockTimedEvent implements TimedEvent {
     @Override
     public StringProperty getStringProperty(String s) {
         throw new RuntimeException("getStringProperty() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public StringProperty removeStringProperty(String stringPropertyName) {
+        throw new RuntimeException("removeStringProperty() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public EventProperty setEventProperty(String name, Event event) {
+        throw new RuntimeException("setEventProperty() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public EventProperty getEventProperty(String eventPropertyName) {
+        throw new RuntimeException("getEventProperty() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public EventProperty removeEventProperty(String eventPropertyName) {
+        throw new RuntimeException("removeEventProperty() NOT YET IMPLEMENTED");
     }
 
     @Override

@@ -16,21 +16,22 @@
 
 package io.novaordis.databot.event;
 
-import io.novaordis.databot.MockMetricDefinition;
+import io.novaordis.events.api.event.EventProperty;
 import io.novaordis.events.api.event.IntegerProperty;
 import io.novaordis.events.api.event.Property;
 import io.novaordis.events.api.event.StringProperty;
 import io.novaordis.events.api.metric.MockAddress;
 import io.novaordis.utilities.address.Address;
+import io.novaordis.utilities.address.AddressImpl;
 import io.novaordis.utilities.time.Timestamp;
 import io.novaordis.utilities.time.TimestampImpl;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -142,6 +143,40 @@ public class MultiSourceReadingEventTest {
     // addSourceReading() ----------------------------------------------------------------------------------------------
 
     @Test
+    public void addSourceReading_NullAddress() throws Exception {
+
+        MultiSourceReadingEvent e = new MultiSourceReadingEvent();
+
+        try {
+
+            e.addSourceReading(null, Collections.singletonList(new IntegerProperty("B", 2)));
+            fail("should have thrown exception");
+        }
+        catch(IllegalArgumentException ex) {
+
+            String msg = ex.getMessage();
+            assertTrue(msg.contains("null source address"));
+        }
+    }
+
+    @Test
+    public void addSourceReading_NullReadingsList() throws Exception {
+
+        MultiSourceReadingEvent e = new MultiSourceReadingEvent();
+
+        try {
+
+            e.addSourceReading(new MockAddress("something"), null);
+            fail("should have thrown exception");
+        }
+        catch(IllegalArgumentException ex) {
+
+            String msg = ex.getMessage();
+            assertTrue(msg.contains("null readings list"));
+        }
+    }
+
+    @Test
     public void addSourceReading_DuplicateAddress() throws Exception {
 
         MultiSourceReadingEvent e = new MultiSourceReadingEvent();
@@ -184,13 +219,13 @@ public class MultiSourceReadingEventTest {
         assertEquals(1, addresses.size());
         assertEquals(new MockAddress("something"), addresses.get(0));
 
-        List<Property> properties = e.getProperties(new MockAddress("something"));
+        List<Property> properties = e.getPropertiesForSource(new MockAddress("something"));
         assertEquals(1, properties.size());
         Property p = properties.get(0);
         assertEquals("A", p.getName());
         assertEquals(1, p.getValue());
 
-        assertEquals(1, e.getPropertyCount());
+        assertEquals(1, e.getAllPropertiesCount());
 
         //
         // make sure collection started timestamp was updated on first add()
@@ -210,19 +245,19 @@ public class MultiSourceReadingEventTest {
         assertEquals(new MockAddress("something"), addresses2.get(0));
         assertEquals(new MockAddress("something else"), addresses2.get(1));
 
-        List<Property> properties2 = e.getProperties(new MockAddress("something"));
+        List<Property> properties2 = e.getPropertiesForSource(new MockAddress("something"));
         assertEquals(1, properties2.size());
         Property p2 = properties2.get(0);
         assertEquals("A", p2.getName());
         assertEquals(1, p2.getValue());
 
-        List<Property> properties3 = e.getProperties(new MockAddress("something else"));
+        List<Property> properties3 = e.getPropertiesForSource(new MockAddress("something else"));
         assertEquals(1, properties3.size());
         Property p3 = properties3.get(0);
         assertEquals("A", p3.getName());
         assertEquals(2, p3.getValue());
 
-        assertEquals(2, e.getPropertyCount());
+        assertEquals(2, e.getAllPropertiesCount());
 
         //
         // make sure collection started timestamp should not be updated on second add()
@@ -244,10 +279,15 @@ public class MultiSourceReadingEventTest {
     public void getProperties_NoAdds() throws Exception {
 
         MultiSourceReadingEvent e = new MultiSourceReadingEvent();
+
         assertTrue(e.getProperties().isEmpty());
-        assertEquals(0, e.getPropertyCount());
+
+        assertEquals(0, e.getAllPropertiesCount());
     }
 
+    /**
+     * Make sure getProperties() preserves the original semantics.
+     */
     @Test
     public void getProperties() throws Exception {
 
@@ -257,65 +297,145 @@ public class MultiSourceReadingEventTest {
         e.addSourceReading(new MockAddress("something else"), Collections.singletonList(new IntegerProperty("A", 1)));
 
         List<Property> properties = e.getProperties();
+
         assertEquals(2, properties.size());
 
-        for(Property p: properties) {
+        EventProperty ep = (EventProperty)properties.get(0);
+        assertEquals("something", ep.getName());
+        assertEquals("A", ep.getEvent().getProperties().get(0).getName());
+        assertEquals(1, ep.getEvent().getProperties().get(0).getValue());
 
-            assertEquals("A", p.getName());
-        }
+        EventProperty ep2 = (EventProperty)properties.get(1);
+        assertEquals("something else", ep2.getName());
+        assertEquals("A", ep2.getEvent().getProperties().get(0).getName());
+        assertEquals(1, ep2.getEvent().getProperties().get(0).getValue());
     }
 
-    // getPropertyByKey() ----------------------------------------------------------------------------------------------
+    // getProperties() -------------------------------------------------------------------------------------------------
 
     @Test
-    public void getPropertyByKey() throws Exception {
+    public void getPropertiesForSource_NoAdds() throws Exception {
 
         MultiSourceReadingEvent e = new MultiSourceReadingEvent();
 
-        e.addSourceReading(new MockAddress("something"), Collections.singletonList(new IntegerProperty("A", 1)));
-
-        MockMetricDefinition mmd = new MockMetricDefinition(new MockAddress("something"), "A");
-        MockMetricDefinition mmd2 = new MockMetricDefinition(new MockAddress("something"), "B");
-        MockMetricDefinition mmd3 = new MockMetricDefinition(new MockAddress("something else"), "A");
-
-        Property p = e.getPropertyByKey(mmd);
-
-        assertEquals("A", p.getName());
-        assertEquals(1, p.getValue());
-
-        Property p2 = e.getPropertyByKey(mmd2);
-        assertNull(p2);
-
-        Property p3 = e.getPropertyByKey(mmd3);
-        assertNull(p3);
+        assertTrue(e.getPropertiesForSource(new AddressImpl("some-random-source")).isEmpty());
     }
 
     @Test
-    public void getPropertyByKey_NotAValidKey() throws Exception {
+    public void getPropertiesForSource() throws Exception {
 
         MultiSourceReadingEvent e = new MultiSourceReadingEvent();
 
-        e.addSourceReading(new MockAddress("something"), Collections.singletonList(new IntegerProperty("A", 1)));
+        e.addSourceReading(new AddressImpl("something"), Collections.singletonList(new IntegerProperty("A", 1)));
 
-        assertNull(e.getPropertyByKey("A"));
-        assertNull(e.getPropertyByKey(new Object()));
+        List<Property> properties = e.getPropertiesForSource(new AddressImpl("something"));
+
+        assertEquals(1, properties.size());
+
+        assertEquals("A", properties.get(0).getName());
+        assertEquals(1, properties.get(0).getValue());
+
+        e.addSourceReading(new AddressImpl("something else"),
+                Arrays.asList(new IntegerProperty("A", 1), new StringProperty("B", "something")));
+
+        List<Property> properties2 = e.getPropertiesForSource(new AddressImpl("something else"));
+        assertEquals(2, properties2.size());
+
+        assertEquals("A", properties2.get(0).getName());
+        assertEquals(1, properties2.get(0).getValue());
+        assertEquals("B", properties2.get(1).getName());
+        assertEquals("something", properties2.get(1).getValue());
+    }
+
+    // getSourceAddresses() --------------------------------------------------------------------------------------------
+
+    @Test
+    public void getSourceAddresses_NoAddresses() throws Exception {
+
+        MultiSourceReadingEvent e = new MultiSourceReadingEvent();
+
+        assertTrue(e.getSourceAddresses().isEmpty());
     }
 
     @Test
-    public void getPropertyByKey_NullKey() throws Exception {
+    public void getSourceAddresses_OneAddress() throws Exception {
 
         MultiSourceReadingEvent e = new MultiSourceReadingEvent();
 
-        try {
+        Address a = new AddressImpl("something");
 
-            e.getPropertyByKey(null);
-            fail("should have thrown exception");
-        }
-        catch(IllegalArgumentException ex) {
+        e.addSourceReading(a, Collections.singletonList(new StringProperty("something", "something else")));
 
-            String msg = ex.getMessage();
-            assertEquals("null key", msg);
-        }
+        List<Address> addresses = e.getSourceAddresses();
+
+        assertEquals(1, addresses.size());
+
+        Address a2 = addresses.get(0);
+        assertEquals(a, a2);
+    }
+
+    // getSourceCount() ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void getSourceCount_NoAddresses() throws Exception {
+
+        MultiSourceReadingEvent e = new MultiSourceReadingEvent();
+
+        assertEquals(0, e.getSourceCount());
+    }
+
+    @Test
+    public void getSourceCount_OneAddress() throws Exception {
+
+        MultiSourceReadingEvent e = new MultiSourceReadingEvent();
+
+        Address a = new AddressImpl("something");
+
+        e.addSourceReading(a, Collections.singletonList(new StringProperty("something", "something else")));
+
+        assertEquals(1, e.getSourceCount());
+    }
+
+    // getAllPropertiesCount() -----------------------------------------------------------------------------------------
+
+    @Test
+    public void getAllPropertiesCount_NoProperties() throws Exception {
+
+        MultiSourceReadingEvent e = new MultiSourceReadingEvent();
+
+        assertEquals(0, e.getAllPropertiesCount());
+    }
+
+    @Test
+    public void getAllPropertiesCount_OneSource_OneSecondLevelProperty() throws Exception {
+
+        MultiSourceReadingEvent e = new MultiSourceReadingEvent();
+
+        e.addSourceReading(new AddressImpl("something"), Collections.singletonList(new StringProperty("A", "B")));
+
+        assertEquals(1, e.getAllPropertiesCount());
+    }
+
+    @Test
+    public void getAllPropertiesCount_OneSource_TwoSecondLevelProperty() throws Exception {
+
+        MultiSourceReadingEvent e = new MultiSourceReadingEvent();
+
+        e.addSourceReading(new AddressImpl("something"),
+                Arrays.asList(new StringProperty("A", "B"), new IntegerProperty("C", 6)));
+
+        assertEquals(2, e.getAllPropertiesCount());
+    }
+
+    @Test
+    public void getAllPropertiesCount_TwoSources_OneSecondLevelPropertyEach() throws Exception {
+
+        MultiSourceReadingEvent e = new MultiSourceReadingEvent();
+
+        e.addSourceReading(new AddressImpl("something"), Collections.singletonList(new StringProperty("A", "B")));
+        e.addSourceReading(new AddressImpl("something-else"), Collections.singletonList(new StringProperty("A", "B")));
+
+        assertEquals(2, e.getAllPropertiesCount());
     }
 
     // toString() ------------------------------------------------------------------------------------------------------

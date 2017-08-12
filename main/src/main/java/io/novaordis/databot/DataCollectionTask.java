@@ -307,10 +307,10 @@ public class DataCollectionTask extends TimerTask {
                     (msre.getCollectionEndTimestamp() - t0) + " ms" +
                     (countOfSourcesThatFailed == 0 ?
                             "" : ", " + countOfSourcesThatFailed + " source(s) failed during collection") +
-                    ", " + msre.getPropertyCount() + " properties collected");
+                    ", " + msre.getAllPropertiesCount() + " properties collected");
         }
 
-        if (log.isTraceEnabled() && msre.getPropertyCount() > 0) {
+        if (log.isTraceEnabled() && msre.getAllPropertiesCount() > 0) {
 
             log.trace("collected properties:\n" + displayProperties(msre));
         }
@@ -362,7 +362,7 @@ public class DataCollectionTask extends TimerTask {
         for(Iterator<Address> ai = addresses.iterator(); ai.hasNext(); ) {
 
             Address a = ai.next();
-            List<Property> props = msre.getProperties(a);
+            List<Property> props = msre.getPropertiesForSource(a);
 
             for (Iterator<Property> pi = props.iterator(); pi.hasNext(); index++) {
 

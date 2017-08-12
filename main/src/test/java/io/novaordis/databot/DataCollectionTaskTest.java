@@ -21,17 +21,15 @@ import io.novaordis.databot.consumer.MockActiveDataConsumer;
 import io.novaordis.databot.event.MultiSourceReadingEvent;
 import io.novaordis.databot.failure.EventQueueFullException;
 import io.novaordis.events.api.event.Event;
+import io.novaordis.events.api.event.EventProperty;
 import io.novaordis.events.api.event.Property;
-import io.novaordis.events.api.event.StringProperty;
 import io.novaordis.events.api.event.TimedEvent;
 import io.novaordis.events.api.metric.MockAddress;
 import io.novaordis.utilities.address.Address;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -318,13 +316,26 @@ public class DataCollectionTaskTest {
         assertTrue(t0 <= e.getTime());
         assertTrue(e.getTime() <= t1);
 
+        //
+        // we don't change the semantics of getProperties(), it will return the top level properties
+        //
+
         List<Property> properties = e.getProperties();
         assertEquals(1, properties.size());
-        StringProperty p = (StringProperty)properties.iterator().next();
+        EventProperty p = (EventProperty)properties.iterator().next();
+
+        assertEquals(ma.getLiteral(), p.getName());
+
+        Event secondLevelEvent = p.getEvent();
+
+        List<Property> secondLevelProperties = secondLevelEvent.getProperties();
+        assertEquals(1, secondLevelProperties.size());
+
+        Property p2 = secondLevelProperties.get(0);
 
         // the property name must be the metric definition ID
-        assertEquals("mock-metric-id", p.getName());
-        assertEquals("mock-value", p.getValue());
+        assertEquals("mock-metric-id", p2.getName());
+        assertEquals("mock-value", p2.getValue());
     }
 
     @Test
@@ -362,7 +373,29 @@ public class DataCollectionTaskTest {
         assertTrue(e.getTime() <= t1);
 
         List<Property> properties = e.getProperties();
-        assertTrue(properties.isEmpty());
+
+        //
+        // getProperties() has the original semantics, there's a EventProperty corresponding to the collection
+        //
+
+        assertEquals(1, properties.size());
+        assertTrue(((EventProperty) properties.get(0)).getEvent().getProperties().isEmpty());
+
+        //
+        // special semantics
+        //
+
+        MultiSourceReadingEvent msre = (MultiSourceReadingEvent)e;
+
+        //
+        // make sure the address was recorded, though
+        //
+
+        List<Address> addresses = msre.getSourceAddresses();
+        assertEquals(1, addresses.size());
+        assertEquals(ma, addresses.get(0));
+        assertEquals(0, msre.getAllPropertiesCount());
+        assertTrue(msre.getPropertiesForSource(ma).isEmpty());
     }
 
     @Test
@@ -380,7 +413,8 @@ public class DataCollectionTaskTest {
         DataBot db = new DataBot(mc);
 
         //
-        // configure the mock source to fail with unchecked exception
+        // configure the mock source to fail with unchecked exception - this means the source will generate zero
+        // readings, but nothing should break
         //
 
         MockMetricSource mms = (MockMetricSource)db.getMetricSource(ma);
@@ -400,15 +434,29 @@ public class DataCollectionTaskTest {
         assertTrue(e.getTime() <= t1);
 
         List<Property> properties = e.getProperties();
-        assertTrue(properties.isEmpty());
+
+        //
+        // getProperties() has the original semantics, there's a EventProperty corresponding to the collection
+        //
+
+        assertEquals(1, properties.size());
+        assertTrue(((EventProperty) properties.get(0)).getEvent().getProperties().isEmpty());
+
+        //
+        // special semantics
+        //
+
+        MultiSourceReadingEvent msre = (MultiSourceReadingEvent)e;
 
         //
         // make sure the address was recorded, though
         //
 
-        List<Address> addresses = ((MultiSourceReadingEvent)e).getSourceAddresses();
+        List<Address> addresses = msre.getSourceAddresses();
         assertEquals(1, addresses.size());
         assertEquals(ma, addresses.get(0));
+        assertEquals(0, msre.getAllPropertiesCount());
+        assertTrue(msre.getPropertiesForSource(ma).isEmpty());
     }
 
     @Test
@@ -450,23 +498,25 @@ public class DataCollectionTaskTest {
 
         assertNotNull(e);
 
+        //
+        // we preserve the original semantics of the Event's methods:
+        //
+
         List<Property> properties = e.getProperties();
         assertEquals(2, properties.size());
 
-        Set<String> expectedValues = new HashSet<>();
-        expectedValues.add("mock-value-for-source-1");
-        expectedValues.add("mock-value-for-source-2");
+        EventProperty ep = (EventProperty)properties.get(0);
+        assertEquals("mock-metric-source-1", ep.getName());
+        List<Property> secondLevelProperties = ep.getEvent().getProperties();
 
-        for(Property p: properties) {
+        EventProperty ep2 = (EventProperty)properties.get(1);
+        assertEquals("mock-metric-source-2", ep2.getName());
+        List<Property> secondLevelProperties2 = ep2.getEvent().getProperties();
 
-            StringProperty sp = (StringProperty)p;
-            String value = sp.getString();
-
-            assertTrue(expectedValues.contains(value));
-            expectedValues.remove(value);
-        }
-
-        assertTrue(expectedValues.isEmpty());
+        assertEquals("shared-mock-metric-id", secondLevelProperties.get(0).getName());
+        assertEquals("mock-value-for-source-1", secondLevelProperties.get(0).getValue());
+        assertEquals("shared-mock-metric-id", secondLevelProperties2.get(0).getName());
+        assertEquals("mock-value-for-source-2", secondLevelProperties2.get(0).getValue());
     }
 
     // toLogMessage() --------------------------------------------------------------------------------------------------

@@ -16,30 +16,32 @@
 
 package io.novaordis.databot.event;
 
-import io.novaordis.events.api.event.BooleanProperty;
+import io.novaordis.events.api.event.Event;
+import io.novaordis.events.api.event.EventProperty;
+import io.novaordis.events.api.event.GenericEvent;
 import io.novaordis.events.api.event.GenericTimedEvent;
-import io.novaordis.events.api.event.IntegerProperty;
-import io.novaordis.events.api.event.ListProperty;
-import io.novaordis.events.api.event.LongProperty;
-import io.novaordis.events.api.event.MapProperty;
 import io.novaordis.events.api.event.Property;
-import io.novaordis.events.api.event.StringProperty;
-import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.utilities.address.Address;
+import io.novaordis.utilities.address.AddressException;
+import io.novaordis.utilities.address.AddressImpl;
 import io.novaordis.utilities.time.Timestamp;
 import io.novaordis.utilities.time.TimestampImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The encapsulations of all metrics from different sources during concurrent runs.
+ *
+ * It is implemented as a hierarchical event, where the top level event contains the calculated "read timestamp" and
+ * second-level events, each of the second-level event corresponding to a source reading. The second-level events
+ * are keyed on the source address' literal. The metrics reads from the source are available as properties of the
+ * corresponding second-level event.
+ *
+ * Note that all Event interface keep their original semantics: they will return EventProperties, and not the second
+ * level properties. The users of this class must be aware of this and interpret.
  *
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
  * @since 7/26/17
@@ -48,8 +50,6 @@ public class MultiSourceReadingEvent extends GenericTimedEvent {
 
     // Constants -------------------------------------------------------------------------------------------------------
 
-    private static final Logger log = LoggerFactory.getLogger(MultiSourceReadingEvent.class);
-
     public static final SimpleDateFormat TO_STRING_TIMESTAMP_FORMAT = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
 
     // Static ----------------------------------------------------------------------------------------------------------
@@ -57,20 +57,14 @@ public class MultiSourceReadingEvent extends GenericTimedEvent {
     // Attributes ------------------------------------------------------------------------------------------------------
 
     private long collectionStartTimestamp;
-    private long collectionEndTimestamp;
 
-    // maintains the order of add()
-    private List<Address> addresses;
-    private Map<Address, List<Property>> properties;
+    private long collectionEndTimestamp;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
     public MultiSourceReadingEvent() {
 
         this.collectionStartTimestamp = System.currentTimeMillis();
-
-        this.addresses = new ArrayList<>();
-        this.properties = new HashMap<>();
 
         // if there are no readings, collection started and ended at the same time
         this.collectionEndTimestamp = collectionStartTimestamp;
@@ -95,48 +89,6 @@ public class MultiSourceReadingEvent extends GenericTimedEvent {
     }
 
     @Override
-    public Property getPropertyByKey(Object propertyKey) {
-
-        if (propertyKey == null) {
-
-            throw new IllegalArgumentException("null key");
-        }
-
-        if (!(propertyKey instanceof MetricDefinition)) {
-
-            log.debug(propertyKey + "(" + propertyKey.getClass() + ") is not a valid key");
-            return null;
-        }
-
-        MetricDefinition md = (MetricDefinition)propertyKey;
-        Address a = md.getMetricSourceAddress();
-
-        if (a == null) {
-
-            return null;
-        }
-
-        List<Property> ps = getProperties(a);
-
-        if (ps.isEmpty()) {
-
-            return null;
-        }
-
-        String id = md.getId();
-
-        for(Property p: ps) {
-
-            if (p.getName().equals(id)) {
-
-                return p;
-            }
-        }
-
-        return null;
-    }
-
-    @Override
     public void setTimestamp(Timestamp timestamp) {
 
         //
@@ -144,75 +96,6 @@ public class MultiSourceReadingEvent extends GenericTimedEvent {
         //
 
         throw new IllegalStateException("timestamp cannot be changed this way for MultiSourceReadingEvents");
-    }
-
-    @Override
-    public List<Property> getProperties() {
-
-        List<Property> result = new ArrayList<>();
-
-        //noinspection Convert2streamapi
-        for(List<Property> ps: properties.values()) {
-
-            result.addAll(ps);
-        }
-
-        return result;
-    }
-
-    //
-    // TODO 9ys5C3: these methods do not belong to the Event interface.
-    //
-    // See: https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed
-    //
-
-    @Override
-    public Property getProperty(String name) {
-
-        log.warn("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, getProperty(" + name + ")");
-        return null;
-    }
-
-    @Override
-    public StringProperty getStringProperty(String stringPropertyName) {
-
-        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, getStringProperty(" + stringPropertyName + ")");
-    }
-
-    @Override
-    public LongProperty getLongProperty(String longPropertyName) {
-
-        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, getLongProperty(" + longPropertyName + ")");
-    }
-
-    @Override
-    public IntegerProperty getIntegerProperty(String integerPropertyName) {
-
-        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, getIntegerProperty(" + integerPropertyName + ")");
-    }
-
-    @Override
-    public BooleanProperty getBooleanProperty(String booleanPropertyName){
-
-        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, getBooleanProperty(" + booleanPropertyName + ")");
-    }
-
-    @Override
-    public MapProperty getMapProperty(String mapPropertyName){
-
-        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, getMapProperty(" + mapPropertyName + ")");
-    }
-
-    @Override
-    public ListProperty getListProperty(String listPropertyName){
-
-        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, getListProperty(" + listPropertyName + ")");
-    }
-
-    @Override
-    public Property setProperty(Property property){
-
-        throw new IllegalStateException("TODO 9ys5C3 https://kb.novaordis.com/index.php/Events-api_Concepts#Event_Interface_Refactoring_Needed, setProperty(" + property + ")");
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
@@ -236,80 +119,140 @@ public class MultiSourceReadingEvent extends GenericTimedEvent {
     }
 
     /**
+     * Specialized mutator that converts a metric source reading into an event property.
+     *
      * @param sourceAddress only one source address per event is permitted.
      */
     public void addSourceReading(Address sourceAddress, List<Property> readings) {
 
-        if (addresses.contains(sourceAddress)) {
+        if (sourceAddress == null) {
+
+            throw new IllegalArgumentException("null source address");
+        }
+
+        if (readings == null) {
+
+            throw new IllegalArgumentException("null readings list");
+        }
+
+        String addressLiteral = sourceAddress.getLiteral();
+
+        if (getEventProperty(addressLiteral) != null) {
 
             throw new IllegalArgumentException("duplicate metric source: " + sourceAddress);
         }
 
-        if (addresses.isEmpty()) {
+        if (getProperties(Event.class).isEmpty()) {
 
             //
-            // this is the first add, adjust collectionStartTimestamp
+            // no sub-events are present, this is the first add, adjust collectionStartTimestamp
             //
             this.collectionStartTimestamp = System.currentTimeMillis();
         }
 
         this.collectionEndTimestamp = System.currentTimeMillis();
-        addresses.add(sourceAddress);
-        properties.put(sourceAddress, readings);
+
+        //
+        // add the source reading as a new event
+        //
+
+        GenericEvent sourceReading = new GenericEvent(readings);
+        setEventProperty(addressLiteral, sourceReading);
     }
 
     /**
-     * @return the total count of properties added so far, across all sources.
+     * @return the total count of second-level properties added so far, across all sources. It only counts the
+     * second-level properties, not the top level event properties.
      */
-    public int getPropertyCount() {
+    public int getAllPropertiesCount() {
 
         int count = 0;
 
-        for(List<Property> ps: properties.values()) {
+        for(Property p: getProperties(Event.class)) {
 
-            count += ps.size();
+            EventProperty ep = (EventProperty)p;
+
+            Event reading = ep.getEvent();
+
+            if (reading != null) {
+
+                count += reading.getProperties().size();
+            }
         }
 
         return count;
     }
 
     /**
-     * Returns the underlying storage, so handle with care.
-     *
      * @return the list of source addresses, in the order in which they were added.  May return an empty list, but never
      * null.
      */
     public List<Address> getSourceAddresses() {
 
-        return addresses;
+        List<Property> eventProperties = getProperties(Event.class);
+
+        if (eventProperties.isEmpty()) {
+
+            return Collections.emptyList();
+        }
+
+        List<Address> result = new ArrayList<>();
+
+        for(Property p: eventProperties) {
+
+            EventProperty ep = (EventProperty)p;
+
+            String addressLiteral = ep.getName();
+
+            try {
+
+                result.add(new AddressImpl(addressLiteral));
+            }
+            catch (AddressException e) {
+
+                //
+                // this should not happen, as we got a valid address. Will happen if the conversion from literal
+                // to address fails, which indicates a programming error
+                //
+
+                throw new IllegalStateException(e);
+            }
+        }
+
+        return result;
     }
 
     public int getSourceCount() {
 
-        return addresses.size();
+        return getProperties(Event.class).size();
     }
 
     /**
      * @return the properties for the given source, in the order they were added. May return an empty list, but never
      * null.
      */
-    public List<Property> getProperties(Address source) {
+    public List<Property> getPropertiesForSource(Address source) {
 
-        List<Property> ps = properties.get(source);
+        for(Property p: getProperties(Event.class)) {
 
-        if (ps == null) {
+            EventProperty ep = (EventProperty)p;
 
-            ps = Collections.emptyList();
+            String address = ep.getName();
+
+            if (source.getLiteral().equals(address)) {
+
+                return ep.getEvent().getProperties();
+            }
         }
 
-        return ps;
+        return Collections.emptyList();
     }
 
     @Override
     public String toString() {
 
         String s = TO_STRING_TIMESTAMP_FORMAT.format(getTime());
-        s += " multi-source collection from " + getSourceCount() + " source(s), " + getPropertyCount() + " properties";
+        s += " multi-source collection from " + getSourceCount() + " source(s), " + getAllPropertiesCount() + " properties";
         return s;
     }
 
