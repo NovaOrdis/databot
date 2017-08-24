@@ -506,11 +506,11 @@ public class DataCollectionTaskTest {
         assertEquals(2, properties.size());
 
         EventProperty ep = (EventProperty)properties.get(0);
-        assertEquals("mock-metric-source-1", ep.getName());
+        assertEquals("mock://mock-metric-source-1", ep.getName());
         List<Property> secondLevelProperties = ep.getEvent().getProperties();
 
         EventProperty ep2 = (EventProperty)properties.get(1);
-        assertEquals("mock-metric-source-2", ep2.getName());
+        assertEquals("mock://mock-metric-source-2", ep2.getName());
         List<Property> secondLevelProperties2 = ep2.getEvent().getProperties();
 
         assertEquals("shared-mock-metric-id", secondLevelProperties.get(0).getName());

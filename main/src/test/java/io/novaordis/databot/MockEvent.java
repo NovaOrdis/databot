@@ -56,6 +56,11 @@ public class MockEvent implements Event {
     }
 
     @Override
+    public Property removeProperty(String name, Class type) {
+        throw new RuntimeException("removeProperty() NOT YET IMPLEMENTED");
+    }
+
+    @Override
     public void clearProperties() {
         throw new RuntimeException("clearProperties() NOT YET IMPLEMENTED");
     }

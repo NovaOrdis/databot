@@ -301,12 +301,12 @@ public class MultiSourceReadingEventTest {
         assertEquals(2, properties.size());
 
         EventProperty ep = (EventProperty)properties.get(0);
-        assertEquals("something", ep.getName());
+        assertEquals("mock://something", ep.getName());
         assertEquals("A", ep.getEvent().getProperties().get(0).getName());
         assertEquals(1, ep.getEvent().getProperties().get(0).getValue());
 
         EventProperty ep2 = (EventProperty)properties.get(1);
-        assertEquals("something else", ep2.getName());
+        assertEquals("mock://something else", ep2.getName());
         assertEquals("A", ep2.getEvent().getProperties().get(0).getName());
         assertEquals(1, ep2.getEvent().getProperties().get(0).getValue());
     }

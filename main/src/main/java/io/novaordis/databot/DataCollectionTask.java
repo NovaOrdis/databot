@@ -223,6 +223,10 @@ public class DataCollectionTask extends TimerTask {
     /**
      * Must strive to handle all exceptions internally and not attempt to bubble them up. If exceptions occur, they
      * should be properly logged as ERROR, at this level. The calling layer will handle runaway exceptions, though.
+     *
+     * @return a timed event where readings for each metric source are encapsulated in EventProperties, one
+     * EventProperty for each metric source. The EventProperty instances are added to the top-level event in the order
+     * in which they are specified in the configuration.
      */
     TimedEvent collectMetrics() {
 
@@ -234,12 +238,14 @@ public class DataCollectionTask extends TimerTask {
         Configuration configuration = dataBot.getConfiguration();
 
         Map<Address, Future<List<Property>>> addressToFuture = new HashMap<>();
+        List<Address> orderedListOfSources = new ArrayList<>();
 
         //noinspection Convert2streamapi
         for(MetricSourceDefinition sd: configuration.getMetricSourceDefinitions()) {
 
             Address sourceAddress = sd.getAddress();
             addressToFuture.put(sourceAddress, null);
+            orderedListOfSources.add(sourceAddress);
         }
 
         MultiSourceReadingEvent msre = new MultiSourceReadingEvent();
@@ -271,7 +277,7 @@ public class DataCollectionTask extends TimerTask {
 
         int countOfSourcesThatFailed = 0;
 
-        for(Address a: addressToFuture.keySet()) {
+        for(Address a: orderedListOfSources) {
 
             List<Property> properties = null;
             Future<List<Property>> future = addressToFuture.get(a);

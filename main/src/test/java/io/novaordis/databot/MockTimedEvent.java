@@ -30,9 +30,7 @@ import io.novaordis.utilities.time.Timestamp;
 import io.novaordis.utilities.time.TimestampImpl;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -84,6 +82,11 @@ public class MockTimedEvent implements TimedEvent {
     @Override
     public List<Property> getProperties(Class type) {
         throw new RuntimeException("getProperties() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public Property removeProperty(String name, Class type) {
+        throw new RuntimeException("removeProperty() NOT YET IMPLEMENTED");
     }
 
     @Override

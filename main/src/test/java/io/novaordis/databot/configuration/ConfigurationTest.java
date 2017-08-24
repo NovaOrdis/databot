@@ -185,13 +185,14 @@ public abstract class ConfigurationTest {
         JmxMetricDefinition m4 = (JmxMetricDefinition)metrics.get(3);
         assertNotNull(m4);
         assertEquals(
-                "admin@localhost:9999/jboss.as:subsystem=messaging,hornetq-server=default,jms-queue=DLQ/messageCount",
+                "jmx://admin@localhost:9999/jboss.as:subsystem=messaging,hornetq-server=default,jms-queue=DLQ/messageCount",
                 m4.getLabel());
         assertEquals(new AddressImpl("jmx", "admin", null, "localhost", 9999), m4.getMetricSourceAddress());
 
         JBossDmrMetricDefinition m5 = (JBossDmrMetricDefinition)metrics.get(4);
         assertNotNull(m5);
-        assertEquals("admin@localhost:9999/subsystem=messaging/hornetq-server=default/jms-queue=DLQ/message-count",
+        assertEquals(
+                "jbosscli://admin@localhost:9999/subsystem=messaging/hornetq-server=default/jms-queue=DLQ/message-count",
                 m5.getLabel());
         assertTrue(new JBossControllerAddress("admin", null, "localhost", 9999).equals(m5.getMetricSourceAddress()));
 
