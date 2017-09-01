@@ -19,6 +19,7 @@ package io.novaordis.databot.os.linux;
 import io.novaordis.events.api.event.IntegerProperty;
 import io.novaordis.events.api.event.LongProperty;
 import io.novaordis.events.api.event.Property;
+import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.measure.MemoryMeasureUnit;
 import io.novaordis.databot.os.InvalidExecutionOutputException;
 import io.novaordis.utilities.Files;
@@ -62,7 +63,9 @@ public class VmstatTest {
         assertTrue(f.isFile());
         String content = Files.read(f);
 
-        List<Property> properties = Vmstat.parseCommandOutput(content);
+        PropertyFactory pf = new PropertyFactory();
+
+        List<Property> properties = Vmstat.parseCommandOutput(pf, content);
 
         IntegerProperty ip;
 
@@ -100,9 +103,12 @@ public class VmstatTest {
     @Test
     public void parseProperty_WrongType() throws Exception {
 
+        PropertyFactory pf = new PropertyFactory();
+
         try {
+
             Vmstat.parseProperty(
-                    "test-header", "unconvertible-value", "test-header", "test-name", Integer.class, 1d, null);
+                    pf, "test-header", "unconvertible-value", "test-header", "test-name", Integer.class, 1d, null);
             fail("should throw exception");
         }
         catch(InvalidExecutionOutputException e) {
@@ -116,8 +122,10 @@ public class VmstatTest {
     @Test
     public void parseProperty_ConversionFromString_NullMultiplicationFactor() throws Exception {
 
+        PropertyFactory pf = new PropertyFactory();
+
         IntegerProperty ip = (IntegerProperty)Vmstat.parseProperty(
-                "test-header", "7", "test-header", "test-name", Integer.class, null, null);
+                pf, "test-header", "7", "test-header", "test-name", Integer.class, null, null);
 
         assertEquals("test-name", ip.getName());
         assertEquals(7, ip.getInteger().intValue());
@@ -126,8 +134,10 @@ public class VmstatTest {
     @Test
     public void parseProperty_ConversionFromString_MultiplicationFactor() throws Exception {
 
+        PropertyFactory pf = new PropertyFactory();
+
         IntegerProperty ip = (IntegerProperty)Vmstat.parseProperty(
-                "test-header", "7", "test-header", "test-name", Integer.class, 10d, null);
+                pf, "test-header", "7", "test-header", "test-name", Integer.class, 10d, null);
 
         assertEquals("test-name", ip.getName());
         assertEquals(70, ip.getInteger().intValue());

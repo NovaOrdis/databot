@@ -18,8 +18,8 @@ package io.novaordis.databot.task;
 
 import io.novaordis.databot.MockMetricDefinition;
 import io.novaordis.databot.MockMetricSource;
-import io.novaordis.databot.MockProperty;
 import io.novaordis.events.api.event.Property;
+import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.event.StringProperty;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSourceException;
@@ -58,8 +58,9 @@ public class SourceQueryTaskTest {
     @Test
     public void constructor_NullMetricSource() throws Exception {
 
+        PropertyFactory pf = new PropertyFactory();
         MockAddress ma = new MockAddress("A");
-        MockMetricDefinition md = new MockMetricDefinition(ma, "md");
+        MockMetricDefinition md = new MockMetricDefinition(pf, ma, "md");
         List<MetricDefinition> mds = Collections.singletonList(md);
 
         try {
@@ -77,14 +78,16 @@ public class SourceQueryTaskTest {
     @Test
     public void constructor_NotAllMetricsBelongToTheSameSource() throws Exception {
 
+        PropertyFactory pf = new PropertyFactory();
+
         MockAddress ma = new MockAddress("A");
 
-        MockMetricSource ms = new MockMetricSource(ma);
+        MockMetricSource ms = new MockMetricSource(pf, ma);
 
-        MockMetricDefinition md = new MockMetricDefinition(ma, "md");
+        MockMetricDefinition md = new MockMetricDefinition(pf, ma, "md");
 
         MockAddress ma2 = new MockAddress("B");
-        MockMetricDefinition md2 = new MockMetricDefinition(ma2, "md2");
+        MockMetricDefinition md2 = new MockMetricDefinition(pf, ma2, "md2");
 
         List<MetricDefinition> mds = Arrays.asList(md, md2);
 
@@ -104,13 +107,16 @@ public class SourceQueryTaskTest {
     public void constructor_AllMetricsBelongToTheSameSourceWhichIsDifferentFromTheSourceToQuery() throws Exception {
 
         MockAddress a = new MockAddress("A");
-        MockMetricSource s = new MockMetricSource(a);
+
+        PropertyFactory pf = new PropertyFactory();
+
+        MockMetricSource s = new MockMetricSource(pf, a);
 
         MockAddress ma = new MockAddress("B");
-        MockMetricDefinition md = new MockMetricDefinition(ma, "md");
+        MockMetricDefinition md = new MockMetricDefinition(pf, ma, "md");
 
         MockAddress ma2 = new MockAddress("B");
-        MockMetricDefinition md2 = new MockMetricDefinition(ma2, "md2");
+        MockMetricDefinition md2 = new MockMetricDefinition(pf, ma2, "md2");
 
         List<MetricDefinition> mds = Arrays.asList(md, md2);
 
@@ -131,7 +137,9 @@ public class SourceQueryTaskTest {
 
         MockAddress ma = new MockAddress();
 
-        MockMetricSource ms = new MockMetricSource(ma);
+        PropertyFactory pf = new PropertyFactory();
+
+        MockMetricSource ms = new MockMetricSource(pf, ma);
 
         SourceQueryTask q = new SourceQueryTask(ms, Collections.emptyList());
 
@@ -142,12 +150,14 @@ public class SourceQueryTaskTest {
     @Test
     public void constructor() throws Exception {
 
+        PropertyFactory pf = new PropertyFactory();
+
         MockAddress ma = new MockAddress();
 
-        MockMetricDefinition md = new MockMetricDefinition(ma, "md");
-        MockMetricDefinition md2 = new MockMetricDefinition(ma, "md2");
+        MockMetricDefinition md = new MockMetricDefinition(pf, ma, "md");
+        MockMetricDefinition md2 = new MockMetricDefinition(pf, ma, "md2");
 
-        MockMetricSource ms = new MockMetricSource(ma);
+        MockMetricSource ms = new MockMetricSource(pf, ma);
 
         SourceQueryTask q = new SourceQueryTask(ms, Arrays.asList(md, md2));
 
@@ -164,11 +174,13 @@ public class SourceQueryTaskTest {
     @Test
     public void call() throws Exception {
 
-        MockAddress ma = new MockAddress("mock-source");
-        MockMetricDefinition md = new MockMetricDefinition(ma, "mock-definition-1");
-        MockMetricDefinition md2 = new MockMetricDefinition(ma, "mock-definition-2");
+        PropertyFactory pf = new PropertyFactory();
 
-        MockMetricSource ms = new MockMetricSource(ma);
+        MockAddress ma = new MockAddress("mock-source");
+        MockMetricDefinition md = new MockMetricDefinition(pf, ma, "mock-definition-1");
+        MockMetricDefinition md2 = new MockMetricDefinition(pf, ma, "mock-definition-2");
+
+        MockMetricSource ms = new MockMetricSource(pf, ma);
 
         //
         // populate the metric source with "expected" values
@@ -193,11 +205,13 @@ public class SourceQueryTaskTest {
     @Test
     public void call_CollectionFailsWithCheckedException() throws Exception {
 
-        MockAddress ma = new MockAddress("mock-source");
-        MockMetricDefinition md = new MockMetricDefinition(ma, "mock-definition-1");
-        MockMetricDefinition md2 = new MockMetricDefinition(ma, "mock-definition-2");
+        PropertyFactory pf = new PropertyFactory();
 
-        MockMetricSource ms = new MockMetricSource(ma);
+        MockAddress ma = new MockAddress("mock-source");
+        MockMetricDefinition md = new MockMetricDefinition(pf, ma, "mock-definition-1");
+        MockMetricDefinition md2 = new MockMetricDefinition(pf, ma, "mock-definition-2");
+
+        MockMetricSource ms = new MockMetricSource(pf, ma);
 
         //
         // configure the metric source to fail
@@ -222,11 +236,14 @@ public class SourceQueryTaskTest {
     @Test
     public void call_CollectionFailsWithUncheckedException() throws Exception {
 
-        MockAddress ma = new MockAddress("mock-source");
-        MockMetricDefinition md = new MockMetricDefinition(ma, "mock-definition-1");
-        MockMetricDefinition md2 = new MockMetricDefinition(ma, "mock-definition-2");
+        PropertyFactory pf = new PropertyFactory();
 
-        MockMetricSource ms = new MockMetricSource(ma);
+
+        MockAddress ma = new MockAddress("mock-source");
+        MockMetricDefinition md = new MockMetricDefinition(pf, ma, "mock-definition-1");
+        MockMetricDefinition md2 = new MockMetricDefinition(pf, ma, "mock-definition-2");
+
+        MockMetricSource ms = new MockMetricSource(pf, ma);
 
         //
         // configure the metric source to fail

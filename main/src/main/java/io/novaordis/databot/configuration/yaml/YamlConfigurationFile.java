@@ -18,6 +18,7 @@ package io.novaordis.databot.configuration.yaml;
 
 import io.novaordis.databot.DataConsumerException;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
+import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.databot.configuration.ConfigurationBase;
 import io.novaordis.events.api.metric.MetricDefinitionParser;
@@ -241,7 +242,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
             for(Object le: list) {
 
-                MetricDefinition md = toMetricDefinition(le);
+                MetricDefinition md = toMetricDefinition(getPropertyFactory(), le);
                 addMetricDefinition(md);
             }
         }
@@ -255,7 +256,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
     // Package protected static ----------------------------------------------------------------------------------------
 
-    static MetricDefinition toMetricDefinition(Object o) throws UserErrorException {
+    static MetricDefinition toMetricDefinition(PropertyFactory pf, Object o) throws UserErrorException {
 
         if (o == null) {
 
@@ -273,7 +274,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
         try {
 
-            md = MetricDefinitionParser.parse(tok);
+            md = MetricDefinitionParser.parse(pf, tok);
         }
         catch (Exception e) {
 

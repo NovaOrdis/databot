@@ -21,6 +21,7 @@ import io.novaordis.databot.configuration.DefaultConfiguration;
 import io.novaordis.databot.configuration.MockConfiguration;
 import io.novaordis.databot.consumer.MockDataConsumer;
 import io.novaordis.events.api.event.Event;
+import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MockAddress;
 import io.novaordis.events.api.metric.jboss.JBossController;
@@ -206,7 +207,7 @@ public class DataBotTest {
         mc.setDataConsumers(Collections.singletonList(mdc));
         mc.setSamplingIntervalSec(1);
 
-        mc.setMetricSourceFactory(new MockMetricSourceFactory());
+        mc.setMetricSourceFactory(new MockMetricSourceFactory(new PropertyFactory()));
 
         DataBot d = new DataBot(mc);
 
@@ -348,11 +349,13 @@ public class DataBotTest {
     @Test
     public void getMetricSource_Exists() throws Exception {
 
+        PropertyFactory pf = new PropertyFactory();
+
         MockAddress a = new MockAddress("mock");
-        MockMetricDefinition md = new MockMetricDefinition(a);
+        MockMetricDefinition md = new MockMetricDefinition(pf, a);
         MockConfiguration mc = new MockConfiguration();
         mc.addMetricDefinition(md);
-        mc.setMetricSourceFactory(new MockMetricSourceFactory());
+        mc.setMetricSourceFactory(new MockMetricSourceFactory(new PropertyFactory()));
 
         DataBot d = new DataBot(mc);
 

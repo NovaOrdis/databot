@@ -16,6 +16,7 @@
 
 package io.novaordis.databot;
 
+import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.utilities.address.Address;
 
 /**
@@ -39,17 +40,17 @@ public class MockMetricDefinition extends MockMetricDefinitionBase {
     /**
      * @param sourceAddress must always have a non-null source.
      */
-    public MockMetricDefinition(Address sourceAddress) {
+    public MockMetricDefinition(PropertyFactory pf, Address sourceAddress) {
 
-        this(sourceAddress, MockMetricDefinition.class.getSimpleName());
+        this(pf, sourceAddress, MockMetricDefinition.class.getSimpleName());
     }
 
     /**
      * @param sourceAddress must always have a non-null source.
      */
-    public MockMetricDefinition(Address sourceAddress, String id) {
+    public MockMetricDefinition(PropertyFactory pf, Address sourceAddress, String id) {
 
-        super(sourceAddress);
+        super(pf, sourceAddress);
         setId(id);
         setSimpleLabel("Mock Metric " + id);
     }

@@ -23,7 +23,9 @@ import io.novaordis.databot.failure.EventQueueFullException;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.EventProperty;
 import io.novaordis.events.api.event.Property;
+import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.event.TimedEvent;
+import io.novaordis.events.api.event.TimestampProperty;
 import io.novaordis.events.api.metric.MockAddress;
 import io.novaordis.utilities.address.Address;
 import org.junit.Test;
@@ -201,7 +203,16 @@ public class DataCollectionTaskTest {
         }
 
         assertNotNull(event);
-        assertTrue(event.getProperties().isEmpty());
+
+        List<Property> properties = event.getProperties();
+
+        //
+        // the only property is the timestamp
+        //
+
+        assertEquals(1, properties.size());
+        TimestampProperty p = (TimestampProperty)properties.get(0);
+        assertNotNull(p);
     }
 
     // dataCollectionRun() ---------------------------------------------------------------------------------------------
@@ -230,7 +241,15 @@ public class DataCollectionTaskTest {
             fail("failed to receive event on the event queue");
         }
 
-        assertTrue(event.getProperties().isEmpty());
+        List<Property> properties = event.getProperties();
+
+        //
+        // the only property is the timestamp
+        //
+
+        assertEquals(1, properties.size());
+        TimestampProperty p = (TimestampProperty)properties.get(0);
+        assertNotNull(p);
     }
 
     @Test
@@ -279,15 +298,24 @@ public class DataCollectionTaskTest {
 
         assertTrue(t0 <= e.getTime());
         assertTrue(e.getTime() <= t1);
-        assertTrue(e.getProperties().isEmpty());
+
+        //
+        // getProperties() carries the timestamp property
+        //
+
+        assertEquals(1, e.getProperties().size());
+        TimestampProperty p = (TimestampProperty)e.getProperties().get(0);
+        assertEquals(e.getTime().longValue(), ((Long)p.getValue()).longValue());
     }
 
     @Test
     public void collectMetrics_OneSource_OneMetricDefinition_CollectionSucceeds() throws Exception {
 
+        PropertyFactory pf = new PropertyFactory();
+
         Address ma = new MockAddress("mock-metric-source");
-        MockMetricDefinition mmd = new MockMetricDefinition(ma, "mock-metric-id");
-        MockMetricSourceFactory mmsf = new MockMetricSourceFactory();
+        MockMetricDefinition mmd = new MockMetricDefinition(pf, ma, "mock-metric-id");
+        MockMetricSourceFactory mmsf = new MockMetricSourceFactory(new PropertyFactory());
 
         MockConfiguration mc = new MockConfiguration();
 
@@ -321,29 +349,35 @@ public class DataCollectionTaskTest {
         //
 
         List<Property> properties = e.getProperties();
-        assertEquals(1, properties.size());
-        EventProperty p = (EventProperty)properties.iterator().next();
+        assertEquals(2, properties.size());
 
-        assertEquals(ma.getLiteral(), p.getName());
+        TimestampProperty p = (TimestampProperty)e.getProperties().get(0);
+        assertEquals(e.getTime().longValue(), ((Long) p.getValue()).longValue());
 
-        Event secondLevelEvent = p.getEvent();
+        EventProperty p2 = (EventProperty)properties.get(1);
+
+        assertEquals(ma.getLiteral(), p2.getName());
+
+        Event secondLevelEvent = p2.getEvent();
 
         List<Property> secondLevelProperties = secondLevelEvent.getProperties();
         assertEquals(1, secondLevelProperties.size());
 
-        Property p2 = secondLevelProperties.get(0);
+        Property p3 = secondLevelProperties.get(0);
 
         // the property name must be the metric definition ID
-        assertEquals("mock-metric-id", p2.getName());
-        assertEquals("mock-value", p2.getValue());
+        assertEquals("mock-metric-id", p3.getName());
+        assertEquals("mock-value", p3.getValue());
     }
 
     @Test
     public void collectMetrics_OneSource_OneMetricDefinition_CollectionFailsWithCheckedException() throws Exception {
 
+        PropertyFactory pf = new PropertyFactory();
+
         Address ma = new MockAddress("mock-metric-source");
-        MockMetricDefinition mmd = new MockMetricDefinition(ma, "mock-metric-id");
-        MockMetricSourceFactory mmsf = new MockMetricSourceFactory();
+        MockMetricDefinition mmd = new MockMetricDefinition(pf, ma, "mock-metric-id");
+        MockMetricSourceFactory mmsf = new MockMetricSourceFactory(new PropertyFactory());
 
         MockConfiguration mc = new MockConfiguration();
 
@@ -378,8 +412,12 @@ public class DataCollectionTaskTest {
         // getProperties() has the original semantics, there's a EventProperty corresponding to the collection
         //
 
-        assertEquals(1, properties.size());
-        assertTrue(((EventProperty) properties.get(0)).getEvent().getProperties().isEmpty());
+        assertEquals(2, properties.size());
+
+        TimestampProperty p = (TimestampProperty)e.getProperties().get(0);
+        assertEquals(e.getTime().longValue(), ((Long) p.getValue()).longValue());
+
+        assertTrue(((EventProperty) properties.get(1)).getEvent().getProperties().isEmpty());
 
         //
         // special semantics
@@ -401,9 +439,11 @@ public class DataCollectionTaskTest {
     @Test
     public void collectMetrics_OneSource_OneMetricDefinition_CollectionFailsWithUncheckedException() throws Exception {
 
+        PropertyFactory pf = new PropertyFactory();
+
         Address ma = new MockAddress("mock-metric-source");
-        MockMetricDefinition mmd = new MockMetricDefinition(ma, "mock-metric-id");
-        MockMetricSourceFactory mmsf = new MockMetricSourceFactory();
+        MockMetricDefinition mmd = new MockMetricDefinition(pf, ma, "mock-metric-id");
+        MockMetricSourceFactory mmsf = new MockMetricSourceFactory(new PropertyFactory());
 
         MockConfiguration mc = new MockConfiguration();
 
@@ -436,11 +476,14 @@ public class DataCollectionTaskTest {
         List<Property> properties = e.getProperties();
 
         //
-        // getProperties() has the original semantics, there's a EventProperty corresponding to the collection
+        // getProperties() has the original semantics, there's a TimestampProperty and an EventProperty corresponding
+        // to the collection
         //
 
-        assertEquals(1, properties.size());
-        assertTrue(((EventProperty) properties.get(0)).getEvent().getProperties().isEmpty());
+        assertEquals(2, properties.size());
+        TimestampProperty p = (TimestampProperty)e.getProperties().get(0);
+        assertEquals(e.getTime().longValue(), ((Long)p.getValue()).longValue());
+        assertTrue(((EventProperty) properties.get(1)).getEvent().getProperties().isEmpty());
 
         //
         // special semantics
@@ -462,17 +505,19 @@ public class DataCollectionTaskTest {
     @Test
     public void collectMetrics_TwoSources_OneSharedMetricDefinition_CollectionSucceeds() throws Exception {
 
+        PropertyFactory pf = new PropertyFactory();
+
         Address ma = new MockAddress("mock-metric-source-1");
-        MockMetricDefinition mmd = new MockMetricDefinition(ma, "shared-mock-metric-id");
+        MockMetricDefinition mmd = new MockMetricDefinition(pf, ma, "shared-mock-metric-id");
 
         Address ma2 = new MockAddress("mock-metric-source-2");
-        MockMetricDefinition mmd2 = new MockMetricDefinition(ma2, "shared-mock-metric-id");
+        MockMetricDefinition mmd2 = new MockMetricDefinition(pf, ma2, "shared-mock-metric-id");
 
         //
         // the metric definition is shared among two distinct sources
         //
 
-        MockMetricSourceFactory mmsf = new MockMetricSourceFactory();
+        MockMetricSourceFactory mmsf = new MockMetricSourceFactory(new PropertyFactory());
 
         MockConfiguration mc = new MockConfiguration();
 
@@ -503,13 +548,16 @@ public class DataCollectionTaskTest {
         //
 
         List<Property> properties = e.getProperties();
-        assertEquals(2, properties.size());
+        assertEquals(3, properties.size());
 
-        EventProperty ep = (EventProperty)properties.get(0);
+        TimestampProperty p = (TimestampProperty)e.getProperties().get(0);
+        assertEquals(e.getTime().longValue(), ((Long)p.getValue()).longValue());
+
+        EventProperty ep = (EventProperty)properties.get(1);
         assertEquals("mock://mock-metric-source-1", ep.getName());
         List<Property> secondLevelProperties = ep.getEvent().getProperties();
 
-        EventProperty ep2 = (EventProperty)properties.get(1);
+        EventProperty ep2 = (EventProperty)properties.get(2);
         assertEquals("mock://mock-metric-source-2", ep2.getName());
         List<Property> secondLevelProperties2 = ep2.getEvent().getProperties();
 

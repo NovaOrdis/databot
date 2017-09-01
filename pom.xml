@@ -8,7 +8,7 @@
 
     <groupId>io.novaordis.databot</groupId>
     <artifactId>databot-root</artifactId>
-    <version>1.0.7-SNAPSHOT-5</version>
+    <version>1.0.7-SNAPSHOT-6</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -17,9 +17,9 @@
             Dependencies
         -->
 
-        <novaordis.utilities.version>4.7.11-SNAPSHOT-2</novaordis.utilities.version>
-        <events.api.version>1.2.2-SNAPSHOT-21</events.api.version>
-        <events.csv.version>1.0.0-SNAPSHOT-15</events.csv.version>
+        <novaordis.utilities.version>4.7.11-SNAPSHOT-5</novaordis.utilities.version>
+        <events.api.version>1.2.2-SNAPSHOT-39</events.api.version>
+        <events.csv.version>1.0.0-SNAPSHOT-39</events.csv.version>
 
         <snakeyaml.version>1.17</snakeyaml.version>
         <slf4j.version>1.7.12</slf4j.version>

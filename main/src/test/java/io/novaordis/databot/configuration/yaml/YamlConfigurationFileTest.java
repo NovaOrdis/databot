@@ -18,6 +18,7 @@ package io.novaordis.databot.configuration.yaml;
 
 import io.novaordis.databot.DataConsumer;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
+import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.configuration.ConfigurationTest;
@@ -299,10 +300,11 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     @Test
     public void toMetricDefinition_Null() throws Exception {
 
+        PropertyFactory pf = new PropertyFactory();
 
         try {
 
-            YamlConfigurationFile.toMetricDefinition(null);
+            YamlConfigurationFile.toMetricDefinition(pf, null);
             fail("should have thrown exception");
         }
         catch(IllegalArgumentException e) {
@@ -315,7 +317,8 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     @Test
     public void toMetricDefinition() throws Exception {
 
-        MetricDefinition md = YamlConfigurationFile.toMetricDefinition("PhysicalMemoryTotal");
+        PropertyFactory pf = new PropertyFactory();
+        MetricDefinition md = YamlConfigurationFile.toMetricDefinition(pf, "PhysicalMemoryTotal");
         assertEquals("PhysicalMemoryTotal", md.getId());
     }
 

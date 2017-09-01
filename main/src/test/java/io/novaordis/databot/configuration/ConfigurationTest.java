@@ -20,6 +20,7 @@ import io.novaordis.databot.DataConsumer;
 import io.novaordis.databot.consumer.MockDataConsumer;
 import io.novaordis.databot.MockMetricDefinition;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
+import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSourceDefinition;
 import io.novaordis.events.api.metric.MetricSourceType;
@@ -233,6 +234,8 @@ public abstract class ConfigurationTest {
     @Test
     public void addMetricDefinition() throws Exception {
 
+        PropertyFactory pf = new PropertyFactory();
+
         ConfigurationBase c = (ConfigurationBase)getConfigurationToTest(false, null);
 
         assertEquals(0, c.getMetricSourceCount());
@@ -241,7 +244,7 @@ public abstract class ConfigurationTest {
 
         AddressImpl a = new AddressImpl("mock-host");
 
-        MockMetricDefinition md = new MockMetricDefinition(a, "mock");
+        MockMetricDefinition md = new MockMetricDefinition(pf, a, "mock");
 
         c.addMetricDefinition(md);
 
@@ -253,7 +256,7 @@ public abstract class ConfigurationTest {
         assertEquals(1, sds.size());
         assertTrue(sds.get(0).getAddress().equals(md.getMetricSourceAddress()));
 
-        MockMetricDefinition md2 = new MockMetricDefinition(a, "mock-2");
+        MockMetricDefinition md2 = new MockMetricDefinition(pf, a, "mock-2");
 
         c.addMetricDefinition(md2);
 
@@ -272,6 +275,8 @@ public abstract class ConfigurationTest {
     @Test
     public void getMetricDefinitions() throws Exception {
 
+        PropertyFactory pf = new PropertyFactory();
+
         ConfigurationBase c = (ConfigurationBase)getConfigurationToTest(true, null);
 
         List<MetricDefinition> result = c.getMetricDefinitions();
@@ -281,7 +286,7 @@ public abstract class ConfigurationTest {
         assertTrue(result.isEmpty());
 
         MockAddress ma = new MockAddress("test-address");
-        MetricDefinition md = new MockMetricDefinition(ma);
+        MetricDefinition md = new MockMetricDefinition(pf, ma);
 
         c.addMetricDefinition(md);
 
@@ -294,7 +299,7 @@ public abstract class ConfigurationTest {
         assertEquals(md, result2.get(0));
 
         MockAddress ma2 = new MockAddress("test-address");
-        MetricDefinition md2 = new MockMetricDefinition(ma2);
+        MetricDefinition md2 = new MockMetricDefinition(pf, ma2);
 
         c.addMetricDefinition(md2);
 

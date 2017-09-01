@@ -18,6 +18,7 @@ package io.novaordis.databot.configuration;
 
 import io.novaordis.databot.DataConsumer;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
+import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSourceDefinition;
 import io.novaordis.events.api.metric.MetricSourceDefinitionImpl;
@@ -67,6 +68,8 @@ public abstract class ConfigurationBase implements Configuration {
 
     private MetricSourceFactory sourceFactory;
 
+    private PropertyFactory propertyFactory;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     /**
@@ -85,6 +88,8 @@ public abstract class ConfigurationBase implements Configuration {
         this.sourceDefinitions = new ArrayList<>();
         this.metricDefinitions = new ArrayList<>();
         this.dataConsumers = new ArrayList<>();
+
+        this.propertyFactory = new PropertyFactory();
 
         if (fileName != null) {
 
@@ -218,6 +223,11 @@ public abstract class ConfigurationBase implements Configuration {
     }
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    public PropertyFactory getPropertyFactory() {
+
+        return propertyFactory;
+    }
 
     /**
      * May be null if the configuration was not loaded from a file.

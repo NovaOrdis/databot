@@ -25,8 +25,9 @@ import io.novaordis.databot.MockTimedEvent;
 import io.novaordis.databot.event.MultiSourceReadingEvent;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.GenericTimedEvent;
+import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.event.ShutdownEvent;
-import io.novaordis.events.csv.CSVFormatter;
+import io.novaordis.events.csv.Constants;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.address.AddressImpl;
 import org.junit.After;
@@ -36,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.StringTokenizer;
@@ -191,7 +191,7 @@ public class AsynchronousCsvLineWriterTest extends DataConsumerTest {
             fail("the asynchronous writer failed to process the event and send it to 'stdout' in " + timeout + " ms");
         }
 
-        String expected = CSVFormatter.DEFAULT_TIMESTAMP_FORMAT.format(time);
+        String expected = Constants.DEFAULT_TIMESTAMP_FORMAT.format(time);
         assertEquals(expected, line);
 
         //
@@ -337,7 +337,7 @@ public class AsynchronousCsvLineWriterTest extends DataConsumerTest {
         assertFalse(line.trim().isEmpty());
 
         // must be a valid timestamp
-        Date date = CSVFormatter.DEFAULT_TIMESTAMP_FORMAT.parse(line);
+        Date date = Constants.DEFAULT_TIMESTAMP_FORMAT.parse(line);
         long time = date.getTime();
 
         assertTrue(time > 0);
@@ -463,7 +463,7 @@ public class AsynchronousCsvLineWriterTest extends DataConsumerTest {
             fail("the asynchronous writer failed to process the event and send it to 'stdout' in " + timeout + " ms");
         }
 
-        String expected = CSVFormatter.DEFAULT_TIMESTAMP_FORMAT.format(time);
+        String expected = Constants.DEFAULT_TIMESTAMP_FORMAT.format(time);
         assertEquals(expected, line);
 
         //
@@ -533,13 +533,15 @@ public class AsynchronousCsvLineWriterTest extends DataConsumerTest {
     @Test
     public void write() throws Exception {
 
+        PropertyFactory pf = new PropertyFactory();
+
         AddressImpl sourceAddress = new AddressImpl("mock-host");
 
         String metricDefinitionId = "Z";
         String metricDefinitionId2 = "A";
 
-        MockMetricDefinition md = new MockMetricDefinition(sourceAddress, metricDefinitionId);
-        MockMetricDefinition md2 = new MockMetricDefinition(sourceAddress, metricDefinitionId2);
+        MockMetricDefinition md = new MockMetricDefinition(pf, sourceAddress, metricDefinitionId);
+        MockMetricDefinition md2 = new MockMetricDefinition(pf, sourceAddress, metricDefinitionId2);
 
         MockPrintStream mps = new MockPrintStream();
 

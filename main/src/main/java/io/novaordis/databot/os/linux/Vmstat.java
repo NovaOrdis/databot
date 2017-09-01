@@ -50,7 +50,8 @@ public class Vmstat {
 
     // Static ----------------------------------------------------------------------------------------------------------
 
-    public static List<Property> parseCommandOutput(String output) throws InvalidExecutionOutputException {
+    public static List<Property> parseCommandOutput(PropertyFactory propertyFactory, String output)
+            throws InvalidExecutionOutputException {
 
         int i = output.indexOf('\n');
 
@@ -102,6 +103,7 @@ public class Vmstat {
             }
 
             Property p = parseProperty(
+                    propertyFactory,
                     headers.nextToken(),
                     values.nextToken(),
                     (String)CONTENT[i][0],
@@ -123,8 +125,8 @@ public class Vmstat {
      *                             property. May be null, in which case it is ignored.
      */
     public static Property parseProperty(
-            String header, String value, String expectedHeader, String name, Class type,
-            Double multiplicationFactor, MeasureUnit measureUnit) throws InvalidExecutionOutputException {
+            PropertyFactory propertyFactory, String header, String value, String expectedHeader, String name,
+            Class type, Double multiplicationFactor, MeasureUnit measureUnit) throws InvalidExecutionOutputException {
 
         if (!expectedHeader.equals(header)) {
 
@@ -133,7 +135,7 @@ public class Vmstat {
         }
 
         try {
-            return PropertyFactory.createInstance(name, type, value, multiplicationFactor, measureUnit);
+            return propertyFactory.createInstance(name, type, value, multiplicationFactor, measureUnit);
         }
         catch(IllegalArgumentException e) {
             throw new InvalidExecutionOutputException(e.getMessage());

@@ -55,17 +55,20 @@ public class MockMetricSource implements MetricSource {
 
     private Address address;
 
+    private PropertyFactory propertyFactory;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public MockMetricSource() {
+    public MockMetricSource(PropertyFactory propertyFactory) {
 
-        this(new MockAddress());
+        this(propertyFactory, new MockAddress());
     }
 
-    public MockMetricSource(Address a) {
+    public MockMetricSource(PropertyFactory propertyFactory, Address a) {
 
         readingsForMetrics = new HashMap<>();
         this.address = a;
+        this.propertyFactory = propertyFactory;
     }
 
     // MetricSource implementation -------------------------------------------------------------------------------------
@@ -110,7 +113,7 @@ public class MockMetricSource implements MetricSource {
                 //
                 // the property's name must be the metric definition ID
                 //
-                Property p = PropertyFactory.createInstance(metricId, o.getClass(), o, null);
+                Property p = propertyFactory.createInstance(metricId, o.getClass(), o, null);
                 result.add(p);
             }
         }

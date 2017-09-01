@@ -20,6 +20,7 @@ import io.novaordis.events.api.event.EventProperty;
 import io.novaordis.events.api.event.IntegerProperty;
 import io.novaordis.events.api.event.Property;
 import io.novaordis.events.api.event.StringProperty;
+import io.novaordis.events.api.event.TimestampProperty;
 import io.novaordis.events.api.metric.MockAddress;
 import io.novaordis.utilities.address.Address;
 import io.novaordis.utilities.address.AddressImpl;
@@ -32,6 +33,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -280,7 +282,14 @@ public class MultiSourceReadingEventTest {
 
         MultiSourceReadingEvent e = new MultiSourceReadingEvent();
 
-        assertTrue(e.getProperties().isEmpty());
+        //
+        // getProperties() should preserve the original semantics, and in this cawe we only carry the top-level event
+        // timestamp
+        //
+
+        List<Property> properties = e.getProperties();
+        assertEquals(1, properties.size());
+        assertTrue(properties.get(0) instanceof TimestampProperty);
 
         assertEquals(0, e.getAllPropertiesCount());
     }
@@ -298,14 +307,17 @@ public class MultiSourceReadingEventTest {
 
         List<Property> properties = e.getProperties();
 
-        assertEquals(2, properties.size());
+        assertEquals(3, properties.size());
 
-        EventProperty ep = (EventProperty)properties.get(0);
+        TimestampProperty tp = (TimestampProperty)properties.get(0);
+        assertNotNull(tp);
+
+        EventProperty ep = (EventProperty)properties.get(1);
         assertEquals("mock://something", ep.getName());
         assertEquals("A", ep.getEvent().getProperties().get(0).getName());
         assertEquals(1, ep.getEvent().getProperties().get(0).getValue());
 
-        EventProperty ep2 = (EventProperty)properties.get(1);
+        EventProperty ep2 = (EventProperty)properties.get(2);
         assertEquals("mock://something else", ep2.getName());
         assertEquals("A", ep2.getEvent().getProperties().get(0).getName());
         assertEquals(1, ep2.getEvent().getProperties().get(0).getValue());

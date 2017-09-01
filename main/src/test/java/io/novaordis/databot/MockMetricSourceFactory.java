@@ -16,6 +16,7 @@
 
 package io.novaordis.databot;
 
+import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceException;
 import io.novaordis.events.api.metric.MetricSourceFactory;
@@ -33,14 +34,21 @@ public class MockMetricSourceFactory implements MetricSourceFactory {
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
+    private PropertyFactory propertyFactory;
+
     // Constructors ----------------------------------------------------------------------------------------------------
+
+    public MockMetricSourceFactory(PropertyFactory f) {
+
+        this.propertyFactory = f;
+    }
 
     // MetricSourceFactory implementation ------------------------------------------------------------------------------
 
     @Override
     public MetricSource buildMetricSource(Address a) throws MetricSourceException {
 
-        return new MockMetricSource(a);
+        return new MockMetricSource(propertyFactory, a);
     }
 
     // Public ----------------------------------------------------------------------------------------------------------

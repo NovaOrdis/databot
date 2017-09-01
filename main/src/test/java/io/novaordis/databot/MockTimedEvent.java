@@ -19,6 +19,7 @@ package io.novaordis.databot;
 import io.novaordis.events.api.event.BooleanProperty;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.EventProperty;
+import io.novaordis.events.api.event.FloatProperty;
 import io.novaordis.events.api.event.IntegerProperty;
 import io.novaordis.events.api.event.ListProperty;
 import io.novaordis.events.api.event.LongProperty;
@@ -107,6 +108,11 @@ public class MockTimedEvent implements TimedEvent {
     }
 
     @Override
+    public Property getProperty(int i) {
+        throw new RuntimeException("getProperty() NOT YET IMPLEMENTED");
+    }
+
+    @Override
     public StringProperty setStringProperty(String name, String value) {
         throw new RuntimeException("setStringProperty() NOT YET IMPLEMENTED");
     }
@@ -137,13 +143,48 @@ public class MockTimedEvent implements TimedEvent {
     }
 
     @Override
+    public LongProperty setLongProperty(String name, Long value) {
+        throw new RuntimeException("setLongProperty() NOT YET IMPLEMENTED");
+    }
+
+    @Override
     public LongProperty getLongProperty(String s) {
         throw new RuntimeException("getLongProperty() NOT YET IMPLEMENTED");
     }
 
     @Override
+    public LongProperty removeLongProperty(String longPropertyName) {
+        throw new RuntimeException("removeLongProperty() NOT YET IMPLEMENTED");
+    }
+
+    @Override
     public IntegerProperty getIntegerProperty(String s) {
         throw new RuntimeException("getIntegerProperty() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public IntegerProperty setIntegerProperty(String name, Integer value) {
+        throw new RuntimeException("setIntegerProperty() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public IntegerProperty removeIntegerProperty(String name) {
+        throw new RuntimeException("removeIntegerProperty() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public FloatProperty getFloatProperty(String floatPropertyName) {
+        throw new RuntimeException("getFloatProperty() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public FloatProperty setFloatProperty(String name, Float value) {
+        throw new RuntimeException("setFloatProperty() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public FloatProperty removeFloatProperty(String name) {
+        throw new RuntimeException("removeFloatProperty() NOT YET IMPLEMENTED");
     }
 
     @Override
