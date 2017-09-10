@@ -203,6 +203,11 @@ public class MockTimedEvent implements TimedEvent {
     }
 
     @Override
+    public boolean isTimed() {
+        throw new RuntimeException("isTimed() NOT YET IMPLEMENTED");
+    }
+
+    @Override
     public Property setProperty(Property property) {
 
         properties.add(property);

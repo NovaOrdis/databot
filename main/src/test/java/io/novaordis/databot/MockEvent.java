@@ -167,6 +167,11 @@ public class MockEvent implements Event {
     }
 
     @Override
+    public boolean isTimed() {
+        throw new RuntimeException("isTimed() NOT YET IMPLEMENTED");
+    }
+
+    @Override
     public Property setProperty(Property property) {
         throw new RuntimeException("setProperty() NOT YET IMPLEMENTED");
     }
