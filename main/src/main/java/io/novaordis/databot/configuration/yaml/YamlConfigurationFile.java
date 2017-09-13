@@ -87,6 +87,28 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
+    @Override
+    public List<LoggerConfiguration> getLoggerConfiguration() {
+
+        if (delegate == null) {
+
+            return Collections.emptyList();
+        }
+
+        return delegate.getLoggerConfiguration();
+    }
+
+    @Override
+    public File getFile() {
+
+        if (delegate == null) {
+
+            return null;
+        }
+
+        return delegate.getFile();
+    }
+
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------
@@ -309,9 +331,26 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
             String sn = (String)sourceName;
 
+            o = sources.get(sn);
+
+            //
+            // we expect a Map here, anything else is a configuration error. Help identify the cause of the failure
+            // with user-friendly messages
+            //
+
+            if (o == null) {
+
+                throw new UserErrorException("invalid empty metric source declaration: '" + sn + "'");
+            }
+
+            if (!(o instanceof Map)) {
+
+                throw new UserErrorException("invalid metric source declaration: '" + sn + "' not a map but a(n) " + o.getClass().getSimpleName());
+            }
+
             try {
 
-                MetricSourceDefinitionImpl sd = new MetricSourceDefinitionImpl(sn, sources.get(sn));
+                MetricSourceDefinitionImpl sd = new MetricSourceDefinitionImpl(sn, o);
                 sourceDefinitions.add(sd);
             }
             catch(MetricSourceException e) {
@@ -321,28 +360,6 @@ public class YamlConfigurationFile extends ConfigurationBase {
         }
 
         return sourceDefinitions;
-    }
-
-    @Override
-    public List<LoggerConfiguration> getLoggerConfiguration() {
-
-        if (delegate == null) {
-
-            return Collections.emptyList();
-        }
-
-        return delegate.getLoggerConfiguration();
-    }
-
-    @Override
-    public File getFile() {
-
-        if (delegate == null) {
-
-            return null;
-        }
-
-        return delegate.getFile();
     }
 
     // Private ---------------------------------------------------------------------------------------------------------

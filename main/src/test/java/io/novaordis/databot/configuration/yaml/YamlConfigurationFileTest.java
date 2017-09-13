@@ -231,7 +231,49 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     // parseSources() --------------------------------------------------------------------------------------------------
 
     @Test
-    public void parseSources_InvalidSourcesContent() throws Exception {
+    public void parseSources_Null() throws Exception {
+
+        String s = "sources:\n";
+
+        Object o = ((Map)YamlConfigurationFile.fromYaml(
+                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.SOURCES_KEY);
+
+        try {
+
+            YamlConfigurationFile.parseSources(o);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("invalid"));
+            assertTrue(msg.contains(YamlConfigurationFile.SOURCES_KEY));
+        }
+    }
+
+    @Test
+    public void parseSources_Null2() throws Exception {
+
+        String s = "sources: \n";
+
+        Object o = ((Map)YamlConfigurationFile.fromYaml(
+                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.SOURCES_KEY);
+
+        try {
+
+            YamlConfigurationFile.parseSources(o);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("invalid"));
+            assertTrue(msg.contains(YamlConfigurationFile.SOURCES_KEY));
+        }
+    }
+
+    @Test
+    public void parseSources_NotAMap() throws Exception {
 
         String s = "sources: 10\n";
 
@@ -248,6 +290,52 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
             String msg = e.getMessage();
             assertTrue(msg.contains("invalid"));
             assertTrue(msg.contains(YamlConfigurationFile.SOURCES_KEY));
+        }
+    }
+
+    @Test
+    public void parseSources_EmptySource() throws Exception {
+
+        String s = "sources:\n" +
+                   "  source-1:\n";
+
+        Object o = ((Map)YamlConfigurationFile.fromYaml(
+                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.SOURCES_KEY);
+
+        try {
+
+            YamlConfigurationFile.parseSources(o);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("invalid empty metric source declaration"));
+            assertTrue(msg.contains("source-1"));
+        }
+    }
+
+    @Test
+    public void parseSources_SourceNotAMapSource() throws Exception {
+
+        String s = "sources:\n" +
+                   "  source-1: 20\n";
+
+        Object o = ((Map)YamlConfigurationFile.fromYaml(
+                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.SOURCES_KEY);
+
+        try {
+
+            YamlConfigurationFile.parseSources(o);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("invalid"));
+            assertTrue(msg.contains("source-1"));
+            assertTrue(msg.contains("metric source declaration"));
+            assertTrue(msg.contains("not a map but a"));
         }
     }
 
