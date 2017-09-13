@@ -340,7 +340,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
             if (o == null) {
 
-                throw new UserErrorException("invalid empty metric source declaration: '" + sn + "'");
+                throw new UserErrorException("invalid empty metric source declaration: '" + sn + "' (check YAML indentation)");
             }
 
             if (!(o instanceof Map)) {
