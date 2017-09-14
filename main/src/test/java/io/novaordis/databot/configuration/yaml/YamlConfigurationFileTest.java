@@ -17,11 +17,11 @@
 package io.novaordis.databot.configuration.yaml;
 
 import io.novaordis.databot.DataConsumer;
+import io.novaordis.databot.configuration.Configuration;
+import io.novaordis.databot.configuration.ConfigurationTest;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.metric.MetricDefinition;
-import io.novaordis.databot.configuration.Configuration;
-import io.novaordis.databot.configuration.ConfigurationTest;
 import io.novaordis.events.api.metric.MetricSourceDefinition;
 import io.novaordis.events.api.metric.MetricSourceType;
 import io.novaordis.jboss.cli.model.JBossControllerAddress;
@@ -408,6 +408,23 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
         PropertyFactory pf = new PropertyFactory();
         MetricDefinition md = YamlConfigurationFile.toMetricDefinition(pf, "PhysicalMemoryTotal");
         assertEquals("PhysicalMemoryTotal", md.getId());
+    }
+
+    // setMetricSourceVariables() --------------------------------------------------------------------------------------
+
+    @Test
+    public void setMetricSourceVariables() throws Exception {
+
+        fail("return here");
+
+//        Scope variables = new ScopeImpl();
+//
+//        List<MetricSourceDefinition> definitions = Arrays.asList(
+//                new MetricSourceDefinitionImpl(),
+//                new MetricSourceDefinitionImpl()
+//        )
+//
+//        YamlConfigurationFile.setMetricSourceVariables(definitions, variables);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
