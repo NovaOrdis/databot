@@ -30,7 +30,6 @@ import io.novaordis.utilities.logging.AlternativeLoggingConfiguration;
 import io.novaordis.utilities.logging.LoggerConfiguration;
 import io.novaordis.utilities.logging.YamlLoggingConfiguration;
 import io.novaordis.utilities.variable2.Scope;
-import io.novaordis.utilities.variable2.ScopeImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -78,18 +77,11 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
     private YamlLoggingConfiguration delegate;
 
-    //
-    // a flat (for now) variable scope, spanning over the entire configuration file
-    //
-    private Scope variables;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
     public YamlConfigurationFile(boolean foreground, String fileName) throws UserErrorException {
 
         super(foreground, fileName);
-
-        this.variables = new ScopeImpl();
     }
 
     // Configuration implementation ------------------------------------------------------------------------------------
@@ -129,6 +121,8 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
         Object o = fromYaml(is);
 
+        Scope rootScope = getRootScope();
+
         Map topLevelMap = toNonNullMap(o);
 
         //
@@ -149,7 +143,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
         // 'sources'
         //
 
-        processSources(topLevelMap.get(SOURCES_KEY), variables);
+        processSources(topLevelMap.get(SOURCES_KEY), rootScope);
 
         //
         // 'output'
@@ -161,7 +155,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
         // 'metrics'
         //
 
-        processMetrics(topLevelMap.get(METRICS_KEY), variables);
+        processMetrics(topLevelMap.get(METRICS_KEY), rootScope);
     }
 
     // Package protected static ----------------------------------------------------------------------------------------
@@ -238,10 +232,10 @@ public class YamlConfigurationFile extends ConfigurationBase {
             throw new UserErrorException("invalid sampling interval value: \"" + o + "\"");
         }
 
-        setSamplingIntervalSec((Integer)o);
+        setSamplingIntervalSec((Integer) o);
     }
 
-    void processSources(Object o, Scope variables) throws UserErrorException {
+    void processSources(Object o, Scope rootScope) throws UserErrorException {
 
         if (o == null) {
 
@@ -249,15 +243,22 @@ public class YamlConfigurationFile extends ConfigurationBase {
         }
 
         List<MetricSourceDefinition> definitions = parseSources(o);
-        setMetricSourceVariables(definitions, variables);
+        setMetricSourceVariables(definitions, rootScope);
         setMetricSourceDefinitions(definitions);
     }
 
     /**
      * Installs String variables named after the metric source names that carry the metric source address as value.
-     * This way, the metric source names can be used in metric definitions and simply those declarations.
+     * This way, the metric source names can be used as variables in metric definitions and simply those declarations.
      */
-    static void setMetricSourceVariables(List<MetricSourceDefinition> definitions, Scope variables) {
+    static void setMetricSourceVariables(List<MetricSourceDefinition> definitions, Scope rootScope) {
+
+        for(MetricSourceDefinition d: definitions) {
+
+            String metricSourceName = d.getName();
+            String address = d.getAddress().getLiteral();
+            rootScope.declare(metricSourceName, String.class, address);
+        }
     }
 
     void processOutput(Object o) throws UserErrorException {
@@ -311,7 +312,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
         }
     }
 
-    void processMetrics(Object o, Scope variables) throws UserErrorException {
+    void processMetrics(Object o, Scope rootScope) throws UserErrorException {
 
         if (o == null) {
 
@@ -327,7 +328,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
         for(Object le: list) {
 
-            MetricDefinition md = toMetricDefinition(getPropertyFactory(), le);
+            MetricDefinition md = toMetricDefinition(getPropertyFactory(), rootScope, le);
             addMetricDefinition(md);
         }
 
@@ -338,7 +339,8 @@ public class YamlConfigurationFile extends ConfigurationBase {
         captureMetricOrder();
     }
 
-    static MetricDefinition toMetricDefinition(PropertyFactory pf, Object o) throws UserErrorException {
+    static MetricDefinition toMetricDefinition(PropertyFactory pf, Scope rootScope, Object o)
+            throws UserErrorException {
 
         if (o == null) {
 
@@ -350,13 +352,24 @@ public class YamlConfigurationFile extends ConfigurationBase {
             throw new RuntimeException(o + " NOT YET IMPLEMENTED");
         }
 
+        if (rootScope == null) {
+
+            throw new IllegalArgumentException("null scope");
+        }
+
+        //
+        // evaluate and replace all variables in the metric definitions, if any
+        //
+
         String tok = (String)o;
+
+        String declarationWithVariablesResolved = rootScope.evaluate(tok);
 
         MetricDefinition md;
 
         try {
 
-            md = MetricDefinitionParser.parse(pf, tok);
+            md = MetricDefinitionParser.parse(pf, declarationWithVariablesResolved);
         }
         catch (Exception e) {
 

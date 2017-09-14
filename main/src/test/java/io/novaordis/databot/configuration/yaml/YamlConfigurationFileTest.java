@@ -23,19 +23,29 @@ import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSourceDefinition;
+import io.novaordis.events.api.metric.MetricSourceDefinitionImpl;
 import io.novaordis.events.api.metric.MetricSourceType;
 import io.novaordis.jboss.cli.model.JBossControllerAddress;
+import io.novaordis.jmx.JmxAddress;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.address.Address;
+import io.novaordis.utilities.address.AddressImpl;
 import io.novaordis.utilities.address.LocalOSAddress;
+import io.novaordis.utilities.variable2.DuplicateDeclarationException;
+import io.novaordis.utilities.variable2.Scope;
+import io.novaordis.utilities.variable2.ScopeImpl;
+import io.novaordis.utilities.variable2.Variable;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -388,11 +398,12 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     @Test
     public void toMetricDefinition_Null() throws Exception {
 
+        Scope scope = new ScopeImpl();
         PropertyFactory pf = new PropertyFactory();
 
         try {
 
-            YamlConfigurationFile.toMetricDefinition(pf, null);
+            YamlConfigurationFile.toMetricDefinition(pf, scope, null);
             fail("should have thrown exception");
         }
         catch(IllegalArgumentException e) {
@@ -406,8 +417,57 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     public void toMetricDefinition() throws Exception {
 
         PropertyFactory pf = new PropertyFactory();
-        MetricDefinition md = YamlConfigurationFile.toMetricDefinition(pf, "PhysicalMemoryTotal");
+        Scope scope = new ScopeImpl();
+        MetricDefinition md = YamlConfigurationFile.toMetricDefinition(pf, scope, "PhysicalMemoryTotal");
         assertEquals("PhysicalMemoryTotal", md.getId());
+    }
+
+    @Test
+    public void toMetricDefinition_VariableDeclarationsAreCorrectlyResolved() throws Exception {
+
+        Scope scope = new ScopeImpl();
+        PropertyFactory pf = new PropertyFactory();
+
+        scope.declare("some_var", String.class, "Memory");
+
+        MetricDefinition md = YamlConfigurationFile.toMetricDefinition(pf, scope, "Physical${some_var}Total");
+        assertEquals("PhysicalMemoryTotal", md.getId());
+    }
+
+    @Test
+    public void toMetricDefinition_UnknownVariable() throws Exception {
+
+        PropertyFactory pf = new PropertyFactory();
+        Scope scope = new ScopeImpl();
+
+        try {
+
+            YamlConfigurationFile.toMetricDefinition(pf, scope, "contains${some_var}");
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("no metric definition parser can understand"));
+            assertTrue(msg.contains("${some_var}"));
+        }
+    }
+
+    @Test
+    public void toMetricDefinition_MissingVariablesStayUnresolved_NoScope() throws Exception {
+
+        PropertyFactory pf = new PropertyFactory();
+
+        try {
+
+            YamlConfigurationFile.toMetricDefinition(pf, null, "contains${some_var}");
+            fail("should have thrown exception");
+        }
+        catch(IllegalArgumentException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("null scope"));
+        }
     }
 
     // setMetricSourceVariables() --------------------------------------------------------------------------------------
@@ -415,16 +475,242 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     @Test
     public void setMetricSourceVariables() throws Exception {
 
-        fail("return here");
+        Scope variables = new ScopeImpl();
 
-//        Scope variables = new ScopeImpl();
-//
-//        List<MetricSourceDefinition> definitions = Arrays.asList(
-//                new MetricSourceDefinitionImpl(),
-//                new MetricSourceDefinitionImpl()
-//        )
-//
-//        YamlConfigurationFile.setMetricSourceVariables(definitions, variables);
+        Address a = new AddressImpl("something://someuser@somehost:1000");
+        Address a2 = new JmxAddress("jmx://someuser@somehost:1001");
+        Address a3 = new JBossControllerAddress("jbosscli://someuser@somehost:1002");
+
+        List<MetricSourceDefinition> definitions = Arrays.asList(
+                new MetricSourceDefinitionImpl("test-metric-source-1", a),
+                new MetricSourceDefinitionImpl("test-metric-source-2", a2),
+                new MetricSourceDefinitionImpl("test-metric-source-3", a3),
+                //
+                // this metric source has a different name but the same Address as 1
+                //
+                new MetricSourceDefinitionImpl("test-metric-source-4", a));
+
+        YamlConfigurationFile.setMetricSourceVariables(definitions, variables);
+
+        Variable v = variables.getVariable("test-metric-source-1");
+        Variable v2 = variables.getVariable("test-metric-source-2");
+        Variable v3 = variables.getVariable("test-metric-source-3");
+        Variable v4 = variables.getVariable("test-metric-source-4");
+
+        assertEquals(a.getLiteral(), v.get());
+        assertEquals(a2.getLiteral(), v2.get());
+        assertEquals(a3.getLiteral(), v3.get());
+        assertEquals(a.getLiteral(), v4.get());
+    }
+
+    @Test
+    public void setMetricSourceVariables_DuplicateName() throws Exception {
+
+        Scope variables = new ScopeImpl();
+
+        Address a = new AddressImpl("something://someuser@somehost:1000");
+        Address a2 = new JmxAddress("jmx://someuser@somehost:1001");
+
+        List<MetricSourceDefinition> definitions = Arrays.asList(
+                new MetricSourceDefinitionImpl("test-metric-source", a),
+                new MetricSourceDefinitionImpl("test-metric-source", a2));
+
+        try {
+
+            YamlConfigurationFile.setMetricSourceVariables(definitions, variables);
+            fail("should have thrown exceptions");
+        }
+        catch(DuplicateDeclarationException e) {
+
+            String msg = e.getMessage();
+            assertEquals("test-metric-source", msg);
+        }
+    }
+
+    // processSources() ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void processSources_NoSources() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        Scope rootScope = new ScopeImpl();
+
+        f.processSources(null, rootScope);
+
+        //
+        // nothing happens
+        //
+
+        List<Variable> v = rootScope.getVariablesDeclaredInScope();
+        assertTrue(v.isEmpty());
+    }
+
+    @Test
+    public void processSources() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        Scope rootScope = new ScopeImpl();
+
+        String s =
+                "sources:\n" +
+                        "  some-source:\n" +
+                        "    type: jboss-controller\n" +
+                        "    host: localhost\n" +
+                        "    port: 9999\n" +
+                        "    classpath:\n" +
+                        "      - $JBOSS_HOME/bin/client/jboss-cli-client.jar\n" +
+                        "      - /some/other/file.jar\n" +
+                        "  some-other-source:\n" +
+                        "    type: jboss-controller\n" +
+                        "    host: other-host\n" +
+                        "    port: 10101\n" +
+                        "    username: admin\n" +
+                        "    password: blah\n" +
+                        "    classpath:\n" +
+                        "      - $JBOSS_HOME/bin/client/jboss-cli-client.jar\n" +
+                        "      - /some/other/file.jar\n";
+
+
+        Object o = ((Map)YamlConfigurationFile.fromYaml(
+                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.SOURCES_KEY);
+
+        f.processSources(o, rootScope);
+
+        //
+        // two metric source definitions and two variables
+        //
+
+        List<MetricSourceDefinition> msDefs = f.getMetricSourceDefinitions();
+        assertEquals(2, msDefs.size());
+
+        for (MetricSourceDefinition d: msDefs) {
+
+            String name = d.getName();
+            Address a = d.getAddress();
+
+            Variable v = rootScope.getVariable(name);
+            assertNotNull(v);
+
+            assertEquals(a.getLiteral(), v.get());
+        }
+    }
+
+    // processMetrics() ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void processMetrics_Null() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        Scope rootScope = new ScopeImpl();
+
+        f.processMetrics(null, rootScope);
+
+        //
+        // nothing happens
+        //
+    }
+
+    @Test
+    public void processMetrics_NotAList() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        Scope rootScope = new ScopeImpl();
+
+        try {
+
+            f.processMetrics("something that is not a List", rootScope);
+            fail("should throw exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("not a list"));
+        }
+    }
+
+    @Test
+    public void processMetrics() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        Scope rootScope = new ScopeImpl();
+
+        String s =
+
+                "metrics:\n" +
+                        "  - CpuUserTime\n";
+
+        Object o = ((Map)YamlConfigurationFile.fromYaml(
+                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.METRICS_KEY);
+
+
+        f.processMetrics(o, rootScope);
+
+        List<MetricDefinition> mDefs = f.getMetricDefinitions();
+        assertEquals(1, mDefs.size());
+
+        MetricDefinition md = mDefs.get(0);
+
+        assertEquals("CpuUserTime", md.getId());
+    }
+
+    @Test
+    public void processMetrics_Variables_NotDeclared() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        Scope rootScope = new ScopeImpl();
+
+        String s =
+
+                "metrics:\n" +
+                        "  - ${some-ms}/something/something-else\n";
+
+        Object o = ((Map)YamlConfigurationFile.fromYaml(
+                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.METRICS_KEY);
+
+        try {
+
+            f.processMetrics(o, rootScope);
+            fail("should throw exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("no metric definition parser can understand"));
+            assertTrue(msg.contains("${some-ms}"));
+        }
+    }
+
+    @Test
+    public void processMetrics_Variables_Declared() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        Scope rootScope = new ScopeImpl();
+
+        rootScope.declare("some-ms", String.class, "localOS://");
+
+        String s =
+
+                "metrics:\n" +
+                        "  - ${some-ms}/CpuUserTime\n";
+
+        Object o = ((Map)YamlConfigurationFile.fromYaml(
+                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.METRICS_KEY);
+
+        f.processMetrics(o, rootScope);
+
+        List<MetricDefinition> mDefs = f.getMetricDefinitions();
+        assertEquals(1, mDefs.size());
+
+        MetricDefinition md = mDefs.get(0);
+        String id = md.getId();
+        assertEquals("CpuUserTime", id);
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

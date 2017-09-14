@@ -25,6 +25,8 @@ import io.novaordis.events.api.metric.MetricSourceDefinitionImpl;
 import io.novaordis.events.api.metric.MetricSourceFactory;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.address.Address;
+import io.novaordis.utilities.variable2.Scope;
+import io.novaordis.utilities.variable2.ScopeImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +72,12 @@ public abstract class ConfigurationBase implements Configuration {
 
     private PropertyFactory propertyFactory;
 
+    //
+    // a flat (for now) variable scope, spanning over the entire configuration file. Used for string replacement
+    // throughout the file: variables that are resolved to strings are replaced
+    //
+    private Scope rootScope;
+
     // Constructors ----------------------------------------------------------------------------------------------------
 
     /**
@@ -90,6 +98,8 @@ public abstract class ConfigurationBase implements Configuration {
         this.dataConsumers = new ArrayList<>();
 
         this.propertyFactory = new PropertyFactory();
+
+        this.rootScope = new ScopeImpl();
 
         if (fileName != null) {
 
@@ -328,6 +338,14 @@ public abstract class ConfigurationBase implements Configuration {
     protected void setMetricSourceFactory(MetricSourceFactory f) {
 
         this.sourceFactory = f;
+    }
+
+    /**
+     * @return the topmost variable scope in the configuration file.
+     */
+    protected Scope getRootScope() {
+
+        return rootScope;
     }
 
     // Private ---------------------------------------------------------------------------------------------------------
