@@ -17,10 +17,10 @@
 package io.novaordis.databot.configuration.yaml;
 
 import io.novaordis.databot.DataConsumerException;
+import io.novaordis.databot.configuration.ConfigurationBase;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
 import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.metric.MetricDefinition;
-import io.novaordis.databot.configuration.ConfigurationBase;
 import io.novaordis.events.api.metric.MetricDefinitionParser;
 import io.novaordis.events.api.metric.MetricSourceDefinition;
 import io.novaordis.events.api.metric.MetricSourceDefinitionImpl;
@@ -120,160 +120,39 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
         Object o = fromYaml(is);
 
-        //
-        // we get null on empty files
-        //
-
-        if (o == null) {
-
-            throw new UserErrorException("empty configuration file");
-        }
-
-        if (!(o instanceof Map)) {
-
-            throw new UserErrorException("invalid configuration file content, expecting a map");
-        }
-
-        Map topLevelMap = (Map)o;
+        Map topLevelMap = toNonNullMap(o);
 
         //
-        // attempt to process logging overrides as early as possible, so we can turn on more verbose logging as soon
-        // as possible, if needed
+        // 'logging' top-level key - attempt to process logging overrides as early as possible, so we can turn on more
+        // verbose logging as soon as possible, if needed
         //
 
-        o = topLevelMap.get(YamlLoggingConfiguration.LOGGING_KEY);
+        processLogging(topLevelMap.get(YamlLoggingConfiguration.LOGGING_KEY));
 
-        if (o != null) {
-
-            if (!(o instanceof Map)) {
-
-                throw new UserErrorException(
-                        "'" + YamlLoggingConfiguration.LOGGING_KEY + "' must contain a Map, but it contains " +
-                                o.getClass().getSimpleName());
-            }
-
-            try {
-
-                this.delegate = new YamlLoggingConfiguration((Map)o);
-            }
-            catch(Exception e) {
-
-                throw new UserErrorException(e);
-            }
-
-            //
-            // apply new logging configuration as soon as we can
-            //
-
-            try {
-
-                AlternativeLoggingConfiguration.apply(this.delegate, true);
-            }
-            catch(Exception e) {
-
-                throw new UserErrorException(e);
-            }
-        }
-
-        o = topLevelMap.get(SAMPLING_INTERVAL_KEY);
-
-        if (o != null) {
-
-            //
-            // if null, we rely on the built-in values, set in the constructor
-            //
-
-            if (!(o instanceof Integer)) {
-
-                throw new UserErrorException("invalid sampling interval value: \"" + o + "\"");
-            }
-
-            setSamplingIntervalSec((Integer)o);
-        }
-
-        o = topLevelMap.get(SOURCES_KEY);
-
-        if (o != null) {
-
-            List<MetricSourceDefinition> definitions = parseSources(o);
-            setMetricSourceDefinitions(definitions);
-        }
-
-        o = topLevelMap.get(OUTPUT_KEY);
-
-        if (o == null) {
-
-            throw new UserErrorException("missing '" + OUTPUT_KEY + "'");
-        }
-        else {
-
-            String outputFileName;
-            Boolean append = null;
-
-            Map sm = (Map)o;
-
-            o = sm.get(OUTPUT_FILE_KEY);
-
-            if (o == null) {
-
-                throw new UserErrorException("missing '" + OUTPUT_KEY + "." + OUTPUT_FILE_KEY + "'");
-            }
-            else {
-
-                if (!(o instanceof String)) {
-
-                    throw new UserErrorException("invalid output file name: \"" + o + "\"");
-                }
-
-                outputFileName = (String)o;
-            }
-
-            o = sm.get(OUTPUT_APPEND_KEY);
-
-            if (o != null) {
-
-                if (!(o instanceof Boolean)) {
-
-                    throw new UserErrorException("invalid '" + OUTPUT_APPEND_KEY + "' boolean value: \"" + o + "\"");
-                }
-
-                append = (Boolean)o;
-            }
-
-            try {
-
-                AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(outputFileName, append, null);
-                addDataConsumer(w);
-            }
-            catch(DataConsumerException e) {
-
-                throw new UserErrorException(e);
-            }
-        }
-
-        o = topLevelMap.get(METRICS_KEY);
-
-        if (o != null) {
-
-            if (!(o instanceof List)) {
-
-                throw new UserErrorException("'" + YamlConfigurationFile.METRICS_KEY + "' not a list");
-            }
-
-            List list = (List)o;
-
-            for(Object le: list) {
-
-                MetricDefinition md = toMetricDefinition(getPropertyFactory(), le);
-                addMetricDefinition(md);
-            }
-        }
 
         //
-        // we capture the metric order, to be later reflected in output
+        // 'sampling.interval'
         //
 
-        captureMetricOrder();
+        processSamplingInterval(topLevelMap.get(SAMPLING_INTERVAL_KEY));
+
+        //
+        // 'sources'
+        //
+
+        processSources(topLevelMap.get(SOURCES_KEY));
+
+        //
+        // 'output'
+        //
+
+        processOutput(topLevelMap.get(OUTPUT_KEY));
+
+        //
+        // 'metrics'
+        //
+
+        processMetrics(topLevelMap.get(METRICS_KEY));
     }
 
     // Package protected static ----------------------------------------------------------------------------------------
@@ -363,6 +242,170 @@ public class YamlConfigurationFile extends ConfigurationBase {
     }
 
     // Private ---------------------------------------------------------------------------------------------------------
+
+    private Map toNonNullMap(Object o) throws UserErrorException {
+
+        //
+        // we get null object on empty YAML files
+        //
+
+        if (o == null) {
+
+            throw new UserErrorException("empty configuration file");
+        }
+
+        if (!(o instanceof Map)) {
+
+            throw new UserErrorException("invalid configuration file content, expecting a map");
+        }
+
+        return (Map)o;
+    }
+
+    private void processLogging(Object o) throws UserErrorException {
+
+        if (o == null) {
+
+            return;
+        }
+
+        if (!(o instanceof Map)) {
+
+            throw new UserErrorException(
+                    "'" + YamlLoggingConfiguration.LOGGING_KEY + "' must contain a Map, but it contains " +
+                            o.getClass().getSimpleName());
+        }
+
+        try {
+
+            this.delegate = new YamlLoggingConfiguration((Map)o);
+        }
+        catch(Exception e) {
+
+            throw new UserErrorException(e);
+        }
+
+        //
+        // apply new logging configuration as soon as we can
+        //
+
+        try {
+
+            AlternativeLoggingConfiguration.apply(this.delegate, true);
+        }
+        catch(Exception e) {
+
+            throw new UserErrorException(e);
+        }
+    }
+
+    private void processSamplingInterval(Object o) throws UserErrorException {
+
+        if (o == null) {
+
+            return;
+        }
+
+        //
+        // if null, we rely on the built-in values, set in the constructor
+        //
+
+        if (!(o instanceof Integer)) {
+
+            throw new UserErrorException("invalid sampling interval value: \"" + o + "\"");
+        }
+
+        setSamplingIntervalSec((Integer)o);
+    }
+
+    private void processSources(Object o) throws UserErrorException {
+
+        if (o == null) {
+
+            return;
+        }
+
+        List<MetricSourceDefinition> definitions = parseSources(o);
+        setMetricSourceDefinitions(definitions);
+    }
+
+    private void processOutput(Object o) throws UserErrorException {
+
+        if (o == null) {
+
+            throw new UserErrorException("missing '" + OUTPUT_KEY + "'");
+        }
+
+        String outputFileName;
+        Boolean append = null;
+
+        Map sm = (Map)o;
+
+        o = sm.get(OUTPUT_FILE_KEY);
+
+        if (o == null) {
+
+            throw new UserErrorException("missing '" + OUTPUT_KEY + "." + OUTPUT_FILE_KEY + "'");
+        }
+        else {
+
+            if (!(o instanceof String)) {
+
+                throw new UserErrorException("invalid output file name: \"" + o + "\"");
+            }
+
+            outputFileName = (String)o;
+        }
+
+        o = sm.get(OUTPUT_APPEND_KEY);
+
+        if (o != null) {
+
+            if (!(o instanceof Boolean)) {
+
+                throw new UserErrorException("invalid '" + OUTPUT_APPEND_KEY + "' boolean value: \"" + o + "\"");
+            }
+
+            append = (Boolean)o;
+        }
+
+        try {
+
+            AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(outputFileName, append, null);
+            addDataConsumer(w);
+        }
+        catch(DataConsumerException e) {
+
+            throw new UserErrorException(e);
+        }
+    }
+
+    private void processMetrics(Object o) throws UserErrorException {
+
+        if (o == null) {
+
+            return;
+        }
+
+        if (!(o instanceof List)) {
+
+            throw new UserErrorException("'" + YamlConfigurationFile.METRICS_KEY + "' not a list");
+        }
+
+        List list = (List)o;
+
+        for(Object le: list) {
+
+            MetricDefinition md = toMetricDefinition(getPropertyFactory(), le);
+            addMetricDefinition(md);
+        }
+
+        //
+        // we capture the metric order, to be later reflected in output
+        //
+
+        captureMetricOrder();
+    }
 
     // Inner classes ---------------------------------------------------------------------------------------------------
 
