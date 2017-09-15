@@ -59,6 +59,8 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
     public static final String OUTPUT_KEY = "output";
 
+    public static final String STDOUT_OUTPUT_LABEL = "stdout";
+
     public static final String OUTPUT_FILE_KEY = "file";
 
     public static final String OUTPUT_APPEND_KEY = "append";
@@ -271,34 +273,58 @@ public class YamlConfigurationFile extends ConfigurationBase {
         String outputFileName;
         Boolean append = null;
 
-        Map sm = (Map)o;
+        //
+        // "output" may be "stdout", or a Map
+        //
 
-        o = sm.get(OUTPUT_FILE_KEY);
+        if (o instanceof String) {
 
-        if (o == null) {
+            String outputType = (String)o;
 
-            throw new UserErrorException("missing '" + OUTPUT_KEY + "." + OUTPUT_FILE_KEY + "'");
+            if (STDOUT_OUTPUT_LABEL.equals(outputType)) {
+
+                //
+                // this will be interpreted as "stdout"
+                //
+
+                outputFileName = null;
+            }
+            else {
+
+                throw new UserErrorException("unknown output type: \"" + outputType + "\"");
+            }
         }
         else {
 
-            if (!(o instanceof String)) {
+            Map sm = (Map) o;
 
-                throw new UserErrorException("invalid output file name: \"" + o + "\"");
+            o = sm.get(OUTPUT_FILE_KEY);
+
+            if (o == null) {
+
+                throw new UserErrorException("missing '" + OUTPUT_KEY + "." + OUTPUT_FILE_KEY + "'");
+            }
+            else {
+
+                if (!(o instanceof String)) {
+
+                    throw new UserErrorException("invalid output file name: \"" + o + "\"");
+                }
+
+                outputFileName = (String) o;
             }
 
-            outputFileName = (String)o;
-        }
+            o = sm.get(OUTPUT_APPEND_KEY);
 
-        o = sm.get(OUTPUT_APPEND_KEY);
+            if (o != null) {
 
-        if (o != null) {
+                if (!(o instanceof Boolean)) {
 
-            if (!(o instanceof Boolean)) {
+                    throw new UserErrorException("invalid '" + OUTPUT_APPEND_KEY + "' boolean value: \"" + o + "\"");
+                }
 
-                throw new UserErrorException("invalid '" + OUTPUT_APPEND_KEY + "' boolean value: \"" + o + "\"");
+                append = (Boolean) o;
             }
-
-            append = (Boolean)o;
         }
 
         try {
@@ -306,7 +332,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
             AsynchronousCsvLineWriter w = new AsynchronousCsvLineWriter(outputFileName, append, null);
             addDataConsumer(w);
         }
-        catch(DataConsumerException e) {
+        catch (DataConsumerException e) {
 
             throw new UserErrorException(e);
         }
@@ -424,6 +450,22 @@ public class YamlConfigurationFile extends ConfigurationBase {
             try {
 
                 MetricSourceDefinitionImpl sd = new MetricSourceDefinitionImpl(sn, o);
+
+
+                //
+                // detect duplicate source names
+                //
+
+                String n = sd.getName();
+
+                for(MetricSourceDefinition d: sourceDefinitions) {
+
+                    if (n.equals(d.getName())) {
+
+                        throw new UserErrorException("duplicate source declaration: \"" + n + "\"");
+                    }
+                }
+
                 sourceDefinitions.add(sd);
             }
             catch(MetricSourceException e) {

@@ -69,7 +69,7 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
     // Constructors ----------------------------------------------------------------------------------------------------
 
     /**
-     * @param outputFileName may be null, which means the output should be stdout.
+     * @param outputFileName may be null, which means the output is stdout.
      *
      * @param append may be null, which will determine the writer instance to fall back to default behavior.
      *
@@ -79,11 +79,13 @@ public class AsynchronousCsvLineWriter extends DataConsumerBase implements Runna
      *
      * @see AsynchronousCsvLineWriter#DEFAULT_PRINT_HEADER
      */
-    public AsynchronousCsvLineWriter(
-            String outputFileName, Boolean append, Boolean printHeader) throws DataConsumerException {
+    public AsynchronousCsvLineWriter(String outputFileName, Boolean append, Boolean printHeader)
+            throws DataConsumerException {
 
         this.outputFileName = outputFileName;
+
         this.append = append == null ? DEFAULT_APPEND : append;
+
         boolean doPrintHeader = printHeader == null ? DEFAULT_PRINT_HEADER : printHeader;
 
         if (outputFileName == null) {

@@ -208,8 +208,8 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
 
         YamlConfigurationFile c = new YamlConfigurationFile(true, null);
 
-        List<MetricSourceDefinition> sourceDefintions = c.getMetricSourceDefinitions();
-        assertTrue(sourceDefintions.isEmpty());
+        List<MetricSourceDefinition> sourceDefinitions = c.getMetricSourceDefinitions();
+        assertTrue(sourceDefinitions.isEmpty());
 
         String s =
                 "output:\n" +
@@ -233,9 +233,148 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
         MetricDefinition md3 = mds.get(2);
         assertEquals("LoadAverageLastMinute", md3.getId());
 
-        sourceDefintions = c.getMetricSourceDefinitions();
+        sourceDefinitions = c.getMetricSourceDefinitions();
+        assertEquals(1, sourceDefinitions.size());
+        assertTrue(sourceDefinitions.get(0).getAddress().equals(new LocalOSAddress()));
+    }
+
+    @Test
+    public void load_MetricDefinitionRequiresAuthentication() throws Exception {
+
+        YamlConfigurationFile c = new YamlConfigurationFile(true, null);
+
+        String s =
+                "output: stdout\n" +
+                        "sources:\n" +
+                        "  test:\n" +
+                        "    type: jboss-controller\n" +
+                        "    host: localhost\n" +
+                        "    port: 9999\n" +
+                        "    username: someuser\n" +
+                        "    password: somepass\n" +
+                        "metrics:\n" +
+                        "  - jbosscli://someuser@localhost:9999/something=somethingelse/blah";
+
+        InputStream is = new ByteArrayInputStream(s.getBytes());
+
+        c.load(is);
+
+        //
+        // we should have a metric source definition and a metric definition
+        //
+
+        List<MetricSourceDefinition> sourceDefintions = c.getMetricSourceDefinitions();
         assertEquals(1, sourceDefintions.size());
-        assertTrue(sourceDefintions.get(0).getAddress().equals(new LocalOSAddress()));
+
+        Address a = sourceDefintions.get(0).getAddress();
+
+        List<MetricDefinition> mds = c.getMetricDefinitions();
+        assertEquals(1, mds.size());
+
+        Address a2 = mds.get(0).getMetricSourceAddress();
+
+        assertEquals(a, a2);
+    }
+
+    // processSources() ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void processSources_NoSources() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        Scope rootScope = new ScopeImpl();
+
+        f.processSources(null, rootScope);
+
+        //
+        // nothing happens
+        //
+
+        List<Variable> v = rootScope.getVariablesDeclaredInScope();
+        assertTrue(v.isEmpty());
+    }
+
+    @Test
+    public void processSources() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        Scope rootScope = new ScopeImpl();
+
+        String s =
+                "sources:\n" +
+                        "  some-source:\n" +
+                        "    type: jboss-controller\n" +
+                        "    host: localhost\n" +
+                        "    port: 9999\n" +
+                        "    classpath:\n" +
+                        "      - $JBOSS_HOME/bin/client/jboss-cli-client.jar\n" +
+                        "      - /some/other/file.jar\n" +
+                        "  some-other-source:\n" +
+                        "    type: jboss-controller\n" +
+                        "    host: other-host\n" +
+                        "    port: 10101\n" +
+                        "    username: admin\n" +
+                        "    password: blah\n" +
+                        "    classpath:\n" +
+                        "      - $JBOSS_HOME/bin/client/jboss-cli-client.jar\n" +
+                        "      - /some/other/file.jar\n";
+
+
+        Object o = ((Map)YamlConfigurationFile.fromYaml(
+                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.SOURCES_KEY);
+
+        f.processSources(o, rootScope);
+
+        //
+        // two metric source definitions and two variables
+        //
+
+        List<MetricSourceDefinition> msDefs = f.getMetricSourceDefinitions();
+        assertEquals(2, msDefs.size());
+
+        for (MetricSourceDefinition d: msDefs) {
+
+            String name = d.getName();
+            Address a = d.getAddress();
+
+            Variable v = rootScope.getVariable(name);
+            assertNotNull(v);
+
+            assertEquals(a.getLiteral(), v.get());
+        }
+    }
+
+    @Test
+    public void processSources_DuplicateName_FirstValueIsDiscarded() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        Scope rootScope = new ScopeImpl();
+
+        String s =
+                "sources:\n" +
+                        "  something:\n" +
+                        "    type: jboss-controller\n" +
+                        "    host: host1\n" +
+                        "    port: 8888\n" +
+                        "  something:\n" +
+                        "    type: jboss-controller\n" +
+                        "    host: host2\n" +
+                        "    port: 9999\n";
+
+
+        Object o = ((Map)YamlConfigurationFile.fromYaml(
+                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.SOURCES_KEY);
+
+        f.processSources(o, rootScope);
+
+        List<MetricSourceDefinition> d = f.getMetricSourceDefinitions();
+        assertEquals(1, d.size());
+        MetricSourceDefinition msd = d.get(0);
+        assertEquals("something", msd.getName());
+        assertEquals("jbosscli://host2:9999", msd.getAddress().getLiteral());
     }
 
     // parseSources() --------------------------------------------------------------------------------------------------
@@ -527,76 +666,6 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
         }
     }
 
-    // processSources() ------------------------------------------------------------------------------------------------
-
-    @Test
-    public void processSources_NoSources() throws Exception {
-
-        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
-
-        Scope rootScope = new ScopeImpl();
-
-        f.processSources(null, rootScope);
-
-        //
-        // nothing happens
-        //
-
-        List<Variable> v = rootScope.getVariablesDeclaredInScope();
-        assertTrue(v.isEmpty());
-    }
-
-    @Test
-    public void processSources() throws Exception {
-
-        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
-
-        Scope rootScope = new ScopeImpl();
-
-        String s =
-                "sources:\n" +
-                        "  some-source:\n" +
-                        "    type: jboss-controller\n" +
-                        "    host: localhost\n" +
-                        "    port: 9999\n" +
-                        "    classpath:\n" +
-                        "      - $JBOSS_HOME/bin/client/jboss-cli-client.jar\n" +
-                        "      - /some/other/file.jar\n" +
-                        "  some-other-source:\n" +
-                        "    type: jboss-controller\n" +
-                        "    host: other-host\n" +
-                        "    port: 10101\n" +
-                        "    username: admin\n" +
-                        "    password: blah\n" +
-                        "    classpath:\n" +
-                        "      - $JBOSS_HOME/bin/client/jboss-cli-client.jar\n" +
-                        "      - /some/other/file.jar\n";
-
-
-        Object o = ((Map)YamlConfigurationFile.fromYaml(
-                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.SOURCES_KEY);
-
-        f.processSources(o, rootScope);
-
-        //
-        // two metric source definitions and two variables
-        //
-
-        List<MetricSourceDefinition> msDefs = f.getMetricSourceDefinitions();
-        assertEquals(2, msDefs.size());
-
-        for (MetricSourceDefinition d: msDefs) {
-
-            String name = d.getName();
-            Address a = d.getAddress();
-
-            Variable v = rootScope.getVariable(name);
-            assertNotNull(v);
-
-            assertEquals(a.getLiteral(), v.get());
-        }
-    }
-
     // processMetrics() ------------------------------------------------------------------------------------------------
 
     @Test
@@ -711,6 +780,49 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
         MetricDefinition md = mDefs.get(0);
         String id = md.getId();
         assertEquals("CpuUserTime", id);
+    }
+
+    // processOutput() -------------------------------------------------------------------------------------------------
+
+    @Test
+    public void processOutput_Stdout() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        String s = "output: stdout\n";
+
+        Object o = ((Map)YamlConfigurationFile.fromYaml(
+                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.OUTPUT_KEY);
+
+        f.processOutput(o);
+
+        List<DataConsumer> c = f.getDataConsumers();
+        assertEquals(1, c.size());
+        AsynchronousCsvLineWriter a = (AsynchronousCsvLineWriter)c.get(0);
+        assertEquals(System.out, a.getPrintStream());
+    }
+
+    @Test
+    public void processOutput_UnknownOutputType() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        String s = "output: something\n";
+
+        Object o = ((Map)YamlConfigurationFile.fromYaml(
+                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.OUTPUT_KEY);
+
+        try {
+
+            f.processOutput(o);
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("something"));
+            assertTrue(msg.contains("unknown output type"));
+        }
     }
 
     // Package protected -----------------------------------------------------------------------------------------------
