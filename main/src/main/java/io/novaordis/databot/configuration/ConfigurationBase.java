@@ -25,8 +25,10 @@ import io.novaordis.events.api.metric.MetricSourceDefinitionImpl;
 import io.novaordis.events.api.metric.MetricSourceFactory;
 import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.address.Address;
-import io.novaordis.utilities.variable2.Scope;
-import io.novaordis.utilities.variable2.ScopeImpl;
+import io.novaordis.utilities.expressions.EncloseableScope;
+import io.novaordis.utilities.expressions.Scope;
+import io.novaordis.utilities.expressions.ScopeImpl;
+import io.novaordis.utilities.expressions.env.OSProcessScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +78,7 @@ public abstract class ConfigurationBase implements Configuration {
     // a flat (for now) variable scope, spanning over the entire configuration file. Used for string replacement
     // throughout the file: variables that are resolved to strings are replaced
     //
-    private Scope rootScope;
+    private EncloseableScope rootScope;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
@@ -100,6 +102,12 @@ public abstract class ConfigurationBase implements Configuration {
         this.propertyFactory = new PropertyFactory();
 
         this.rootScope = new ScopeImpl();
+
+        //
+        // make environment variables accessible in scope
+        //
+
+        this.rootScope.setParent(new OSProcessScope());
 
         if (fileName != null) {
 

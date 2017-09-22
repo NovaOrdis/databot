@@ -1,0 +1,27 @@
+#
+# reference configuration - do not change, tests will fail
+#
+
+sampling.interval: ${TEST_SAMPLING_INTERVAL}
+
+logging:
+  file: ${TEST_LOG_FILE}
+  loggers:
+    - io.novaordis.databot: ${TEST_LOG_LEVEL}
+
+sources:
+  local-jboss-instance:
+    type: jboss-controller
+    host: ${TEST_HOST}
+    port: ${TEST_PORT}
+    username: ${TEST_USERNAME}
+    classpath:
+      - ${TEST_JBOSS_HOME}/bin/client/jboss-cli-client.jar
+      - ${TEST_CLASSPATH}
+
+output:
+  file: ${TEST_OUTPUT_FILE}
+  append: ${TEST_APPEND_VALUE}
+
+metrics:
+  - ${local-jboss-instance}/subsystem=messaging/hornetq-server=default/jms-queue=DLQ/${TEST_METRIC}

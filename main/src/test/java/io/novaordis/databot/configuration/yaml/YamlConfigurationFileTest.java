@@ -31,10 +31,10 @@ import io.novaordis.utilities.UserErrorException;
 import io.novaordis.utilities.address.Address;
 import io.novaordis.utilities.address.AddressImpl;
 import io.novaordis.utilities.address.LocalOSAddress;
-import io.novaordis.utilities.variable2.DuplicateDeclarationException;
-import io.novaordis.utilities.variable2.Scope;
-import io.novaordis.utilities.variable2.ScopeImpl;
-import io.novaordis.utilities.variable2.Variable;
+import io.novaordis.utilities.expressions.DuplicateDeclarationException;
+import io.novaordis.utilities.expressions.Scope;
+import io.novaordis.utilities.expressions.ScopeImpl;
+import io.novaordis.utilities.expressions.Variable;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -567,7 +567,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
         Scope scope = new ScopeImpl();
         PropertyFactory pf = new PropertyFactory();
 
-        scope.declare("some_var", String.class, "Memory");
+        scope.declare("some_var", "Memory");
 
         MetricDefinition md = YamlConfigurationFile.toMetricDefinition(pf, scope, "Physical${some_var}Total");
         assertEquals("PhysicalMemoryTotal", md.getId());
@@ -762,7 +762,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
 
         Scope rootScope = new ScopeImpl();
 
-        rootScope.declare("some-ms", String.class, "localOS://");
+        rootScope.declare("some-ms", "localOS://");
 
         String s =
 
@@ -823,6 +823,44 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
             assertTrue(msg.contains("something"));
             assertTrue(msg.contains("unknown output type"));
         }
+    }
+
+    // environment value resolution ------------------------------------------------------------------------------------
+
+    @Test
+    public void insureTheScopeSeesEnvironmentVariables() throws Exception {
+
+        YamlConfigurationFile ycf = new YamlConfigurationFile(true, null);
+
+        Scope s = ycf.getRootScope();
+
+        //
+        // test the availability of a common enviornment variable
+        //
+
+        String user = System.getenv("USER");
+        assertNotNull(user);
+
+        Variable v = s.getVariable("USER");
+
+        assertNotNull(v);
+        assertEquals(user, v.get());
+    }
+
+    @Test
+    public void insureEnvironmentVariablesAreResolved() throws Exception {
+
+        File f = new File(System.getProperty("basedir"),
+                "src/test/resources/data/configuration/configuration-with-environment-variables.yaml");
+
+        assertTrue(f.isFile());
+
+        YamlConfigurationFile c = new YamlConfigurationFile(true, f.getPath());
+
+        int si = c.getSamplingIntervalSec();
+        assertEquals(7, si);
+
+        fail("TODO continue with testing all other configuration elements");
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

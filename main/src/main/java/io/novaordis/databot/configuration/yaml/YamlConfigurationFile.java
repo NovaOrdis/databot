@@ -26,10 +26,10 @@ import io.novaordis.events.api.metric.MetricSourceDefinition;
 import io.novaordis.events.api.metric.MetricSourceDefinitionImpl;
 import io.novaordis.events.api.metric.MetricSourceException;
 import io.novaordis.utilities.UserErrorException;
+import io.novaordis.utilities.expressions.Scope;
 import io.novaordis.utilities.logging.AlternativeLoggingConfiguration;
 import io.novaordis.utilities.logging.LoggerConfiguration;
 import io.novaordis.utilities.logging.YamlLoggingConfiguration;
-import io.novaordis.utilities.variable2.Scope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -160,6 +160,15 @@ public class YamlConfigurationFile extends ConfigurationBase {
         processMetrics(topLevelMap.get(METRICS_KEY), rootScope);
     }
 
+    /**
+     * Make the method package accessible for testing.
+     */
+    @Override
+    protected Scope getRootScope() {
+
+        return super.getRootScope();
+    }
+
     // Package protected static ----------------------------------------------------------------------------------------
 
     Map toNonNullMap(Object o) throws UserErrorException {
@@ -259,7 +268,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
             String metricSourceName = d.getName();
             String address = d.getAddress().getLiteral();
-            rootScope.declare(metricSourceName, String.class, address);
+            rootScope.declare(metricSourceName, address);
         }
     }
 
