@@ -63,12 +63,12 @@ public abstract class DataConsumerBase implements DataConsumer {
 
             if (this.eventQueue != null) {
 
-                log.debug(this + " disconnected from the event queue " + Util.queueLogLabel(eventQueue));
+                log.debug(this + " disconnected from " + Util.queueLogLabel(eventQueue));
             }
         }
         else {
 
-            log.debug(this + " connected to event queue " + Util.queueLogLabel(q));
+            log.debug(this + " connected to " + Util.queueLogLabel(q));
         }
 
         this.eventQueue = q;

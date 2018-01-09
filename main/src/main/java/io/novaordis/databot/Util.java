@@ -49,7 +49,7 @@ public class Util {
             s += "?";
         }
 
-        s += ":" + queue.size();
+        s += ":" + queue.size() + ")";
 
         return s;
 
