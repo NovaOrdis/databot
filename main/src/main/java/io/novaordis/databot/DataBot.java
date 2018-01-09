@@ -16,21 +16,6 @@
 
 package io.novaordis.databot;
 
-import io.novaordis.databot.configuration.Configuration;
-import io.novaordis.databot.failure.DataBotException;
-import io.novaordis.events.api.event.Event;
-import io.novaordis.events.api.event.ShutdownEvent;
-import io.novaordis.events.api.metric.MetricSource;
-import io.novaordis.events.api.metric.MetricSourceDefinition;
-import io.novaordis.events.api.metric.MetricSourceException;
-import io.novaordis.events.api.metric.MetricSourceFactory;
-import io.novaordis.events.api.metric.MetricSourceFactoryImpl;
-import io.novaordis.events.api.metric.MetricSourceRepository;
-import io.novaordis.events.api.metric.MetricSourceRepositoryImpl;
-import io.novaordis.utilities.address.Address;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +29,22 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.novaordis.databot.configuration.Configuration;
+import io.novaordis.databot.failure.DataBotException;
+import io.novaordis.events.api.event.Event;
+import io.novaordis.events.api.event.ShutdownEvent;
+import io.novaordis.events.api.metric.MetricSource;
+import io.novaordis.events.api.metric.MetricSourceDefinition;
+import io.novaordis.events.api.metric.MetricSourceException;
+import io.novaordis.events.api.metric.MetricSourceFactory;
+import io.novaordis.events.api.metric.MetricSourceFactoryImpl;
+import io.novaordis.events.api.metric.MetricSourceRepository;
+import io.novaordis.events.api.metric.MetricSourceRepositoryImpl;
+import io.novaordis.utilities.address.Address;
 
 /**
  * The central instance of a data collector node (DataBot). This instance:
@@ -134,6 +135,8 @@ public class DataBot {
         this.eventQueueSize = configuration.getEventQueueSize();
 
         this.eventQueue = new ArrayBlockingQueue<>(eventQueueSize);
+
+        log.debug(Util.queueLogLabel(eventQueue, eventQueueSize) + " created");
 
         this.sourceFactory =
                 configuration.getMetricSourceFactory() != null ?

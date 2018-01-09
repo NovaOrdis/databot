@@ -16,13 +16,15 @@
 
 package io.novaordis.databot.consumer;
 
-import io.novaordis.databot.DataConsumer;
-import io.novaordis.databot.DataConsumerException;
-import io.novaordis.events.api.event.Event;
+import java.util.concurrent.BlockingQueue;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.BlockingQueue;
+import io.novaordis.databot.DataConsumer;
+import io.novaordis.databot.DataConsumerException;
+import io.novaordis.databot.Util;
+import io.novaordis.events.api.event.Event;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -61,12 +63,12 @@ public abstract class DataConsumerBase implements DataConsumer {
 
             if (this.eventQueue != null) {
 
-                log.debug(this + " disconnected from the event queue");
+                log.debug(this + " disconnected from the event queue " + Util.queueLogLabel(eventQueue));
             }
         }
         else {
 
-            log.debug(this + " connected to event queue " + q);
+            log.debug(this + " connected to event queue " + Util.queueLogLabel(q));
         }
 
         this.eventQueue = q;
