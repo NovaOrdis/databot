@@ -366,7 +366,7 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
                 if (!(i instanceof DataConsumer)) {
 
-                    throw new UserErrorException(s + " not a DataConsumer class");
+                    throw new UserErrorException("'" + s + "' not a DataConsumer class");
                 }
 
                 addDataConsumer((DataConsumer)i);
@@ -374,11 +374,11 @@ public class YamlConfigurationFile extends ConfigurationBase {
             }
             catch(ClassNotFoundException e) {
 
-                throw new UserErrorException("consumer class " + s + " not found in classpath", e);
+                throw new UserErrorException("consumer class '" + s + "' not found in classpath", e);
             }
             catch (IllegalAccessException | InstantiationException e ) {
 
-                throw new UserErrorException("consumer class " + s + " cannot be instantiated", e);
+                throw new UserErrorException("consumer class '" + s + "' cannot be instantiated", e);
             }
         }
     }
