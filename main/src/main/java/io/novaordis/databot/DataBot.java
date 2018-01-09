@@ -66,6 +66,7 @@ public class DataBot {
 
     private static final Logger log = LoggerFactory.getLogger(DataBot.class);
 
+    @SuppressWarnings("WeakerAccess")
     public static final String TIMER_THREAD_NAME = "DataBot Timer Thread";
 
     //
@@ -121,7 +122,7 @@ public class DataBot {
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public DataBot(Configuration configuration) throws DataBotException {
+    DataBot(Configuration configuration) throws DataBotException {
 
         if (configuration == null) {
 
@@ -492,6 +493,7 @@ public class DataBot {
             c.setEventQueue(eventQueue);
 
             consumers.add(c);
+
             log.debug(this + " installed data consumer " + c);
         }
     }

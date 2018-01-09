@@ -16,6 +16,21 @@
 
 package io.novaordis.databot;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimerTask;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.event.MultiSourceReadingEvent;
 import io.novaordis.databot.failure.DataBotException;
@@ -28,20 +43,6 @@ import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSource;
 import io.novaordis.events.api.metric.MetricSourceDefinition;
 import io.novaordis.utilities.address.Address;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimerTask;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 /**
  * A timer task that insure the sources are started, starts them if they're not, collects the required metrics, wraps
@@ -206,7 +207,7 @@ public class DataCollectionTask extends TimerTask {
 
         BlockingQueue<Event> eventQueue = dataBot.getEventQueue();
 
-        log.debug("placing event '" + event + "' in the event queue");
+        log.debug("placing event '" + event + "' in " + Util.queueLogLabel(eventQueue));
 
         boolean sent = eventQueue.offer(event);
 
