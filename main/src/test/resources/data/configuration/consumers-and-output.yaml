@@ -1,0 +1,12 @@
+#
+# test configuration - do not change, tests will fail
+#
+
+consumers:
+  - io.novaordis.databot.consumer.MockDataConsumer
+  - io.novaordis.databot.consumer.MockDataConsumer
+
+output:
+  file: /tmp/test.csv
+  append: false
+

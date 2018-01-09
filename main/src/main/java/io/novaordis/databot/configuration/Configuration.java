@@ -16,14 +16,14 @@
 
 package io.novaordis.databot.configuration;
 
+import java.util.List;
+
 import io.novaordis.databot.DataConsumer;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSourceDefinition;
 import io.novaordis.events.api.metric.MetricSourceFactory;
 import io.novaordis.utilities.address.Address;
 import io.novaordis.utilities.logging.LoggingConfiguration;
-
-import java.util.List;
 
 /**
  * The command line/configuration file configuration.
@@ -43,9 +43,9 @@ public interface Configuration extends LoggingConfiguration {
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    //
+
     // Global Options --------------------------------------------------------------------------------------------------
-    //
+
 
     /**
      * @return true if the process runs in foreground, and thus getOutputFileName() value is ignored.
@@ -65,9 +65,9 @@ public interface Configuration extends LoggingConfiguration {
      */
     int getEventQueueSize();
 
-    //
+
     // Metric Sources --------------------------------------------------------------------------------------------------
-    //
+
 
     /**
      * May return null, which means that no special metric source factory is configured, and the DataBot instance will
@@ -89,9 +89,9 @@ public interface Configuration extends LoggingConfiguration {
      */
     int getMetricSourceCount();
 
-    //
+
     // Data Consumers --------------------------------------------------------------------------------------------------
-    //
+
 
     /**
      * @return the data consumers to consume the events. Order is important, the data consumers should be returned in
@@ -99,9 +99,9 @@ public interface Configuration extends LoggingConfiguration {
      */
     List<DataConsumer> getDataConsumers();
 
-    //
+
     // Metrics ---------------------------------------------------------------------------------------------------------
-    //
+
 
     /**
      * @return the list of metric definitions to collect and log. Order is important, the metric definitions should be

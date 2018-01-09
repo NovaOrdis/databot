@@ -16,6 +16,18 @@
 
 package io.novaordis.databot.configuration.yaml;
 
+import java.io.File;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
+
+import io.novaordis.databot.DataConsumer;
 import io.novaordis.databot.DataConsumerException;
 import io.novaordis.databot.configuration.ConfigurationBase;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
@@ -30,16 +42,6 @@ import io.novaordis.utilities.expressions.Scope;
 import io.novaordis.utilities.logging.AlternativeLoggingConfiguration;
 import io.novaordis.utilities.logging.LoggerConfiguration;
 import io.novaordis.utilities.logging.YamlLoggingConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-
-import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 /**
  * A configuration instance backed by a property file.
@@ -53,17 +55,22 @@ public class YamlConfigurationFile extends ConfigurationBase {
 
     private static final Logger log = LoggerFactory.getLogger(YamlConfigurationFile.class);
 
+    @SuppressWarnings("WeakerAccess")
     public static final String SAMPLING_INTERVAL_KEY = "sampling.interval";
 
     public static final String SOURCES_KEY = "sources";
 
     public static final String OUTPUT_KEY = "output";
 
+    @SuppressWarnings("WeakerAccess")
     public static final String STDOUT_OUTPUT_LABEL = "stdout";
 
     public static final String OUTPUT_FILE_KEY = "file";
 
+    @SuppressWarnings("WeakerAccess")
     public static final String OUTPUT_APPEND_KEY = "append";
+
+    public static final String CONSUMERS_KEY = "consumers";
 
     public static final String METRICS_KEY = "metrics";
 
@@ -148,10 +155,10 @@ public class YamlConfigurationFile extends ConfigurationBase {
         processSources(topLevelMap.get(SOURCES_KEY), rootScope);
 
         //
-        // 'output'
+        // 'output', 'consumers'
         //
 
-        processOutput(topLevelMap.get(OUTPUT_KEY));
+        processOutputAndConsumers(topLevelMap);
 
         //
         // 'metrics'
@@ -170,81 +177,6 @@ public class YamlConfigurationFile extends ConfigurationBase {
     }
 
     // Package protected static ----------------------------------------------------------------------------------------
-
-    Map toNonNullMap(Object o) throws UserErrorException {
-
-        //
-        // we get null object on empty YAML files
-        //
-
-        if (o == null) {
-
-            throw new UserErrorException("empty configuration file");
-        }
-
-        if (!(o instanceof Map)) {
-
-            throw new UserErrorException("invalid configuration file content, expecting a map");
-        }
-
-        return (Map)o;
-    }
-
-    void processLogging(Object o) throws UserErrorException {
-
-        if (o == null) {
-
-            return;
-        }
-
-        if (!(o instanceof Map)) {
-
-            throw new UserErrorException(
-                    "'" + YamlLoggingConfiguration.LOGGING_KEY + "' must contain a Map, but it contains " +
-                            o.getClass().getSimpleName());
-        }
-
-        try {
-
-            this.delegate = new YamlLoggingConfiguration((Map)o);
-        }
-        catch(Exception e) {
-
-            throw new UserErrorException(e);
-        }
-
-        //
-        // apply new logging configuration as soon as we can
-        //
-
-        try {
-
-            AlternativeLoggingConfiguration.apply(this.delegate, true);
-        }
-        catch(Exception e) {
-
-            throw new UserErrorException(e);
-        }
-    }
-
-    void processSamplingInterval(Object o) throws UserErrorException {
-
-        if (o == null) {
-
-            return;
-        }
-
-        //
-        // if null, we rely on the built-in values, set in the constructor
-        //
-
-        if (!(o instanceof Integer)) {
-
-            throw new UserErrorException("invalid sampling interval value: \"" + o + "\"");
-        }
-
-        setSamplingIntervalSec((Integer) o);
-    }
 
     void processSources(Object o, Scope rootScope) throws UserErrorException {
 
@@ -272,11 +204,41 @@ public class YamlConfigurationFile extends ConfigurationBase {
         }
     }
 
+    @SuppressWarnings("WeakerAccess")
+    void processOutputAndConsumers(Map topLevelMap) throws UserErrorException {
+
+        //
+        // 'output'
+        //
+
+        processOutput(topLevelMap.get(OUTPUT_KEY));
+
+        //
+        // 'consumers'
+        //
+
+        processConsumers(topLevelMap.get(CONSUMERS_KEY));
+
+        //
+        // we must have at least one consumer (output or otherwise)
+        //
+
+        if (getDataConsumers().isEmpty()) {
+
+            throw new UserErrorException("no data consumer specified in configuration");
+        }
+
+    }
+
     void processOutput(Object o) throws UserErrorException {
 
         if (o == null) {
 
-            throw new UserErrorException("missing '" + OUTPUT_KEY + "'");
+            //
+            // it is fine to have no 'output' provided that we have at least one consumer
+            //
+
+            return;
         }
 
         String outputFileName;
@@ -344,6 +306,80 @@ public class YamlConfigurationFile extends ConfigurationBase {
         catch (DataConsumerException e) {
 
             throw new UserErrorException(e);
+        }
+    }
+
+    void processConsumers(Object o) throws UserErrorException {
+
+        if (o == null) {
+
+            //
+            // that is fine, no extra consumers
+            //
+
+            return;
+        }
+
+        if (!(o instanceof List)) {
+
+            throw new UserErrorException("'" + CONSUMERS_KEY + "' must be followed by a list, not a " +
+                    o.getClass().getSimpleName());
+        }
+
+        List l = (List)o;
+
+        //
+        // we may get null element lists if the configuration is incorrectly specified
+        //
+
+        if (l.isEmpty()) {
+
+            // noop
+            return;
+        }
+
+        for(Object elem: l) {
+
+            if (elem == null) {
+
+                throw new UserErrorException("empty '" + CONSUMERS_KEY + "' element");
+            }
+
+            //
+            // for the time being we only support fully qualified class names that must be available in the classpath
+            // and will be instantiated by reflection
+            //
+
+            if (!(elem instanceof String)) {
+
+                throw new UserErrorException("invalid '" + CONSUMERS_KEY + "' element: " + elem);
+            }
+
+            String s = (String)elem;
+
+
+            try {
+
+                Class c = Class.forName(s);
+
+                Object i = c.newInstance();
+
+                if (!(i instanceof DataConsumer)) {
+
+                    throw new UserErrorException(s + " not a DataConsumer class");
+                }
+
+                addDataConsumer((DataConsumer)i);
+
+            }
+            catch(ClassNotFoundException e) {
+
+                throw new UserErrorException("consumer class " + s + " not found in classpath", e);
+            }
+            catch (IllegalAccessException | InstantiationException e ) {
+
+                throw new UserErrorException("consumer class " + s + " cannot be instantiated", e);
+            }
         }
     }
 
@@ -487,6 +523,81 @@ public class YamlConfigurationFile extends ConfigurationBase {
     }
 
     // Private ---------------------------------------------------------------------------------------------------------
+
+    private Map toNonNullMap(Object o) throws UserErrorException {
+
+        //
+        // we get null object on empty YAML files
+        //
+
+        if (o == null) {
+
+            throw new UserErrorException("empty configuration file");
+        }
+
+        if (!(o instanceof Map)) {
+
+            throw new UserErrorException("invalid configuration file content, expecting a map");
+        }
+
+        return (Map)o;
+    }
+
+    private void processLogging(Object o) throws UserErrorException {
+
+        if (o == null) {
+
+            return;
+        }
+
+        if (!(o instanceof Map)) {
+
+            throw new UserErrorException(
+                    "'" + YamlLoggingConfiguration.LOGGING_KEY + "' must contain a Map, but it contains " +
+                            o.getClass().getSimpleName());
+        }
+
+        try {
+
+            this.delegate = new YamlLoggingConfiguration((Map)o);
+        }
+        catch(Exception e) {
+
+            throw new UserErrorException(e);
+        }
+
+        //
+        // apply new logging configuration as soon as we can
+        //
+
+        try {
+
+            AlternativeLoggingConfiguration.apply(this.delegate, true);
+        }
+        catch(Exception e) {
+
+            throw new UserErrorException(e);
+        }
+    }
+
+    private void processSamplingInterval(Object o) throws UserErrorException {
+
+        if (o == null) {
+
+            return;
+        }
+
+        //
+        // if null, we rely on the built-in values, set in the constructor
+        //
+
+        if (!(o instanceof Integer)) {
+
+            throw new UserErrorException("invalid sampling interval value: \"" + o + "\"");
+        }
+
+        setSamplingIntervalSec((Integer) o);
+    }
 
     // Inner classes ---------------------------------------------------------------------------------------------------
 

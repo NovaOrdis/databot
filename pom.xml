@@ -8,7 +8,7 @@
 
     <groupId>io.novaordis.databot</groupId>
     <artifactId>databot-root</artifactId>
-    <version>1.0.8-SNAPSHOT-1</version>
+    <version>1.0.8-SNAPSHOT-2</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -134,9 +134,9 @@
                     <execution>
                         <phase>generate-test-resources</phase>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <mkdir dir="${test.scratch.directory}"/>
-                            </tasks>
+                            </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>

@@ -1,11 +1,5 @@
 #!/bin/bash
 
-#
-# Command-line wrapper script - generated from Nova Ordis Release Tools' run-wrapper-template
-#
-# For more details see https://kb.novaordis.com/index.php/novaordis-release-tools
-#
-
 [ -f $(dirname $0)/databot.shlib ] && \
     . $(dirname $0)/databot.shlib || \
     { echo "[error]: required library file $(dirname $0)/databot.shlib not found, databot was most likely incorrectly installed" 1>&2; exit 1; }
@@ -13,7 +7,6 @@
 main_class=io.novaordis.databot.Main
 memory=256m
 verbose=false
-os_stats_config_file_name="databot.conf"
 
 function main() {
 
@@ -96,7 +89,7 @@ function main() {
     #
     local pids
     pids=$(get-pids) || fail "failed to get pids"
-    [ -n "${pids}" ] && fail "an databot process is already running (pid ${pids})"
+    [ -n "${pids}" ] && fail "a databot process is already running (pid ${pids})"
 
     local java_home
     java_home=$(get-java-home) || fail "failed to get java home"

@@ -16,10 +16,15 @@
 
 package io.novaordis.databot.configuration;
 
+import java.io.File;
+import java.util.List;
+
+import org.junit.Test;
+
 import io.novaordis.databot.DataConsumer;
-import io.novaordis.databot.consumer.MockDataConsumer;
 import io.novaordis.databot.MockMetricDefinition;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
+import io.novaordis.databot.consumer.MockDataConsumer;
 import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSourceDefinition;
@@ -36,10 +41,6 @@ import io.novaordis.utilities.address.AddressImpl;
 import io.novaordis.utilities.address.LocalOSAddress;
 import io.novaordis.utilities.logging.LoggerConfiguration;
 import io.novaordis.utilities.logging.log4j.Log4jLevel;
-import org.junit.Test;
-
-import java.io.File;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -344,6 +345,81 @@ public abstract class ConfigurationTest {
         assertEquals(mdc2, dcs.get(1));
     }
 
+    // consumers in configuration --------------------------------------------------------------------------------------
+
+    @Test
+    public void outputAndConsumersInConfiguration() throws Exception {
+
+        String cf = getConfigurationFileName("output-and-consumers");
+
+        assertTrue(new File(cf).isFile());
+
+        Configuration c = getConfigurationToTest(true, cf);
+
+        List<DataConsumer> dcs = c.getDataConsumers();
+
+        assertEquals(3, dcs.size());
+
+        // "output" is always on the first position in line
+        DataConsumer output = dcs.get(0);
+        assertTrue(output instanceof AsynchronousCsvLineWriter);
+
+        MockDataConsumer mdc = (MockDataConsumer)dcs.get(1);
+        assertNotNull(mdc);
+
+        MockDataConsumer mdc2 = (MockDataConsumer)dcs.get(2);
+        assertNotNull(mdc2);
+
+        assertNotEquals(mdc, mdc2);
+    }
+
+    @Test
+    public void consumersAndOutputInConfiguration() throws Exception {
+
+        String cf = getConfigurationFileName("consumers-and-output");
+
+        assertTrue(new File(cf).isFile());
+
+        Configuration c = getConfigurationToTest(true, cf);
+
+        List<DataConsumer> dcs = c.getDataConsumers();
+
+        assertEquals(3, dcs.size());
+
+        // "output" is always on the first position in line
+        DataConsumer output = dcs.get(0);
+        assertTrue(output instanceof AsynchronousCsvLineWriter);
+
+        MockDataConsumer mdc = (MockDataConsumer)dcs.get(1);
+        assertNotNull(mdc);
+
+        MockDataConsumer mdc2 = (MockDataConsumer)dcs.get(2);
+        assertNotNull(mdc2);
+
+        assertNotEquals(mdc, mdc2);
+    }
+
+    @Test
+    public void onlyConsumersInConfiguration() throws Exception {
+
+        String cf = getConfigurationFileName("only-consumers");
+
+        assertTrue(new File(cf).isFile());
+
+        Configuration c = getConfigurationToTest(true, cf);
+
+        List<DataConsumer> dcs = c.getDataConsumers();
+
+        assertEquals(2, dcs.size());
+        MockDataConsumer mdc = (MockDataConsumer)dcs.get(0);
+        assertNotNull(mdc);
+
+        MockDataConsumer mdc2 = (MockDataConsumer)dcs.get(1);
+        assertNotNull(mdc2);
+
+        assertNotEquals(mdc, mdc2);
+    }
+
     // addMetricSource() -----------------------------------------------------------------------------------------------
 
     @Test
@@ -380,6 +456,8 @@ public abstract class ConfigurationTest {
     protected abstract Configuration getConfigurationToTest(boolean foreground, String fileName) throws Exception;
 
     protected abstract String getReferenceFileName();
+
+    protected abstract String getConfigurationFileName(String basename);
 
     // Private ---------------------------------------------------------------------------------------------------------
 

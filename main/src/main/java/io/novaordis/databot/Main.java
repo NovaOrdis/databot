@@ -16,13 +16,14 @@
 
 package io.novaordis.databot;
 
-import io.novaordis.databot.configuration.Configuration;
-import io.novaordis.databot.configuration.ConfigurationFactory;
-import io.novaordis.utilities.UserErrorException;
+import java.util.concurrent.CountDownLatch;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.CountDownLatch;
+import io.novaordis.databot.configuration.Configuration;
+import io.novaordis.databot.configuration.ConfigurationFactory;
+import io.novaordis.utilities.UserErrorException;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>

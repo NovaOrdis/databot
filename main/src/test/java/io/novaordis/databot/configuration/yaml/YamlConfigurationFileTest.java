@@ -29,6 +29,7 @@ import io.novaordis.databot.DataConsumer;
 import io.novaordis.databot.configuration.Configuration;
 import io.novaordis.databot.configuration.ConfigurationTest;
 import io.novaordis.databot.consumer.AsynchronousCsvLineWriter;
+import io.novaordis.databot.consumer.MockDataConsumer;
 import io.novaordis.events.api.event.PropertyFactory;
 import io.novaordis.events.api.metric.MetricDefinition;
 import io.novaordis.events.api.metric.MetricSourceDefinition;
@@ -47,6 +48,7 @@ import io.novaordis.utilities.expressions.Variable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -136,7 +138,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     }
 
     @Test
-    public void load_MissingOutput() throws Exception {
+    public void load_MissingConsumers() throws Exception {
 
         YamlConfigurationFile c = new YamlConfigurationFile(true, null);
 
@@ -152,7 +154,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
         catch(UserErrorException e) {
 
             String msg = e.getMessage();
-            assertEquals("missing '" + YamlConfigurationFile.OUTPUT_KEY + "'", msg);
+            assertEquals("no data consumer specified in configuration", msg);
         }
     }
 
@@ -381,7 +383,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     // parseSources() --------------------------------------------------------------------------------------------------
 
     @Test
-    public void parseSources_Null() throws Exception {
+    public void parseSources_Null() {
 
         String s = "sources:\n";
 
@@ -402,7 +404,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     }
 
     @Test
-    public void parseSources_Null2() throws Exception {
+    public void parseSources_Null2() {
 
         String s = "sources: \n";
 
@@ -423,7 +425,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     }
 
     @Test
-    public void parseSources_NotAMap() throws Exception {
+    public void parseSources_NotAMap() {
 
         String s = "sources: 10\n";
 
@@ -444,7 +446,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     }
 
     @Test
-    public void parseSources_EmptySource() throws Exception {
+    public void parseSources_EmptySource() {
 
         String s = "sources:\n" +
                    "  source-1:\n";
@@ -466,7 +468,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     }
 
     @Test
-    public void parseSources_SourceNotAMapSource() throws Exception {
+    public void parseSources_SourceNotAMapSource() {
 
         String s = "sources:\n" +
                    "  source-1: 20\n";
@@ -575,7 +577,7 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     }
 
     @Test
-    public void toMetricDefinition_UnknownVariable() throws Exception {
+    public void toMetricDefinition_UnknownVariable() {
 
         PropertyFactory pf = new PropertyFactory();
         Scope scope = new ScopeImpl();
@@ -826,6 +828,169 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
         }
     }
 
+    // processConsumers() ----------------------------------------------------------------------------------------------
+
+    @Test
+    public void processConsumers_NullList() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        String s = "blah:\n";
+
+        Object o = ((Map)YamlConfigurationFile.fromYaml(
+                new ByteArrayInputStream(s.getBytes()))).get(YamlConfigurationFile.CONSUMERS_KEY);
+
+        // noop
+        f.processConsumers(o);
+
+        assertTrue(f.getDataConsumers().isEmpty());
+    }
+
+    @Test
+    public void processConsumers_EmptyList() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        String s = "consumers:\n";
+
+        Map m = (Map)YamlConfigurationFile.fromYaml(new ByteArrayInputStream(s.getBytes()));
+
+        assertTrue(m.containsKey("consumers"));
+        assertNull(m.get("consumers"));
+
+        Object o = m.get(YamlConfigurationFile.CONSUMERS_KEY);
+        assertNull(o);
+
+        // noop
+        //noinspection ConstantConditions
+        f.processConsumers(o);
+
+        assertTrue(f.getDataConsumers().isEmpty());
+    }
+
+    @Test
+    public void processConsumers_NullElementList() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        String s = "consumers:\n  -\n";
+
+        Map m = (Map)YamlConfigurationFile.fromYaml(new ByteArrayInputStream(s.getBytes()));
+
+        List l = (List)m.get(YamlConfigurationFile.CONSUMERS_KEY);
+        assertNotNull(l);
+
+        // however, it's an empty list
+        assertEquals(1, l.size());
+        assertNull(l.get(0));
+
+        try {
+
+            f.processConsumers(l);
+
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("empty"));
+            assertTrue(msg.contains(YamlConfigurationFile.CONSUMERS_KEY));
+        }
+    }
+
+    @Test
+    public void processConsumers_ListElementAnInteger() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        String s = "consumers:\n  - 7\n";
+
+        Map m = (Map)YamlConfigurationFile.fromYaml(new ByteArrayInputStream(s.getBytes()));
+        List l = (List)m.get(YamlConfigurationFile.CONSUMERS_KEY);
+
+        try {
+
+            f.processConsumers(l);
+
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("invalid"));
+            assertTrue(msg.contains(YamlConfigurationFile.CONSUMERS_KEY));
+            assertTrue(msg.contains("7"));
+        }
+    }
+
+    @Test
+    public void processConsumers_ClassNotFoundException() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        String s = "consumers:\n  - no.such.Class\n";
+
+        Map m = (Map)YamlConfigurationFile.fromYaml(new ByteArrayInputStream(s.getBytes()));
+        List l = (List)m.get(YamlConfigurationFile.CONSUMERS_KEY);
+
+        try {
+
+            f.processConsumers(l);
+
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("consumer class"));
+            assertTrue(msg.contains("no.such.Class"));
+            assertTrue(msg.contains("not found in classpath"));
+            assertTrue(e.getCause() instanceof ClassNotFoundException);
+        }
+    }
+
+    @Test
+    public void processConsumers_NotADataConsumerClass() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        String s = "consumers:\n  - java.lang.String\n";
+
+        Map m = (Map)YamlConfigurationFile.fromYaml(new ByteArrayInputStream(s.getBytes()));
+        List l = (List)m.get(YamlConfigurationFile.CONSUMERS_KEY);
+
+        try {
+
+            f.processConsumers(l);
+
+            fail("should have thrown exception");
+        }
+        catch(UserErrorException e) {
+
+            String msg = e.getMessage();
+            assertTrue(msg.contains("java.lang.String"));
+            assertTrue(msg.contains("not a DataConsumer class"));
+        }
+    }
+
+    @Test
+    public void processConsumers() throws Exception {
+
+        YamlConfigurationFile f = new YamlConfigurationFile(false, null);
+
+        String s = "consumers:\n  - " + MockDataConsumer.class.getName() + "\n";
+
+        Map m = (Map)YamlConfigurationFile.fromYaml(new ByteArrayInputStream(s.getBytes()));
+        List l = (List)m.get(YamlConfigurationFile.CONSUMERS_KEY);
+
+        f.processConsumers(l);
+
+        List<DataConsumer> c = f.getDataConsumers();
+        assertEquals(1, c.size());
+        MockDataConsumer mdc = (MockDataConsumer)c.get(0);
+        assertNotNull(mdc);
+    }
+
     // environment value resolution ------------------------------------------------------------------------------------
 
     @Test
@@ -879,6 +1044,14 @@ public class YamlConfigurationFileTest extends ConfigurationTest {
     protected String getReferenceFileName() {
 
         File f = new File(System.getProperty("basedir"), "src/test/resources/data/configuration/reference-yaml.yaml");
+        assertTrue(f.isFile());
+        return f.getPath();
+    }
+
+    @Override
+    protected String getConfigurationFileName(String basename) {
+
+        File f = new File(System.getProperty("basedir"), "src/test/resources/data/configuration/" + basename + ".yaml");
         assertTrue(f.isFile());
         return f.getPath();
     }
