@@ -28,10 +28,7 @@ public class Util {
 
     // Static ----------------------------------------------------------------------------------------------------------
 
-    /**
-     * @param capacity optional capacity.
-     */
-    public static String queueLogLabel(Queue queue, Integer... capacity) {
+    public static String queueLogLabel(Queue queue) {
 
         if (queue == null) {
 
@@ -40,19 +37,9 @@ public class Util {
 
         String s = "event queue [" + Integer.toHexString(System.identityHashCode(queue)) + "](";
 
-        if (capacity != null && capacity.length > 0) {
-
-            s += capacity[0];
-        }
-        else {
-
-            s += "?";
-        }
-
-        s += ":" + queue.size() + ")";
+        s += queue.size() + ")";
 
         return s;
-
     }
 
     // Attributes ------------------------------------------------------------------------------------------------------

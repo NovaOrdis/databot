@@ -137,7 +137,7 @@ public class DataBot {
 
         this.eventQueue = new ArrayBlockingQueue<>(eventQueueSize);
 
-        log.debug(Util.queueLogLabel(eventQueue, eventQueueSize) + " created");
+        log.debug(Util.queueLogLabel(eventQueue) + " created");
 
         this.sourceFactory =
                 configuration.getMetricSourceFactory() != null ?
