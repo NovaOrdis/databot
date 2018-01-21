@@ -17,9 +17,9 @@
             Dependencies
         -->
 
-        <novaordis.utilities.version>4.7.12</novaordis.utilities.version>
-        <events.api.version>1.2.2</events.api.version>
-        <events.csv.version>1.0.0</events.csv.version>
+        <novaordis.utilities.version>4.7.14</novaordis.utilities.version>
+        <events.api.version>1.3.1</events.api.version>
+        <events.csv.version>1.2.0</events.csv.version>
 
         <slf4j.version>1.7.12</slf4j.version>
         <junit.version>4.12</junit.version>

@@ -16,6 +16,9 @@
 
 package io.novaordis.databot;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.novaordis.events.api.event.BooleanProperty;
 import io.novaordis.events.api.event.Event;
 import io.novaordis.events.api.event.EventProperty;
@@ -29,9 +32,6 @@ import io.novaordis.events.api.event.StringProperty;
 import io.novaordis.events.api.event.TimedEvent;
 import io.novaordis.utilities.time.Timestamp;
 import io.novaordis.utilities.time.TimestampImpl;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Ovidiu Feodorov <ovidiu@novaordis.com>
@@ -190,6 +190,16 @@ public class MockTimedEvent implements TimedEvent {
     @Override
     public BooleanProperty getBooleanProperty(String s) {
         throw new RuntimeException("getBooleanProperty() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public BooleanProperty setBooleanProperty(String name, boolean value) {
+        throw new RuntimeException("setBooleanProperty() NOT YET IMPLEMENTED");
+    }
+
+    @Override
+    public BooleanProperty removeBooleanProperty(String name) {
+        throw new RuntimeException("removeBooleanProperty() NOT YET IMPLEMENTED");
     }
 
     @Override

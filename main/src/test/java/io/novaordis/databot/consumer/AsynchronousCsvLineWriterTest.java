@@ -16,6 +16,20 @@
 
 package io.novaordis.databot.consumer;
 
+import java.io.File;
+import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.StringTokenizer;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+import org.junit.After;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.novaordis.databot.DataConsumer;
 import io.novaordis.databot.MockEvent;
 import io.novaordis.databot.MockMetricDefinition;
@@ -30,18 +44,6 @@ import io.novaordis.events.api.event.ShutdownEvent;
 import io.novaordis.events.csv.Constants;
 import io.novaordis.utilities.Files;
 import io.novaordis.utilities.address.AddressImpl;
-import org.junit.After;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.StringTokenizer;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -191,7 +193,7 @@ public class AsynchronousCsvLineWriterTest extends DataConsumerTest {
             fail("the asynchronous writer failed to process the event and send it to 'stdout' in " + timeout + " ms");
         }
 
-        String expected = Constants.DEFAULT_TIMESTAMP_FORMAT.format(time);
+        String expected = new SimpleDateFormat(Constants.DEFAULT_TIMESTAMP_FORMAT_LITERAL).format(time);
         assertEquals(expected, line);
 
         //
@@ -337,7 +339,7 @@ public class AsynchronousCsvLineWriterTest extends DataConsumerTest {
         assertFalse(line.trim().isEmpty());
 
         // must be a valid timestamp
-        Date date = Constants.DEFAULT_TIMESTAMP_FORMAT.parse(line);
+        Date date = new SimpleDateFormat(Constants.DEFAULT_TIMESTAMP_FORMAT_LITERAL).parse(line);
         long time = date.getTime();
 
         assertTrue(time > 0);
@@ -463,7 +465,7 @@ public class AsynchronousCsvLineWriterTest extends DataConsumerTest {
             fail("the asynchronous writer failed to process the event and send it to 'stdout' in " + timeout + " ms");
         }
 
-        String expected = Constants.DEFAULT_TIMESTAMP_FORMAT.format(time);
+        String expected = new SimpleDateFormat(Constants.DEFAULT_TIMESTAMP_FORMAT_LITERAL).format(time);
         assertEquals(expected, line);
 
         //
@@ -564,7 +566,7 @@ public class AsynchronousCsvLineWriterTest extends DataConsumerTest {
 
         String header = mps.getLine();
 
-        assertEquals("# timestamp, Mock Metric Z, Mock Metric A", header);
+        assertEquals("# time, Mock Metric Z, Mock Metric A", header);
 
         String line = mps.getLine();
 
